@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { @apply bg-cream text-neutral-900 font-sans antialiased; }
+  h1, h2, h3, h4, h5, h6 { @apply font-serif text-maroon; }
+}
+
+@layer components {
+  .btn-primary { @apply inline-flex items-center justify-center rounded-md bg-maroon px-6 py-3 text-white shadow-sm transition hover:bg-maroon/90 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2; }
+  .btn-outline { @apply inline-flex items-center justify-center rounded-md border border-gold px-6 py-3 text-maroon transition hover:bg-gold/10; }
+  .card { @apply rounded-xl bg-white/80 backdrop-blur shadow-sm ring-1 ring-black/5; }
+  .chip { @apply inline-flex items-center gap-1 rounded-full border border-gold/60 bg-gold/10 px-2.5 py-1 text-xs font-medium text-maroon; }
+  .section-title { @apply font-serif text-3xl md:text-4xl; }
+}
+
+/* Gradients and decorative utilities */
+@layer utilities {
+  .text-gradient { @apply bg-clip-text text-transparent; background-image: linear-gradient(135deg, #f7e3a1, #d5b245 40%, #f0e6c8); }
+  .glass { @apply bg-white/70 backdrop-blur-lg ring-1 ring-black/5; }
+  .shadow-elegant { box-shadow: 0 10px 30px -10px rgba(89,25,39,.35); }
+
+  /* Reveal animations */
+  @keyframes fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slide-right { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
+
+  .reveal { opacity: 0; }
+  .reveal-up.is-revealed { animation: fade-up .6s ease-out forwards; }
+  .reveal-in.is-revealed { animation: fade-in .6s ease-out forwards; }
+  .reveal-right.is-revealed { animation: slide-right .6s ease-out forwards; }
+}
