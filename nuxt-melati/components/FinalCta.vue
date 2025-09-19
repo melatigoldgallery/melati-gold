@@ -6,7 +6,7 @@
       <h2 class="section-title">Siap Bersinar Hari Ini?</h2>
       <p class="mt-2 text-neutral-700">Temukan perhiasan yang melengkapi pesona dirimu.</p>
       <div class="mt-6">
-        <a href="#produk" class="btn-primary">Belanja Sekarang</a>
+        <a href="#produk" class="btn-primary w-full sm:w-auto">Belanja Sekarang</a>
       </div>
     </div>
   </section>

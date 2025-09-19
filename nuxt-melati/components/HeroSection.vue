@@ -1,5 +1,5 @@
 <template>
-  <section class="relative overflow-hidden bg-gradient-to-b from-maroon to-maroon/95 text-white">
+  <section class="relative overflow-hidden bg-gradient-to-b from-maroon via-maroon/90 to-cream text-white">
     <div class="absolute inset-0 opacity-10" aria-hidden="true">
       <div class="absolute -left-40 top-1/3 h-96 w-96 rounded-full bg-gold blur-3xl" />
       <div class="absolute right-0 -top-24 h-96 w-96 rounded-full bg-gold/60 blur-3xl" />
@@ -8,14 +8,15 @@
       <div class="space-y-6 reveal-up">
         <span class="chip">Koleksi Baru</span>
         <h1 class="font-serif text-4xl md:text-6xl leading-tight">
-          <span class="text-gradient">Kilau Elegan</span>, Pesona Abadi
+          <span class="text-gradient">Kilau Elegan</span>
+          , Pesona Abadi
         </h1>
         <p class="text-white/90 max-w-prose">
           Perhiasan emas premium dengan desain eksklusif. Percayakan kilauanmu pada koleksi terbaik dari Melati Gold.
         </p>
-        <div class="flex gap-3">
+        <div class="flex flex-col gap-3 sm:flex-row">
           <a href="#produk" class="btn-primary">Lihat Koleksi</a>
-          <a href="#tentang" class="btn-outline">Tentang Kami</a>
+          <a href="#produk" class="btn-outline">Belanja Sekarang</a>
         </div>
       </div>
       <div class="relative reveal-right">
@@ -25,10 +26,19 @@
           class="mx-auto aspect-[4/3] w-full max-w-xl rounded-2xl object-cover ring-1 ring-white/10 shadow-2xl"
         />
         <div class="absolute -bottom-6 -left-6 hidden md:block">
-          <img src="/img/earringcvr.jpg" class="h-28 w-40 rounded-xl object-cover ring-1 ring-white/20 shadow-lg" alt="Earring" />
+          <img
+            src="/img/earringcvr.jpg"
+            loading="lazy"
+            class="h-28 w-40 rounded-xl object-cover ring-1 ring-white/20 shadow-lg"
+            alt="Earring"
+          />
         </div>
-        <div class="pointer-events-none absolute -right-8 -top-8 hidden aspect-square w-40 rounded-full border border-gold/40 md:block" />
+        <div
+          class="pointer-events-none absolute -right-8 -top-8 hidden aspect-square w-40 rounded-full border border-gold/40 md:block"
+        />
       </div>
     </div>
+    <!-- Soft fade into next cream section -->
+    <div class="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-b from-transparent to-cream"></div>
   </section>
 </template>

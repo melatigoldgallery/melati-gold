@@ -1,10 +1,11 @@
 <template>
   <div>
-  <HeroSection />
-  <FeaturedProducts />
-  <Advantages />
-  <Testimonials />
-  <AboutUs />
-  <FinalCta />
+    <HeroSection />
+    <CatalogShowcase />
+    <Advantages />
+    <FeaturedProducts />
+    <Testimonials />
+    <AboutUs />
+    <FinalCta />
   </div>
 </template>
