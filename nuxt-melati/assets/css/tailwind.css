@@ -35,6 +35,9 @@
   .section-title {
     @apply font-serif text-3xl md:text-4xl;
   }
+  .font-script {
+    font-family: 'Allura', cursive;
+  }
 }
 
 /* Gradients and decorative utilities */

@@ -1,44 +1,18 @@
 <template>
-  <section class="relative overflow-hidden bg-gradient-to-b from-maroon via-maroon/90 to-cream text-white">
-    <div class="absolute inset-0 opacity-10" aria-hidden="true">
-      <div class="absolute -left-40 top-1/3 h-96 w-96 rounded-full bg-gold blur-3xl" />
-      <div class="absolute right-0 -top-24 h-96 w-96 rounded-full bg-gold/60 blur-3xl" />
+  <section class="relative overflow-hidden text-white">
+    <div class="absolute inset-0 -z-10">
+      <img src="/img/wedding-cover.jpg" alt="Hero Background" class="h-full w-full object-cover" />
+      <div class="absolute inset-0 bg-black/60" />
     </div>
-    <div class="container relative z-10 mx-auto grid max-w-6xl gap-10 py-20 md:grid-cols-2 md:items-center">
+  <div class="container relative z-10 mx-auto grid max-w-6xl gap-10 py-24 md:py-28 md:grid-cols-2 md:items-center">
       <div class="space-y-6 reveal-up">
-        <span class="chip">Koleksi Baru</span>
-        <h1 class="font-serif text-4xl md:text-6xl leading-tight">
-          <span class="text-gradient">Kilau Elegan</span>
-          , Pesona Abadi
+        <h1 class="font-script text-5xl md:text-7xl leading-tight text-gold">
+          Kilau Elegan, Pesona Abadi
         </h1>
-        <p class="text-white/90 max-w-prose">
+        <p class="text-black/90 max-w-prose">
           Perhiasan emas premium dengan desain eksklusif. Percayakan kilauanmu pada koleksi terbaik dari Melati Gold.
         </p>
-        <div class="flex flex-col gap-3 sm:flex-row">
-          <a href="#produk" class="btn-primary">Lihat Koleksi</a>
-          <a href="#produk" class="btn-outline">Belanja Sekarang</a>
-        </div>
-      </div>
-      <div class="relative reveal-right">
-        <img
-          src="/img/necklace-cvr.jpg"
-          alt="Melati Gold Hero"
-          class="mx-auto aspect-[4/3] w-full max-w-xl rounded-2xl object-cover ring-1 ring-white/10 shadow-2xl"
-        />
-        <div class="absolute -bottom-6 -left-6 hidden md:block">
-          <img
-            src="/img/earringcvr.jpg"
-            loading="lazy"
-            class="h-28 w-40 rounded-xl object-cover ring-1 ring-white/20 shadow-lg"
-            alt="Earring"
-          />
-        </div>
-        <div
-          class="pointer-events-none absolute -right-8 -top-8 hidden aspect-square w-40 rounded-full border border-gold/40 md:block"
-        />
       </div>
     </div>
-    <!-- Soft fade into next cream section -->
-    <div class="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-b from-transparent to-cream"></div>
   </section>
 </template>

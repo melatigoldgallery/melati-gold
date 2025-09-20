@@ -3,9 +3,14 @@ const open = ref(false);
 </script>
 
 <template>
-  <header
-    class="sticky top-0 z-50 bg-black/60 backdrop-blur supports-[backdrop-filter]:bg-black/50 text-white shadow-elegant border-b border-maroon/20"
-  >
+  <header class="sticky top-0 z-50 relative text-white shadow-elegant border-b border-white/10">
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute inset-0">
+        <img src="/img/wedding-cover.jpg" alt="Background" class="h-full w-full object-cover" />
+      </div>
+      <div class="absolute inset-0 bg-black/60" />
+      <div class="absolute inset-0 backdrop-blur-sm supports-[backdrop-filter]:backdrop-blur-md" />
+    </div>
     <div class="container mx-auto flex max-w-6xl items-center justify-between py-0 md:py-0">
       <NuxtLink to="/" class="flex items-center gap-3">
         <img src="/img/logo.png" alt="Melati Gold" class="h-14 w-auto sm:h-16 md:h-20" />

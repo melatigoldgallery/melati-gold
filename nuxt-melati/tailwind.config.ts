@@ -8,8 +8,9 @@ export default {
         black: "#0B0B0B",
       },
       fontFamily: {
-        serif: ['"Playfair Display"', "serif"],
-        sans: ["Inter", "Poppins", "system-ui", "ui-sans-serif", "sans-serif"],
+        serif: ['"Playfair Display"', 'ui-serif', 'Georgia', 'serif'],
+        sans: ["Poppins", "Inter", "system-ui", "ui-sans-serif", "sans-serif"],
+        script: ['Allura', 'cursive'],
       },
       container: {
         center: true,
