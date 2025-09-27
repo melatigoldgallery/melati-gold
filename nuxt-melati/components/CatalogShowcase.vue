@@ -1,86 +1,89 @@
 <script setup lang="ts">
-// Data katalog per kategori (placeholder images from /public/img)
+// Data katalog 6 kategori utama
 const categories = [
   {
+    id: 1,
     title: "Kalung",
-    items: [
-      { label: "Dewasa", img: "/img/necklace.jpg" },
-      { label: "Anak-anak", img: "/img/kids-necklace.jpg" },
-      { label: "Best Seller", img: "/img/necklace2.jpg" },
-    ],
+    image: "/img/necklace-cvr.jpg",
+    description: "Koleksi kalung emas elegan",
   },
   {
+    id: 2,
     title: "Liontin",
-    items: [
-      { label: "Best Seller", img: "/img/pandent2.jpg" },
-      { label: "Anak-anak", img: "/img/kids-set.jpg" },
-    ],
+    image: "/img/pandent2.jpg",
+    description: "Liontin cantik untuk penampilan istimewa",
   },
   {
+    id: 3,
     title: "Anting",
-    items: [
-      { label: "Best Seller", img: "/img/earrings2.jpg" },
-      { label: "Anak-anak", img: "/img/kidsearring.jpg" },
-    ],
+    image: "/img/earringcvr.jpg",
+    description: "Anting emas yang mempesona",
   },
   {
+    id: 4,
     title: "Cincin",
-    items: [
-      { label: "Anak-anak", img: "/img/kidsring.jpg" },
-      { label: "Fashion", img: "/img/rings1.jpg" },
-      { label: "Couple Ring", img: "/img/couplering.jpg" },
-      { label: "Men Ring", img: "/img/mensring.jpg" },
-      { label: "Best Seller", img: "/img/ring2.jpg" },
-    ],
+    image: "/img/ringcvr.jpg",
+    description: "Cincin emas berkualitas premium",
   },
   {
+    id: 5,
     title: "Gelang",
-    items: [
-      { label: "Best Seller", img: "/img/bangle1.jpg" },
-      { label: "Anak-anak", img: "/img/kids-bracelet.jpg" },
-      { label: "Fashion", img: "/img/mens-brecelet.jpg" },
-    ],
+    image: "/img/bangle1.jpg",
+    description: "Gelang emas dengan desain modern",
   },
   {
+    id: 6,
     title: "Giwang",
-    items: [
-      { label: "Best Seller", img: "/img/earring.jpg" },
-      { label: "Fashion", img: "/img/earring2.jpg" },
-    ],
+    image: "/img/earring2.jpg",
+    description: "Giwang tradisional dan kontemporer",
   },
 ];
 </script>
 
 <template>
-  <section class="bg-cream py-20">
-    <div class="container mx-auto max-w-6xl">
-      <div class="mb-6 text-center">
-        <h2 class="section-title">Katalog Best Seller</h2>
-        <p class="mt-2 text-neutral-600">Jelajahi pilihan kategori populer kami.</p>
+  <section id="produk" class="bg-cream py-20">
+    <div class="container mx-auto max-w-7xl px-4">
+      <!-- Header Section -->
+      <div class="mb-12 text-center reveal-up">
+        <h2 class="section-title text-maroon">Katalog Produk Kami</h2>
+        <p class="mt-4 text-lg text-neutral-600 max-w-2xl mx-auto">
+          Jelajahi koleksi perhiasan emas premium dengan berbagai kategori pilihan terbaik
+        </p>
       </div>
 
-      <!-- Unified responsive grid -->
-      <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <div v-for="cat in categories" :key="cat.title" class="rounded-2xl glass p-4">
-          <div class="mb-3 flex items-center justify-between">
-            <h3 class="font-serif text-2xl text-maroon">{{ cat.title }}</h3>
-          </div>
-          <div class="grid grid-cols-3 gap-3">
-            <a
-              v-for="(it, idx) in cat.items"
-              :key="it.label + idx"
-              href="#produk"
-              class="group relative overflow-hidden rounded-xl"
-            >
-              <img
-                :src="it.img"
-                :alt="`${cat.title} - ${it.label}`"
-                loading="lazy"
-                class="aspect-square w-full object-cover transition duration-300 group-hover:scale-105"
-              />
-              <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 to-black/0" />
-              <span class="absolute bottom-2 left-2 chip">{{ it.label }}</span>
-            </a>
+      <!-- Catalog Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+        <div v-for="category in categories" :key="category.id" class="group cursor-pointer">
+          <!-- Card with Overlay Content -->
+          <div
+            class="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 aspect-[4/5] transform hover:scale-105"
+          >
+            <!-- Background Image -->
+            <img
+              :src="category.image"
+              :alt="category.title"
+              class="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+
+            <!-- Dark Overlay -->
+            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-300"></div>
+
+            <!-- Content Overlay -->
+            <div class="absolute inset-0 flex flex-col justify-center items-center text-center p-4">
+              <!-- Category Title -->
+              <h3 class="font-serif text-white text-2xl md:text-3xl lg:text-2xl xl:text-3xl mb-4 drop-shadow-lg">
+                {{ category.title }}
+              </h3>
+
+              <!-- CTA Button -->
+              <a
+                href="#detail-produk"
+                class="bg-gold hover:bg-gold/90 text-black font-semibold py-2.5 px-6 md:py-3 md:px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-sm md:text-base"
+              >
+                Lihat Katalog
+              </a>
+            </div>
           </div>
         </div>
       </div>
