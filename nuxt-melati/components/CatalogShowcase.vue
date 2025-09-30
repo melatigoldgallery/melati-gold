@@ -45,7 +45,7 @@ const categories = [
     <div class="container mx-auto max-w-7xl px-4">
       <!-- Header Section -->
       <div class="mb-12 text-center reveal-up">
-        <h2 class="section-title text-maroon">Katalog Produk Kami</h2>
+        <h2 class="section-title text-maroon">Katalog Produk</h2>
         <p class="mt-4 text-lg text-neutral-600 max-w-2xl mx-auto">
           Jelajahi koleksi perhiasan emas premium dengan berbagai kategori pilihan terbaik
         </p>
@@ -70,16 +70,16 @@ const categories = [
             <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-300"></div>
 
             <!-- Content Overlay -->
-            <div class="absolute inset-0 flex flex-col justify-center items-center text-center p-4">
+            <div class="absolute inset-0 flex flex-col justify-end items-center text-left p-2 space-y-0">
               <!-- Category Title -->
-              <h3 class="font-serif text-white text-2xl md:text-3xl lg:text-2xl xl:text-3xl mb-4 drop-shadow-lg">
+              <h3 class="font-serif text-white text-2xl md:text-3xl lg:text-2xl xl:text-3xl mb-2 drop-shadow-lg">
                 {{ category.title }}
               </h3>
 
               <!-- CTA Button -->
               <a
                 href="#detail-produk"
-                class="bg-gold hover:bg-gold/90 text-black font-semibold py-2.5 px-6 md:py-3 md:px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-sm md:text-base"
+                class="text-white bg-transparent font-semibold py-2 px-3 md:py-2 md:px-2 transition-transform duration-300 transform hover:scale-55 text-sm"
               >
                 Lihat Katalog
               </a>

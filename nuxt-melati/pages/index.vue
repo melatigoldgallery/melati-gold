@@ -2,8 +2,8 @@
   <div>
     <HeroSection />
     <CatalogShowcase />
-    <Advantages />
     <FeaturedProducts />
+    <CustomServices />
     <Testimonials />
     <AboutUs />
     <FinalCta />
