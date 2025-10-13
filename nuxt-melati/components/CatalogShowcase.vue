@@ -1,5 +1,8 @@
 <script setup lang="ts">
-// Data katalog 6 kategori utama
+const emit = defineEmits<{
+  (e: "open-subcategories", category: string): void;
+}>();
+
 const categories = [
   {
     id: 1,
@@ -76,13 +79,16 @@ const categories = [
                 {{ category.title }}
               </h3>
 
+              <div class="h-px w-full bg-gradient-to-r from-transparent via-white/90 to-transparent"></div>
+
               <!-- CTA Button -->
-              <a
-                href="#detail-produk"
-                class="text-white bg-transparent font-semibold py-2 px-3 md:py-2 md:px-2 transition-transform duration-300 transform hover:scale-55 text-sm"
+              <button
+                type="button"
+                @click="category.title === 'Kalung' ? emit('open-subcategories', 'Kalung') : null"
+                class="text-white bg-transparent py-2 px-3 md:py-2 md:px-2 transition-transform duration-300 transform hover:scale-55 text-sm"
               >
                 Lihat Katalog
-              </a>
+              </button>
             </div>
           </div>
         </div>

@@ -141,7 +141,7 @@ const onImageError = () => {
         <div class="mt-10 transition-all duration-700 delay-300">
           <a
             href="#produk"
-            class="inline-block bg-gold hover:bg-gold/90 text-black font-semibold px-6 py-3 md:px-8 md:py-5 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-base md:text-lg"
+            class="inline-block bg-gold hover:bg-gold/90 text-black font-semibold px-6 py-3 md:px-5 md:py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-base md:text-lg"
           >
             {{ currentSlide.buttonText }}
           </a>

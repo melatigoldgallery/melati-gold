@@ -147,7 +147,7 @@ function buildWhatsAppLink(p: CardProduct | null) {
 </script>
 
 <template>
-  <section id="produk" class="container py-20">
+  <section id="best-produk" class="container py-20">
     <div class="mx-auto mb-6 text-center max-w-2xl reveal-in">
       <h2 class="section-title">Best Seller Bulan September</h2>
       <p class="mt-2 text-neutral-600">Koleksi favorit pilihan pelanggan, siap memancarkan pesonamu.</p>

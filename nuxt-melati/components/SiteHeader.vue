@@ -48,13 +48,13 @@ onUnmounted(() => {
           href="#produk"
           class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
         >
-          Produk
+          Katalog Produk
         </a>
         <a
-          href="#keunggulan"
+          href="#best-produk"
           class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
         >
-          Keunggulan
+          Best Seller
         </a>
         <a
           href="#testimoni"
@@ -81,8 +81,8 @@ onUnmounted(() => {
       <div v-if="open" class="md:hidden border-t border-white/20 bg-black/80 backdrop-blur-md">
         <nav class="container mx-auto max-w-6xl py-3 px-4 grid gap-2">
           <a href="#produk" class="py-3 text-gold hover:text-white transition-colors" @click="open = false">Produk</a>
-          <a href="#keunggulan" class="py-3 text-gold hover:text-white transition-colors" @click="open = false">
-            Keunggulan
+          <a href="#best-produk" class="py-3 text-gold hover:text-white transition-colors" @click="open = false">
+            Best Seller
           </a>
           <a href="#testimoni" class="py-3 text-gold hover:text-white transition-colors" @click="open = false">
             Testimoni
