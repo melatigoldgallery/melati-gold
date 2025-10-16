@@ -4,6 +4,5 @@
     <main class="relative">
       <slot />
     </main>
-    <SiteFooter />
   </div>
 </template>

@@ -15,7 +15,30 @@ const subcategoriesMap: Record<string, { key: string; title: string; image: stri
   Kalung: [
     { key: "anak", title: "Kalung Anak", image: "/img/kids-necklace.jpg" },
     { key: "fashion", title: "Kalung Fashion", image: "/img/necklace2.jpg" },
-    { key: "pria", title: "Kalung Laki-laki", image: "/img/necklace-man.jpg" },
+    { key: "pria", title: "Kalung Pria", image: "/img/necklace-man.jpg" },
+  ],
+  Liontin: [
+    { key: "anak", title: "Liontin Anak", image: "/img/pandent.jpg" },
+    { key: "fashion", title: "Liontin Fashion", image: "/img/pandent2.jpg" },
+  ],
+  Anting: [
+    { key: "anak", title: "Anting Anak", image: "/img/kidsearring.jpg" },
+    { key: "fashion", title: "Anting Fashion", image: "/img/earrings1.jpg" },
+  ],
+  Cincin: [
+    { key: "anak", title: "Cincin Anak", image: "/img/kidsring.jpg" },
+    { key: "fashion", title: "Cincin Fashion", image: "/img/ring2.jpg" },
+    { key: "pria", title: "Cincin Pria", image: "/img/mensring.jpg" },
+  ],
+  Gelang: [
+    { key: "anak", title: "Gelang Anak", image: "/img/kids-bracelet.jpg" },
+    { key: "fashion", title: "Gelang Fashion", image: "/img/bracelet3.jpg" },
+    { key: "bangle", title: "Bangle", image: "/img/bangle2.jpg" },
+    { key: "pria", title: "Gelang Pria", image: "/img/mens-brecelet.jpg" },
+  ],
+  Giwang: [
+    { key: "anak", title: "Giwang Anak", image: "/img/kidsearring.jpg" },
+    { key: "fashion", title: "Giwang Fashion", image: "/img/earring.jpg" },
   ],
 };
 
@@ -37,12 +60,18 @@ watchEffect(() => {
           </div>
           <div class="modal-body">
             <div class="row g-3">
-              <div v-for="it in items" :key="it.key" class="col-12 col-md-4">
+              <div
+                v-for="it in items"
+                :key="it.key"
+                :class="
+                  items.length === 4 ? 'col-6 col-md-3' : items.length === 3 ? 'col-12 col-md-4' : 'col-12 col-md-6'
+                "
+              >
                 <button class="w-100 btn p-0 border-0 bg-transparent" @click="emit('select', it.key)">
                   <div class="position-relative rounded-3 overflow-hidden subcard">
                     <img :src="it.image" :alt="it.title" class="w-100 h-100 object-fit-cover" />
                     <div class="overlay d-flex align-items-center justify-content-center">
-                      <span class="text-white fw-semibold">{{ it.title }}</span>
+                      <span class="text-white fw-semibold fs-6">{{ it.title }}</span>
                     </div>
                   </div>
                 </button>

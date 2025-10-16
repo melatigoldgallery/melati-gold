@@ -2,7 +2,16 @@
 import { defineNuxtConfig } from "nuxt/config";
 
 export default defineNuxtConfig({
+  // 🚀 nonaktifkan SSR supaya build jadi static site
+  ssr: false,
+
+  // gunakan preset netlify agar output-nya siap deploy di Netlify
+  nitro: {
+    preset: "netlify",
+  },
+
   modules: ["@nuxtjs/tailwindcss"],
+
   app: {
     head: {
       title: "Melati Gold Gallery",
@@ -17,18 +26,38 @@ export default defineNuxtConfig({
           rel: "stylesheet",
           href: "https://fonts.googleapis.com/css2?family=Allura&family=Poppins:wght@300;400;500;600;700&display=swap",
         },
-        { rel: "stylesheet", href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" },
-        { rel: "stylesheet", href: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" },
+        {
+          rel: "stylesheet",
+          href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css",
+        },
+        {
+          rel: "stylesheet",
+          href: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
+        },
       ],
-      script: [{ src: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js", defer: true }],
+      script: [
+        {
+          src: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
+          defer: true,
+        },
+      ],
     },
   },
+
   runtimeConfig: {
+    // Server-only config (private)
+    cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
+
     public: {
+      // Client-side config (public)
       supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL || "",
       supabaseAnonKey: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || "",
+      cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "",
+      cloudinaryApiKey: process.env.NUXT_PUBLIC_CLOUDINARY_API_KEY || "",
+      cloudinaryUploadPreset: process.env.NUXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "melati_gold_unsigned",
     },
   },
+
   tailwindcss: {
     cssPath: "~/assets/css/tailwind.css",
     viewer: false,

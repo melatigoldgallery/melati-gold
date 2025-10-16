@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// TODO: After database setup, replace with:
+// const { getContent, loadContent } = useContentManager()
+// const products = getContent('products')
+
 // Local type for card + modal needs in this component only
 type CardProduct = {
   id: string;
@@ -161,7 +165,7 @@ function buildWhatsAppLink(p: CardProduct | null) {
       </button>
     </div>
 
-  <div class="grid gap-7 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <div class="grid gap-7 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       <article
         v-for="p in filtered"
         :key="p.id"
@@ -174,24 +178,30 @@ function buildWhatsAppLink(p: CardProduct | null) {
         <div class="p-5 flex flex-col gap-2">
           <!-- Header row: name + Detail button side-by-side -->
           <div class="flex items-center justify-between gap-2 md:gap-3 min-w-0">
-            <h3 class="font-medium text-maroon flex-1 min-w-0 truncate leading-tight text-sm md:text-base">{{ p.name }}</h3>
+            <h3 class="font-medium text-maroon flex-1 min-w-0 truncate leading-tight text-sm md:text-base">
+              {{ p.name }}
+            </h3>
           </div>
           <!-- Optional brief info under name -->
           <p class="text-sm text-neutral-600">{{ p.karat }} {{ formatIDR(p.estimatedPrice) }}</p>
-          
-            <button
-              class="btn-outline shrink-0 text-[11px] md:text-sm px-2 py-1 md:px-3 md:py-1.5 whitespace-nowrap rounded-md"
-              @click="openDetail(p)"
-            >
-              Detail
-            </button>
+
+          <button
+            class="btn-outline shrink-0 text-[11px] md:text-sm px-2 py-1 md:px-3 md:py-1.5 whitespace-nowrap rounded-md"
+            @click="openDetail(p)"
+          >
+            Detail
+          </button>
         </div>
       </article>
     </div>
 
     <!-- Modal: Product Detail -->
     <transition name="fade">
-      <div v-if="isOpen" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-[1px] flex items-center justify-center p-4" @click.self="closeModal">
+      <div
+        v-if="isOpen"
+        class="fixed inset-0 z-50 bg-black/60 backdrop-blur-[1px] flex items-center justify-center p-4"
+        @click.self="closeModal"
+      >
         <div class="bg-white w-full max-w-4xl rounded-2xl overflow-hidden shadow-elegant">
           <div class="flex items-center justify-between px-5 py-4 border-b">
             <h3 class="text-lg font-semibold text-maroon">{{ selected?.name }}</h3>
@@ -200,7 +210,11 @@ function buildWhatsAppLink(p: CardProduct | null) {
           <div class="grid md:grid-cols-2 gap-4 p-5">
             <!-- Images -->
             <div>
-              <img :src="mainImage || selected?.image" :alt="selected?.name || 'Produk'" class="w-full h-64 object-cover rounded-lg" />
+              <img
+                :src="mainImage || selected?.image"
+                :alt="selected?.name || 'Produk'"
+                class="w-full h-64 object-cover rounded-lg"
+              />
               <div class="mt-3 flex gap-2 overflow-x-auto">
                 <button
                   v-for="(img, idx) in selected?.images"
@@ -208,19 +222,39 @@ function buildWhatsAppLink(p: CardProduct | null) {
                   class="rounded-lg overflow-hidden border hover:border-gold focus:ring-1 focus:ring-gold"
                   @click="mainImage = img"
                 >
-                  <img :src="img" :alt="`Thumbnail ${idx+1}`" class="h-16 w-20 object-cover" loading="lazy" />
+                  <img :src="img" :alt="`Thumbnail ${idx + 1}`" class="h-16 w-20 object-cover" loading="lazy" />
                 </button>
               </div>
             </div>
             <!-- Details -->
             <div class="space-y-2">
-              <div class="text-sm text-neutral-700"><span class="font-medium text-neutral-900">Nama:</span> {{ selected?.name }}</div>
-              <div class="text-sm text-neutral-700"><span class="font-medium text-neutral-900">Kadar:</span> {{ selected?.karat }}</div>
-              <div class="text-sm text-neutral-700"><span class="font-medium text-neutral-900">Berat:</span> {{ selected?.weight }}</div>
-              <div class="text-sm text-neutral-700"><span class="font-medium text-neutral-900">Estimasi Harga:</span> {{ formatIDR(selected?.estimatedPrice) }}</div>
-              <div class="pt-2 text-sm text-neutral-700"><span class="font-medium text-neutral-900">Deskripsi:</span> {{ selected?.description }}</div>
+              <div class="text-sm text-neutral-700">
+                <span class="font-medium text-neutral-900">Nama:</span>
+                {{ selected?.name }}
+              </div>
+              <div class="text-sm text-neutral-700">
+                <span class="font-medium text-neutral-900">Kadar:</span>
+                {{ selected?.karat }}
+              </div>
+              <div class="text-sm text-neutral-700">
+                <span class="font-medium text-neutral-900">Berat:</span>
+                {{ selected?.weight }}
+              </div>
+              <div class="text-sm text-neutral-700">
+                <span class="font-medium text-neutral-900">Estimasi Harga:</span>
+                {{ formatIDR(selected?.estimatedPrice) }}
+              </div>
+              <div class="pt-2 text-sm text-neutral-700">
+                <span class="font-medium text-neutral-900">Deskripsi:</span>
+                {{ selected?.description }}
+              </div>
               <div class="pt-4">
-                <a :href="buildWhatsAppLink(selected)" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition">
+                <a
+                  :href="buildWhatsAppLink(selected)"
+                  target="_blank"
+                  rel="noopener"
+                  class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition"
+                >
                   WhatsApp
                 </a>
               </div>

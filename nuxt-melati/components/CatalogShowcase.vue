@@ -84,7 +84,7 @@ const categories = [
               <!-- CTA Button -->
               <button
                 type="button"
-                @click="category.title === 'Kalung' ? emit('open-subcategories', 'Kalung') : null"
+                @click="emit('open-subcategories', category.title)"
                 class="text-white bg-transparent py-2 px-3 md:py-2 md:px-2 transition-transform duration-300 transform hover:scale-55 text-sm"
               >
                 Lihat Katalog
