@@ -182,25 +182,42 @@
             <div class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <NuxtLink
-                  to="/admin"
+                  to="/admin/catalog"
                   class="bg-yellow-600 hover:bg-yellow-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
                 >
-                  Content Manager
+                  <i class="bi bi-grid-3x3-gap mr-2"></i>
+                  Catalog Manager
+                </NuxtLink>
+                <NuxtLink
+                  to="/admin/db-test"
+                  class="bg-teal-600 hover:bg-teal-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <i class="bi bi-database-check mr-2"></i>
+                  DB Test
                 </NuxtLink>
                 <NuxtLink
                   to="/admin/users"
                   class="bg-purple-600 hover:bg-purple-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
                 >
+                  <i class="bi bi-people-fill mr-2"></i>
                   Admin Users
+                </NuxtLink>
+                <NuxtLink
+                  to="/admin"
+                  class="bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <i class="bi bi-file-text mr-2"></i>
+                  Content Manager
                 </NuxtLink>
                 <NuxtLink
                   to="/admin/setup"
                   class="bg-gray-600 hover:bg-gray-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
                 >
+                  <i class="bi bi-database mr-2"></i>
                   Database Setup
                 </NuxtLink>
               </div>
-              <p class="text-sm text-gray-500 text-center">Edit products, services, and website content</p>
+              <p class="text-sm text-gray-500 text-center">Manage catalog, products, services, and website content</p>
             </div>
           </div>
         </div>
@@ -215,25 +232,13 @@
         <div class="p-4 sm:p-6">
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <NuxtLink
-              to="/admin"
+              to="/admin/catalog?tab=products"
               class="flex flex-col items-center p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-yellow-300 hover:bg-yellow-50 transition-colors group"
             >
               <div
                 class="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-100 group-hover:bg-yellow-200 rounded-lg flex items-center justify-center mb-2"
               >
-                <svg
-                  class="w-3 h-3 sm:w-4 sm:h-4 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V9a2 2 0 00-2-2H5z"
-                  />
-                </svg>
+                <i class="bi bi-box-seam text-yellow-600 text-sm sm:text-base"></i>
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-yellow-700 text-center">
                 Products
@@ -241,20 +246,13 @@
             </NuxtLink>
 
             <NuxtLink
-              to="/admin"
+              to="/admin/catalog?tab=best-sellers"
               class="flex flex-col items-center p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors group"
             >
               <div
                 class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 group-hover:bg-blue-200 rounded-lg flex items-center justify-center mb-2"
               >
-                <svg class="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                  />
-                </svg>
+                <i class="bi bi-star-fill text-blue-600 text-sm sm:text-base"></i>
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-blue-700 text-center">
                 Best Sellers
@@ -262,26 +260,13 @@
             </NuxtLink>
 
             <NuxtLink
-              to="/admin"
+              to="/admin/catalog?tab=services"
               class="flex flex-col items-center p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors group"
             >
               <div
                 class="w-6 h-6 sm:w-8 sm:h-8 bg-green-100 group-hover:bg-green-200 rounded-lg flex items-center justify-center mb-2"
               >
-                <svg class="w-3 h-3 sm:w-4 sm:h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                  />
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
+                <i class="bi bi-tools text-green-600 text-sm sm:text-base"></i>
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-green-700 text-center">
                 Services
@@ -289,28 +274,16 @@
             </NuxtLink>
 
             <NuxtLink
-              to="/admin/setup"
+              to="/admin/catalog?tab=categories"
               class="flex flex-col items-center p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors group"
             >
               <div
                 class="w-6 h-6 sm:w-8 sm:h-8 bg-purple-100 group-hover:bg-purple-200 rounded-lg flex items-center justify-center mb-2"
               >
-                <svg
-                  class="w-3 h-3 sm:w-4 sm:h-4 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
-                  />
-                </svg>
+                <i class="bi bi-grid-3x3-gap text-purple-600 text-sm sm:text-base"></i>
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-purple-700 text-center">
-                Database
+                Categories
               </span>
             </NuxtLink>
           </div>

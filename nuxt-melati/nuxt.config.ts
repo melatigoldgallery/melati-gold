@@ -12,6 +12,19 @@ export default defineNuxtConfig({
 
   modules: ["@nuxtjs/tailwindcss"],
 
+  // 🔧 Configure component auto-import for nested folders
+  components: [
+    {
+      path: "~/components",
+      pathPrefix: false,
+    },
+    {
+      path: "~/components/admin/catalog",
+      pathPrefix: false,
+      global: true,
+    },
+  ],
+
   app: {
     head: {
       title: "Melati Gold Gallery",

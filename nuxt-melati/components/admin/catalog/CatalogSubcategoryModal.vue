@@ -1,0 +1,198 @@
+<template>
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <!-- Header -->
+      <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+        <h3 class="text-xl font-semibold">
+          {{ subcategory ? "Edit Subcategory" : "Add New Subcategory" }}
+        </h3>
+        <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600">
+          <i class="bi bi-x-lg text-2xl"></i>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
+        <!-- Category Selection -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Parent Category
+            <span class="text-red-500">*</span>
+          </label>
+          <select
+            v-model="form.category_id"
+            required
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          >
+            <option value="">Select Category</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+              {{ cat.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Name
+            <span class="text-red-500">*</span>
+          </label>
+          <input
+            v-model="form.name"
+            @input="autoGenerateSlug"
+            type="text"
+            required
+            placeholder="e.g. Fashion, Anak, Pria"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          />
+        </div>
+
+        <!-- Slug -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Slug
+            <span class="text-red-500">*</span>
+          </label>
+          <input
+            v-model="form.slug"
+            type="text"
+            required
+            placeholder="fashion-anak-pria"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          />
+          <p class="text-xs text-gray-500 mt-1">URL-friendly version (auto-generated from name)</p>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea
+            v-model="form.description"
+            rows="3"
+            placeholder="Brief description of this subcategory"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          ></textarea>
+        </div>
+
+        <!-- Cover Image URL -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Cover Image URL</label>
+          <input
+            v-model="form.cover_image"
+            type="url"
+            placeholder="https://example.com/image.jpg"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          />
+          <p class="text-xs text-gray-500 mt-1">Or upload via Cloudinary (coming soon)</p>
+        </div>
+
+        <!-- Display Order -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
+          <input
+            v-model.number="form.display_order"
+            type="number"
+            min="0"
+            placeholder="0"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          />
+          <p class="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
+        </div>
+
+        <!-- Active Status -->
+        <div class="flex items-center">
+          <input v-model="form.is_active" type="checkbox" id="is_active" class="mr-2" />
+          <label for="is_active" class="text-sm text-gray-700">Active (visible to users)</label>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-3 pt-4">
+          <button
+            type="submit"
+            :disabled="saving"
+            class="flex-1 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white py-2 px-4 rounded-lg transition-colors"
+          >
+            {{ saving ? "Saving..." : subcategory ? "Update Subcategory" : "Create Subcategory" }}
+          </button>
+          <button
+            type="button"
+            @click="$emit('close')"
+            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+const props = defineProps<{
+  subcategory?: any;
+  categories: any[];
+}>();
+
+const emit = defineEmits(["close", "saved"]);
+
+const { createSubcategory, updateSubcategory } = useCatalogManager();
+
+// Form state
+const form = ref({
+  category_id: "",
+  name: "",
+  slug: "",
+  description: "",
+  cover_image: "",
+  display_order: 0,
+  is_active: true,
+});
+
+const saving = ref(false);
+
+// Initialize form with existing data if editing
+if (props.subcategory) {
+  form.value = {
+    category_id: props.subcategory.category_id || "",
+    name: props.subcategory.name,
+    slug: props.subcategory.slug,
+    description: props.subcategory.description || "",
+    cover_image: props.subcategory.cover_image || "",
+    display_order: props.subcategory.display_order || 0,
+    is_active: props.subcategory.is_active ?? true,
+  };
+}
+
+// Auto-generate slug from name
+const autoGenerateSlug = () => {
+  if (!props.subcategory) {
+    // Only auto-generate for new subcategories
+    form.value.slug = form.value.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "");
+  }
+};
+
+// Handle form submission
+const handleSubmit = async () => {
+  saving.value = true;
+
+  try {
+    const result = props.subcategory
+      ? await updateSubcategory(props.subcategory.id, form.value)
+      : await createSubcategory(form.value);
+
+    if (result.success) {
+      emit("saved");
+    } else {
+      alert("Error: " + result.error);
+    }
+  } catch (error) {
+    console.error("Error saving subcategory:", error);
+    alert("Failed to save subcategory");
+  } finally {
+    saving.value = false;
+  }
+};
+</script>
