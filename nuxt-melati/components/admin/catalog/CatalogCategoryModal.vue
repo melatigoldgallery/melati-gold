@@ -54,17 +54,13 @@
           <!-- Cover Image -->
           <div>
             <label class="block text-sm font-medium mb-2">Cover Image</label>
-            <div v-if="form.cover_image" class="mb-2">
-              <img :src="form.cover_image" alt="Cover" class="w-32 h-32 object-cover rounded-lg" />
-              <button type="button" @click="form.cover_image = ''" class="mt-2 text-sm text-red-600 hover:text-red-700">
-                Remove Image
-              </button>
-            </div>
             <CloudinaryUploader
+              v-model="imageUrls"
               @uploaded="handleImageUpload"
-              :uploading="uploading"
-              folder="melati-gold/categories"
+              folder="categories"
               :single="true"
+              :maxSize="5"
+              :showUrls="false"
             />
           </div>
 
@@ -136,7 +132,7 @@ const { createCategory, updateCategory } = useCatalogManager();
 
 // State
 const saving = ref(false);
-const uploading = ref(false);
+const imageUrls = ref<string[]>([]);
 
 const form = ref({
   name: "",
@@ -152,13 +148,17 @@ const form = ref({
 onMounted(() => {
   if (props.category) {
     form.value = { ...props.category };
+    // Initialize imageUrls with existing cover_image
+    if (props.category.cover_image) {
+      imageUrls.value = [props.category.cover_image];
+    }
   }
 });
 
 // Auto-generate slug from name
 watch(
   () => form.value.name,
-  (newName) => {
+  (newName: string) => {
     if (!props.category) {
       // Only auto-generate for new categories
       form.value.slug = newName
@@ -173,8 +173,11 @@ watch(
 const handleImageUpload = (urls: string[]) => {
   if (urls.length > 0) {
     form.value.cover_image = urls[0];
+    imageUrls.value = urls;
+  } else {
+    form.value.cover_image = "";
+    imageUrls.value = [];
   }
-  uploading.value = false;
 };
 
 // Save category

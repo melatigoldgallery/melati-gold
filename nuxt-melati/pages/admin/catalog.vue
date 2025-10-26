@@ -60,9 +60,14 @@
           <CatalogSubcategoryManager :key="`sub-${componentKey}`" @alert="showAlert" />
         </div>
 
-        <!-- Products Tab -->
-        <div v-else-if="activeTab === 'products'" class="p-6">
+        <!-- All Products Tab -->
+        <div v-else-if="activeTab === 'all-products'" class="p-6">
           <CatalogProductManager :key="`prod-${componentKey}`" @alert="showAlert" />
+        </div>
+
+        <!-- Featured Products Tab -->
+        <div v-else-if="activeTab === 'featured'" class="p-6">
+          <CatalogFeaturedManager :key="`feat-${componentKey}`" @alert="showAlert" />
         </div>
 
         <!-- Best Sellers Tab -->
@@ -97,7 +102,7 @@ useHead({
 
 // Check for tab parameter in URL
 const route = useRoute();
-const activeTab = ref(route.query.tab?.toString() || "categories");
+const activeTab = ref(route.query.tab?.toString() || "all-products");
 const componentKey = ref(0); // Force component re-render
 
 // Watch for tab changes in URL
@@ -130,7 +135,8 @@ onMounted(() => {
 const tabs = [
   { key: "categories", label: "Categories", icon: "bi bi-grid-3x3-gap" },
   { key: "subcategories", label: "Subcategories", icon: "bi bi-diagram-3" },
-  { key: "products", label: "Products", icon: "bi bi-box-seam" },
+  { key: "all-products", label: "All Products", icon: "bi bi-box-seam" },
+  { key: "featured", label: "Barang Pilihan", icon: "bi bi-star" },
   { key: "best-sellers", label: "Best Sellers", icon: "bi bi-star-fill" },
   { key: "services", label: "Custom Services", icon: "bi bi-tools" },
 ];

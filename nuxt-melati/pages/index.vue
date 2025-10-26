@@ -4,8 +4,8 @@
     <main class="relative">
       <HeroSection />
       <CatalogShowcase @open-subcategories="openSubcategories" />
-      <CustomServices />
       <FeaturedProducts />
+      <CustomServices @open-service="openService" />
       <Testimonials />
       <AboutUs />
       <FinalCta />
@@ -15,7 +15,7 @@
     <!-- Subcategory Modal -->
     <SubcategoryModal
       :show="showSubcategoryModal"
-      :category="selectedCategory"
+      :category="selectedCategoryName"
       @close="closeSubcategoryModal"
       @select="selectSubcategory"
     />
@@ -29,30 +29,56 @@
           @click.self="closeLookbookModal"
         >
           <div class="bg-white rounded-2xl max-w-7xl w-full max-h-[90vh] overflow-y-auto p-6">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-2xl font-bold text-gray-900">{{ selectedCategory }} - {{ selectedSubcategoryTitle }}</h3>
-              <button
-                @click="closeLookbookModal"
-                class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-              >
-                <i class="bi bi-x-lg text-2xl"></i>
-              </button>
+            <!-- Loading State -->
+            <div v-if="loadingProducts" class="text-center py-12">
+              <div
+                class="inline-block w-12 h-12 border-4 border-maroon border-t-transparent rounded-full animate-spin"
+              ></div>
+              <p class="mt-4 text-neutral-600">Memuat produk...</p>
             </div>
-            <LookbookGrid :items="currentProducts" @open="openProductDetail" />
+
+            <!-- Products Grid -->
+            <div v-else>
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">
+                  {{ selectedCategoryName }} - {{ selectedSubcategoryName }}
+                </h3>
+                <button
+                  @click="closeLookbookModal"
+                  class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <i class="bi bi-x-lg text-2xl"></i>
+                </button>
+              </div>
+              <LookbookGrid :items="currentProducts" @open="openProductDetail" />
+            </div>
           </div>
         </div>
       </Transition>
     </Teleport>
 
     <!-- Product Detail Modal -->
-    <ProductDetailModal :show="showProductModal" :product="selectedProduct" @close="closeProductModal" />
+    <ProductDetailModal
+      :show="showProductModal"
+      :product="selectedProduct"
+      :serviceContext="selectedService"
+      @close="closeProductModal"
+    />
+
+    <!-- Custom Service Modal -->
+    <CustomServiceModal
+      :show="showServiceModal"
+      :service="selectedService"
+      @close="closeServiceModal"
+      @select-product="openProductFromService"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 useHead({
-  title: "Melati Gold Gallery - Handcrafted Jewelry",
-  meta: [{ name: "description", content: "Discover exquisite handcrafted jewelry at Melati Gold Gallery." }],
+  title: "Melati Gold Shop",
+  meta: [{ name: "description", content: "Discover exquisite jewelry at Melati Gold Shop." }],
   link: [
     {
       rel: "stylesheet",
@@ -61,29 +87,26 @@ useHead({
   ],
 });
 
+const { getProducts: getCatalogProducts } = useCatalogManager();
 const { getProducts, getProductDetail } = useCatalogData();
 
 // State management
 const showSubcategoryModal = ref(false);
 const showLookbookModal = ref(false);
 const showProductModal = ref(false);
+const showServiceModal = ref(false);
 const selectedCategory = ref<string | null>(null);
+const selectedCategoryName = ref<string | null>(null);
 const selectedSubcategory = ref<string | null>(null);
-const selectedSubcategoryTitle = ref<string>("");
+const selectedSubcategoryName = ref<string>("");
 const selectedProduct = ref<any>(null);
+const selectedService = ref<any>(null);
 const currentProducts = ref<any[]>([]);
-
-// Mapping subcategory key to title
-const subcategoryTitles: Record<string, string> = {
-  anak: "Anak",
-  fashion: "Fashion",
-  pria: "Pria",
-  bangle: "Bangle",
-};
+const loadingProducts = ref(false);
 
 // Open subcategory modal
-const openSubcategories = (category: string) => {
-  selectedCategory.value = category;
+const openSubcategories = (category: any) => {
+  selectedCategoryName.value = category.name || category;
   showSubcategoryModal.value = true;
 };
 
@@ -92,17 +115,25 @@ const closeSubcategoryModal = () => {
   showSubcategoryModal.value = false;
 };
 
-// Select subcategory and show lookbook
-const selectSubcategory = (subcategory: string) => {
-  selectedSubcategory.value = subcategory;
-  selectedSubcategoryTitle.value = subcategoryTitles[subcategory] || subcategory;
+// Select subcategory and show lookbook with products from database
+const selectSubcategory = async (subcategoryId: string, subcategoryName: string) => {
+  selectedSubcategory.value = subcategoryId;
+  selectedSubcategoryName.value = subcategoryName;
   showSubcategoryModal.value = false;
 
-  // Get products for this category and subcategory
-  if (selectedCategory.value) {
-    currentProducts.value = getProducts(selectedCategory.value, subcategory);
+  // Fetch products for this subcategory from database
+  loadingProducts.value = true;
+  const result = await getCatalogProducts({ subcategoryId });
+
+  if (result.success && result.data.length > 0) {
+    currentProducts.value = result.data;
     showLookbookModal.value = true;
+  } else {
+    // No products found
+    alert(`Belum ada produk untuk ${subcategoryName}`);
   }
+
+  loadingProducts.value = false;
 };
 
 // Close lookbook modal
@@ -110,17 +141,33 @@ const closeLookbookModal = () => {
   showLookbookModal.value = false;
 };
 
-// Open product detail
-const openProductDetail = (productId: number) => {
-  if (selectedCategory.value && selectedSubcategory.value) {
-    selectedProduct.value = getProductDetail(selectedCategory.value, selectedSubcategory.value, productId);
-    showProductModal.value = true;
-  }
+// Open product detail (using database product)
+const openProductDetail = (product: any) => {
+  selectedProduct.value = product;
+  showProductModal.value = true;
 };
 
 // Close product detail modal
 const closeProductModal = () => {
   showProductModal.value = false;
+};
+
+// Open service modal
+const openService = (service: any) => {
+  selectedService.value = service;
+  showServiceModal.value = true;
+};
+
+// Close service modal
+const closeServiceModal = () => {
+  showServiceModal.value = false;
+};
+
+// Open product from service (close service modal, open product detail)
+const openProductFromService = (product: any) => {
+  selectedProduct.value = product;
+  showServiceModal.value = false;
+  showProductModal.value = true;
 };
 </script>
 

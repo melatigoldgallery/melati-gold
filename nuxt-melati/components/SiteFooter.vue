@@ -1,62 +1,124 @@
 <template>
-  <footer id="kontak" class="relative text-white bg-gradient-to-b from-maroon to-black">
-    <!-- soft fade from previous cream section into footer -->
-    <div class="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-cream to-transparent"></div>
+  <footer id="kontak" class="relative text-white bg-gradient-to-b from-maroon via-black to-black">
+    <!-- Decorative gold line -->
+    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-gold to-transparent"></div>
 
-    <div class="container mx-auto max-w-6xl px-4 d-flex justify-center">
-      <div class="grid gap-10 py-12 md:grid-cols-3">
-        <!-- Brand + hours -->
-        <div class="flex flex-col items-center text-center">
-          <div class="flex items-center gap-3">
-            <span class="font-serif text-xl tracking-wide text-gold">Melati Gold Shop</span>
+    <div class="container mx-auto max-w-7xl px-4">
+      <!-- Main Footer Content -->
+      <div class="grid gap-12 py-16 md:grid-cols-3 border-b border-gold/20">
+        <!-- Brand + Hours -->
+        <div class="flex flex-col items-center md:items-start text-center md:text-left">
+          <!-- Logo/Icon -->
+          <div class="flex items-center gap-3 mb-4">
+            <div
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-maroon to-dark flex items-center justify-center shadow-lg"
+            >
+              <img src="public/img/logo.png" alt="" />
+            </div>
+            <span class="font-serif text-2xl font-bold tracking-wide text-gold">Melati Gold Shop</span>
           </div>
-          <p class="mt-3 text-white/80">Open Every Day | 09.30 - 21.00</p>
+          <p class="text-white/90 font-medium mb-2">Premium Gold Jewelry</p>
+          <div class="flex items-center gap-2 text-white/80">
+            <i class="bi bi-clock text-gold"></i>
+            <span class="text-sm">Buka Setiap Hari</span>
+          </div>
+          <p class="text-white/80 text-sm mt-1">09.00 - 21.00 WITA</p>
         </div>
 
-        <!-- Address -->
-        <div class="flex flex-col items-center text-center">
-          <h3 class="font-semibold text-gold">Alamat</h3>
-          <p class="mt-2 text-white/80">
-            Jl. Diponegoro No.116, Dauh Puri,
-            <br />
-            Denpasar, Bali 80232
-          </p>
-          <p class="mt-2 text-white/80">Phone: 03612096147</p>
+        <!-- Address & Contact -->
+        <div class="flex flex-col items-center md:items-start text-center md:text-left">
+          <h3 class="font-serif font-semibold text-gold text-lg mb-4 flex items-center gap-2">
+            <i class="bi bi-geo-alt-fill"></i>
+            Lokasi & Kontak
+          </h3>
+          <div class="space-y-3 text-white/80">
+            <p class="flex items-start gap-2 text-left">
+              <i class="bi bi-building text-gold mt-1 flex-shrink-0"></i>
+              <span>
+                Jl. Diponegoro No.116, Dauh Puri,
+                <br />
+                Denpasar, Bali 80232
+              </span>
+            </p>
+            <p class="flex items-center gap-2">
+              <i class="bi bi-telephone-fill text-gold"></i>
+              <a href="tel:03612096147" class="hover:text-gold transition-colors">0361 2096147</a>
+            </p>
+            <p class="flex items-center gap-2">
+              <i class="bi bi-whatsapp text-gold"></i>
+              <a href="https://wa.me/6281234567890" target="_blank" class="hover:text-gold transition-colors">
+                +62 812-3456-7890
+              </a>
+            </p>
+          </div>
         </div>
 
-        <!-- Socials -->
-        <div class="flex flex-col items-center text-center">
-          <h3 class="font-semibold text-gold">Sosial Media</h3>
-          <div class="mt-3 flex gap-3">
+        <!-- Social Media -->
+        <div class="flex flex-col items-center md:items-start text-center md:text-left">
+          <h3 class="font-serif font-semibold text-gold text-lg mb-4 flex items-center gap-2">
+            <i class="bi bi-share-fill"></i>
+            Ikuti Kami
+          </h3>
+          <p class="text-white/80 text-sm mb-4">Dapatkan update produk terbaru</p>
+          <div class="flex gap-3">
             <a
-              href="#"
+              href="https://instagram.com/melatigoldshop"
+              target="_blank"
               aria-label="Instagram"
-              class="inline-flex h-10 w-10 items-center justify-center rounded-full border hover:bg-gold/10 transition"
+              class="group w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/30 hover:from-gold hover:to-yellow-600 transition-all duration-300"
             >
-              <i class="fa-brands fa-instagram"></i>
+              <i class="bi bi-instagram text-gold group-hover:text-white transition-colors"></i>
             </a>
             <a
-              href="#"
+              href="https://tiktok.com/@melatigoldshop"
+              target="_blank"
               aria-label="TikTok"
-              class="inline-flex h-10 w-10 items-center justify-center rounded-full border hover:bg-gold/10 transition"
+              class="group w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/30 hover:from-gold hover:to-yellow-600 transition-all duration-300"
             >
-              <i class="fa-brands fa-tiktok"></i>
+              <i class="bi bi-tiktok text-gold group-hover:text-white transition-colors"></i>
             </a>
             <a
-              href="#"
+              href="https://facebook.com/melatigoldshop"
+              target="_blank"
               aria-label="Facebook"
-              class="inline-flex h-10 w-10 items-center justify-center rounded-full border hover:bg-gold/10 transition"
+              class="group w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/30 hover:from-gold hover:to-yellow-600 transition-all duration-300"
             >
-              <i class="fa-brands fa-facebook"></i>
+              <i class="bi bi-facebook text-gold group-hover:text-white transition-colors"></i>
             </a>
+            <a
+              href="https://wa.me/6281234567890"
+              target="_blank"
+              aria-label="WhatsApp"
+              class="group w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/30 hover:from-gold hover:to-yellow-600 transition-all duration-300"
+            >
+              <i class="bi bi-whatsapp text-gold group-hover:text-white transition-colors"></i>
+            </a>
+          </div>
+
+          <!-- Trust Badges -->
+          <div class="mt-6 flex flex-wrap gap-3 justify-center md:justify-start">
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-full border border-gold/20">
+              <i class="bi bi-shield-check text-gold text-sm"></i>
+              <span class="text-xs text-white/80">Emas Asli</span>
+            </div>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-full border border-gold/20">
+              <i class="bi bi-award text-gold text-sm"></i>
+              <span class="text-xs text-white/80">Terpercaya</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- subtle gold divider -->
-      <div class="h-px w-full bg-gradient-to-r from-transparent via-gold/40 to-transparent"></div>
-
-      <div class="py-4 text-center text-sm text-white/80">&copy; {{ new Date().getFullYear() }} Melati Gold Shop</div>
+      <!-- Bottom Bar -->
+      <div class="py-6 flex flex-col md:flex-row items-center justify-center gap-4">
+        <div class="text-center md:text-left">
+          <p class="text-white/80 text-sm">
+            &copy; {{ new Date().getFullYear() }}
+            <span class="text-gold font-semibold">Melati Gold Shop</span>
+            . All rights reserved.
+          </p>
+        </div>
+      </div>
     </div>
   </footer>
 </template>

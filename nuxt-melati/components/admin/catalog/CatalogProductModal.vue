@@ -127,14 +127,21 @@
             </div>
           </div>
 
-          <!-- TODO: Images Upload Component -->
+          <!-- Images Upload -->
           <div>
-            <label class="block text-sm font-medium mb-2">Images</label>
-            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-              <i class="bi bi-cloud-upload text-3xl text-gray-400"></i>
-              <p class="text-sm text-gray-500 mt-2">Image upload component coming soon...</p>
-              <p class="text-xs text-gray-400">Use CloudinaryUploader component</p>
-            </div>
+            <label class="block text-sm font-medium mb-2">Product Images</label>
+            <p class="text-xs text-gray-500 mb-3">
+              First image will be used as thumbnail. You can upload multiple images for gallery.
+            </p>
+            <CloudinaryUploader
+              v-model="imageUrls"
+              @uploaded="handleImagesUpload"
+              folder="products"
+              :single="false"
+              :maxFiles="8"
+              :maxSize="5"
+              :showUrls="false"
+            />
           </div>
 
           <!-- Specs (Simple textarea for now) -->
@@ -203,6 +210,7 @@ const { createProduct, updateProduct } = useCatalogManager();
 // State
 const saving = ref(false);
 const specsText = ref("");
+const imageUrls = ref<string[]>([]);
 
 const form = ref<{
   category_id: string;
@@ -257,13 +265,33 @@ onMounted(() => {
   if (props.product) {
     form.value = { ...props.product };
     specsText.value = (props.product.specs || []).join("\n");
+
+    // Initialize imageUrls with existing images
+    if (props.product.images && props.product.images.length > 0) {
+      imageUrls.value = [...props.product.images];
+    } else if (props.product.thumbnail_image) {
+      imageUrls.value = [props.product.thumbnail_image];
+    }
   }
 });
 
 // Watch specs text
-watch(specsText, (newValue) => {
-  form.value.specs = newValue.split("\n").filter((s) => s.trim());
+watch(specsText, (newValue: string) => {
+  form.value.specs = newValue.split("\n").filter((s: string) => s.trim());
 });
+
+// Handle images upload
+const handleImagesUpload = (urls: string[]) => {
+  imageUrls.value = urls;
+  form.value.images = urls;
+
+  // Set first image as thumbnail
+  if (urls.length > 0) {
+    form.value.thumbnail_image = urls[0];
+  } else {
+    form.value.thumbnail_image = "";
+  }
+};
 
 // Save
 const save = async () => {

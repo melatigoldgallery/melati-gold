@@ -189,32 +189,11 @@
                   Catalog Manager
                 </NuxtLink>
                 <NuxtLink
-                  to="/admin/db-test"
-                  class="bg-teal-600 hover:bg-teal-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
-                >
-                  <i class="bi bi-database-check mr-2"></i>
-                  DB Test
-                </NuxtLink>
-                <NuxtLink
                   to="/admin/users"
                   class="bg-purple-600 hover:bg-purple-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
                 >
                   <i class="bi bi-people-fill mr-2"></i>
                   Admin Users
-                </NuxtLink>
-                <NuxtLink
-                  to="/admin"
-                  class="bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
-                >
-                  <i class="bi bi-file-text mr-2"></i>
-                  Content Manager
-                </NuxtLink>
-                <NuxtLink
-                  to="/admin/setup"
-                  class="bg-gray-600 hover:bg-gray-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
-                >
-                  <i class="bi bi-database mr-2"></i>
-                  Database Setup
                 </NuxtLink>
               </div>
               <p class="text-sm text-gray-500 text-center">Manage catalog, products, services, and website content</p>

@@ -2,12 +2,30 @@
 import { defineNuxtConfig } from "nuxt/config";
 
 export default defineNuxtConfig({
+  compatibilityDate: "2025-10-26",
+
   // 🚀 nonaktifkan SSR supaya build jadi static site
   ssr: false,
 
   // gunakan preset netlify agar output-nya siap deploy di Netlify
   nitro: {
     preset: "netlify",
+  },
+
+  // ⚡ Vite config for better HMR (Hot Module Replacement)
+  vite: {
+    server: {
+      hmr: {
+        protocol: "ws",
+        host: "localhost",
+      },
+    },
+    clearScreen: false,
+  },
+
+  // 🔄 Dev server config
+  devServer: {
+    port: 3000,
   },
 
   modules: ["@nuxtjs/tailwindcss"],

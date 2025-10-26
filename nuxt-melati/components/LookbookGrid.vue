@@ -1,17 +1,22 @@
 <script setup lang="ts">
 const props = defineProps<{
-  items: { id: number; title: string; image: string; large?: boolean }[];
+  items: any[]; // Accept products from database
 }>();
 
 const emit = defineEmits<{
-  (e: "open", id: number): void;
+  (e: "open", product: any): void; // Emit full product object
 }>();
 </script>
 
 <template>
   <div class="lookbook-grid">
-    <div v-for="it in items" :key="it.id" class="item" :class="{ large: it.large }" @click="emit('open', it.id)">
-      <img :src="it.image" :alt="it.title" />
+    <div v-for="product in items" :key="product.id" class="item" @click="emit('open', product)">
+      <!-- Use thumbnail_image from database or fallback -->
+      <img
+        :src="product.thumbnail_image || product.images?.[0] || '/img/placeholder.jpg'"
+        :alt="product.title || product.name"
+        loading="lazy"
+      />
       <div class="hover-overlay">
         <span>Lihat Detail</span>
       </div>

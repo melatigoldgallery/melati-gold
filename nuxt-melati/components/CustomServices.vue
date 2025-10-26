@@ -1,101 +1,41 @@
 <script setup lang="ts">
-// Minimal local type for custom items
-interface CustomItem {
-  id: string;
-  title: string;
-  images: { src: string; caption?: string }[];
-  cover: string; // main image
-  description: string;
-}
+// Emit event untuk membuka modal service
+const emit = defineEmits<{
+  (e: "open-service", service: any): void;
+}>();
 
-const items = ref<CustomItem[]>([
-  {
-    id: "custom-liontin-nama",
-    title: "Custom Liontin Nama",
-    cover: "/img/pandent2.jpg",
-    images: [
-      { src: "/img/pandent2.jpg", caption: "Liontin nama huruf tebal" },
-      { src: "/img/pandent.jpg", caption: "Pilihan huruf tipis elegan" },
-    ],
-    description: "Buat liontin nama dengan font sesuai keinginan dan finishing rapi.",
-  },
-  {
-    id: "custom-kalung-nama",
-    title: "Custom Kalung Nama",
-    cover: "/img/necklace.jpg",
-    images: [
-      { src: "/img/necklace.jpg", caption: "Kalung nama dengan chain klasik" },
-      { src: "/img/necklace2.jpg", caption: "Gaya minimalis dan modern" },
-    ],
-    description: "Kalung nama personal dengan variasi rantai dan ukuran.",
-  },
-  {
-    id: "custom-cincin-nama",
-    title: "Custom Cincin Nama",
-    cover: "/img/ring.jpg",
-    images: [
-      { src: "/img/ring.jpg", caption: "Cincin nama ukiran halus" },
-      { src: "/img/ring2.jpg", caption: "Pilihan bentuk band beragam" },
-    ],
-    description: "Cincin dengan ukiran nama, nyaman dipakai harian.",
-  },
-  {
-    id: "custom-cincin-couple",
-    title: "Custom Cincin Couple",
-    cover: "/img/couplering.jpg",
-    images: [
-      { src: "/img/couplering.jpg", caption: "Set couple matching" },
-      { src: "/img/mensring.jpg", caption: "Pilihan maskulin dan feminin" },
-      { src: "/img/mensring1.jpg", caption: "Finishing matte/glossy" },
-    ],
-    description: "Cincin couple spesial dengan ukuran dan desain personal.",
-  },
-  {
-    id: "custom-gantungan-lm",
-    title: "Custom Gantungan LM",
-    cover: "/img/custom.jpg",
-    images: [
-      { src: "/img/custom.jpg", caption: "Gantungan LM aman dan stylish" },
-      { src: "/img/menu2.jpg", caption: "Pilihan model frame" },
-    ],
-    description: "Gantungan untuk LM/emas batangan, desain sesuai preferensi.",
-  },
-]);
+// Fetch custom services from database
+const { getCustomServices } = useCatalogManager();
 
-const isOpen = ref(false);
-const selected = ref<CustomItem | null>(null);
-const currentIndex = ref(0);
+// State
+const services = ref<any[]>([]);
+const loading = ref(true);
 
-const whatsappNumber = "6281234567890"; // ganti dengan nomor toko
+// Load services
+const loadServices = async () => {
+  loading.value = true;
 
-function openItem(item: CustomItem) {
-  selected.value = item;
-  currentIndex.value = 0;
-  isOpen.value = true;
-}
+  const result = await getCustomServices();
 
-function closeModal() {
-  isOpen.value = false;
-  selected.value = null;
-}
+  if (result.success) {
+    // Filter only active services and sort by display_order
+    services.value = result.data
+      .filter((service: any) => service.is_active)
+      .sort((a: any, b: any) => a.display_order - b.display_order);
+  }
 
-function prev() {
-  if (!selected.value) return;
-  currentIndex.value = (currentIndex.value + selected.value.images.length - 1) % selected.value.images.length;
-}
+  loading.value = false;
+};
 
-function next() {
-  if (!selected.value) return;
-  currentIndex.value = (currentIndex.value + 1) % selected.value.images.length;
-}
+// Handle service card click
+const openService = (service: any) => {
+  emit("open-service", service);
+};
 
-function waLink(item: CustomItem | null) {
-  const base = `https://wa.me/${whatsappNumber}`;
-  const text = item ? `Halo, saya ingin custom ${item.title}. Bisa dibantu untuk konsultasi desain?` : "Halo";
-  return `${base}?text=${encodeURIComponent(text)}`;
-}
-
-const visibleItems = computed(() => items.value);
+// Load on mount
+onMounted(() => {
+  loadServices();
+});
 </script>
 
 <template>
@@ -106,79 +46,60 @@ const visibleItems = computed(() => items.value);
         <p class="mt-3 text-neutral-600">Kami melayani pembuatan perhiasan sesuai keinginan Anda.</p>
       </div>
 
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-12">
+        <div class="inline-block w-12 h-12 border-4 border-maroon border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-4 text-neutral-600">Memuat layanan...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="!services.length" class="text-center py-12">
+        <p class="text-neutral-600">Belum ada layanan custom tersedia.</p>
+      </div>
+
       <!-- Cards -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+      <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
         <article
-          v-for="it in visibleItems"
-          :key="it.id"
+          v-for="service in services"
+          :key="service.id"
           class="group cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 aspect-[4/5]"
-          @click="openItem(it)"
+          @click="openService(service)"
         >
           <div class="relative h-full">
-            <img :src="it.cover" :alt="it.title" class="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            <!-- Use image_url from database or fallback to icon -->
+            <img
+              v-if="service.image_url"
+              :src="service.image_url"
+              :alt="service.title"
+              class="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div v-else class="absolute inset-0 bg-gradient-to-br from-maroon to-gold flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-16 h-16 text-white opacity-50"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                />
+              </svg>
+            </div>
             <div class="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors"></div>
             <div class="absolute inset-0 flex items-end p-4">
               <div>
-                <h3 class="font-serif text-white text-lg md:text-xl drop-shadow">{{ it.title }}</h3>
-                <span class="text-white/90 text-xs">Klik untuk detail</span>
+                <h3 class="font-serif text-white text-lg md:text-xl drop-shadow">{{ service.title }}</h3>
+                <span class="text-white/90 text-xs">Lihat Contoh Produk</span>
               </div>
             </div>
           </div>
         </article>
       </div>
-
-      <!-- Modal -->
-      <transition name="fade">
-        <div
-          v-if="isOpen"
-          class="fixed inset-0 z-50 bg-black/60 backdrop-blur-[1px] flex items-center justify-center p-4"
-          @click.self="closeModal"
-        >
-          <div class="bg-white w-full max-w-4xl rounded-2xl overflow-hidden shadow-elegant">
-            <div class="flex items-center justify-between px-5 py-4 border-b">
-              <h3 class="text-lg font-semibold text-maroon">{{ selected?.title }}</h3>
-              <button class="chip" @click="closeModal">Tutup</button>
-            </div>
-            <div class="grid md:grid-cols-2 gap-4 p-5">
-              <!-- Slider -->
-              <div>
-                <div class="relative">
-                  <img
-                    :src="selected?.images[currentIndex].src"
-                    :alt="selected?.title"
-                    class="w-full h-64 object-cover rounded-lg"
-                  />
-                  <button class="absolute left-2 top-1/2 -translate-y-1/2 chip" @click.stop="prev">◀</button>
-                  <button class="absolute right-2 top-1/2 -translate-y-1/2 chip" @click.stop="next">▶</button>
-                </div>
-                <div class="mt-3 text-sm text-neutral-600">{{ selected?.images[currentIndex].caption }}</div>
-                <div class="mt-3 flex gap-2 overflow-x-auto">
-                  <button
-                    v-for="(img, idx) in selected?.images"
-                    :key="idx"
-                    class="rounded-lg overflow-hidden border hover:border-gold focus:ring-1 focus:ring-gold"
-                    @click="currentIndex = idx"
-                  >
-                    <img :src="img.src" :alt="`Slide ${idx + 1}`" class="h-16 w-20 object-cover" loading="lazy" />
-                  </button>
-                </div>
-              </div>
-              <!-- Detail + WA -->
-              <div class="space-y-3">
-                <p class="text-sm text-neutral-700">{{ selected?.description }}</p>
-                <a
-                  :href="waLink(selected)"
-                  target="_blank"
-                  rel="noopener"
-                  class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition"
-                >
-                  Konsultasi via WhatsApp
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </transition>
     </div>
   </section>
 </template>

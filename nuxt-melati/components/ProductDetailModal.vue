@@ -1,19 +1,39 @@
 <script setup lang="ts">
+import { computed } from "vue";
+
 const props = defineProps<{
   show: boolean;
-  product: null | {
-    id: number;
-    name: string;
-    price: string;
-    description: string;
-    specs: string[];
-    images: string[];
-  };
+  product: null | any;
+  serviceContext?: any | null;
 }>();
 
 const emit = defineEmits<{
   (e: "close"): void;
 }>();
+
+// Derived values to handle both demo and db product shapes
+const displayName = computed(() => props.product && (props.product.name || props.product.title || ""));
+const displayImages = computed(() => {
+  if (!props.product) return [];
+  if (props.product.images && props.product.images.length) return props.product.images;
+  if (props.product.gallery_images && props.product.gallery_images.length) return props.product.gallery_images;
+  if (props.product.thumbnail_image) return [props.product.thumbnail_image];
+  return [];
+});
+
+const whatsappLink = computed(() => {
+  if (!props.product) return `https://wa.me/6281234567890`;
+  const base = `https://wa.me/6281234567890`;
+  const productName = displayName.value || "produk";
+  const service = props.serviceContext?.title ? ` untuk layanan ${props.serviceContext.title}` : "";
+  const text = `Halo, saya ingin tanya tentang ${productName}${service}. Bisa dibantu?`;
+  return `${base}?text=${encodeURIComponent(text)}`;
+});
+
+const displaySpecs = computed(() => {
+  if (!props.product) return [];
+  return props.product.specs || props.product.specs || [];
+});
 </script>
 
 <template>
@@ -26,8 +46,8 @@ const emit = defineEmits<{
               <div class="col-12 col-lg-7 p-3 p-lg-4">
                 <div id="carousel" class="carousel slide">
                   <div class="carousel-inner rounded-3 overflow-hidden">
-                    <div class="carousel-item" :class="{ active: i === 0 }" v-for="(img, i) in product.images" :key="i">
-                      <img :src="img" class="d-block w-100" :alt="product.name" />
+                    <div class="carousel-item" :class="{ active: i === 0 }" v-for="(img, i) in displayImages" :key="i">
+                      <img :src="img" class="d-block w-100" :alt="displayName" />
                     </div>
                   </div>
                   <button class="carousel-control-prev" type="button" data-bs-target="#carousel" data-bs-slide="prev">
@@ -40,27 +60,21 @@ const emit = defineEmits<{
                   </button>
                 </div>
                 <div class="d-flex gap-2 mt-3">
-                  <img v-for="(img, i) in product.images" :key="'t' + i" :src="img" class="thumb" />
+                  <img v-for="(img, i) in displayImages" :key="'t' + i" :src="img" class="thumb" />
                 </div>
               </div>
 
               <div class="col-12 col-lg-5 p-4 p-lg-5 bg-light">
                 <div class="d-flex justify-content-between align-items-start mb-3">
-                  <h4 class="mb-0">{{ product.name }}</h4>
+                  <h4 class="mb-0">{{ product.name || product.title }}</h4>
                   <button type="button" class="btn-close" @click="emit('close')"></button>
                 </div>
-                <p class="text-muted">{{ product.description }}</p>
+                <p class="text-muted">{{ product.description || product.subtitle || "" }}</p>
                 <ul class="small">
-                  <li v-for="(s, i) in product.specs" :key="i">{{ s }}</li>
+                  <li v-for="(s, i) in displaySpecs" :key="i">{{ s }}</li>
                 </ul>
-                <div class="h5 text-maroon fw-semibold">{{ product.price }}</div>
-                <a
-                  :href="`https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20tanya%20produk%20${encodeURIComponent(
-                    product.name
-                  )}`"
-                  target="_blank"
-                  class="btn btn-success mt-3"
-                >
+                <div class="h5 text-maroon fw-semibold">{{ product.price || product.price_formatted || "" }}</div>
+                <a :href="whatsappLink" target="_blank" class="btn btn-success mt-3">
                   <i class="fab fa-whatsapp me-2"></i>
                   Chat WhatsApp
                 </a>

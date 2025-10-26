@@ -51,9 +51,12 @@ export const useCatalogManager = () => {
 
   const updateCategory = async (id: string, categoryData: any) => {
     try {
+      // Remove any non-column fields before update
+      const { ...cleanData } = categoryData;
+
       const { data, error } = await $supabase
         .from("catalog_categories")
-        .update(categoryData)
+        .update(cleanData)
         .eq("id", id)
         .select()
         .single();
@@ -122,9 +125,12 @@ export const useCatalogManager = () => {
 
   const updateSubcategory = async (id: string, subcategoryData: any) => {
     try {
+      // Remove joined relations before update (category is a join, not a column)
+      const { category, ...cleanData } = subcategoryData;
+
       const { data, error } = await $supabase
         .from("catalog_subcategories")
-        .update(subcategoryData)
+        .update(cleanData)
         .eq("id", id)
         .select()
         .single();
@@ -225,12 +231,10 @@ export const useCatalogManager = () => {
 
   const updateProduct = async (id: string, productData: any) => {
     try {
-      const { data, error } = await $supabase
-        .from("catalog_products")
-        .update(productData)
-        .eq("id", id)
-        .select()
-        .single();
+      // Remove joined relations before update (they are not actual columns)
+      const { category, subcategory, ...cleanData } = productData;
+
+      const { data, error } = await $supabase.from("catalog_products").update(cleanData).eq("id", id).select().single();
 
       if (error) throw error;
       return { success: true, data };
@@ -300,6 +304,68 @@ export const useCatalogManager = () => {
     }
   };
 
+  const getServiceWithProducts = async (serviceId: string) => {
+    try {
+      console.log("[getServiceWithProducts] Fetching service ID:", serviceId);
+
+      // Get service details
+      const { data: service, error: serviceError } = await $supabase
+        .from("custom_services")
+        .select("*")
+        .eq("id", serviceId)
+        .single();
+
+      console.log("[getServiceWithProducts] Service result:", { service, serviceError });
+
+      if (serviceError) throw serviceError;
+      if (!service) {
+        return { success: false, error: "Service not found", data: null };
+      }
+
+      console.log("[getServiceWithProducts] Service example_products:", service.example_products);
+      console.log("[getServiceWithProducts] Array length:", service.example_products?.length);
+
+      // Get example products if available
+      let products: any[] = [];
+      if (service.example_products && service.example_products.length > 0) {
+        console.log("[getServiceWithProducts] Fetching products with IDs:", service.example_products);
+
+        const { data: productsData, error: productsError } = await $supabase
+          .from("catalog_products")
+          .select(
+            "id, title, name, description, thumbnail_image, price, price_display, stock_status, category_id, subcategory_id, weight, karat"
+          )
+          .in("id", service.example_products)
+          .eq("is_active", true);
+
+        console.log("[getServiceWithProducts] Products query result:", { productsData, productsError });
+
+        if (productsError) {
+          console.error("[getServiceWithProducts] Error fetching service products:", productsError);
+        } else {
+          products = productsData || [];
+          console.log("[getServiceWithProducts] Products found:", products.length);
+        }
+      } else {
+        console.log("[getServiceWithProducts] No example_products to fetch");
+      }
+
+      const result = {
+        success: true,
+        data: {
+          ...service,
+          products,
+        },
+      };
+
+      console.log("[getServiceWithProducts] Final result:", result);
+      return result;
+    } catch (error) {
+      console.error("[getServiceWithProducts] Error:", error);
+      return { success: false, error: getErrorMessage(error), data: null };
+    }
+  };
+
   const createCustomService = async (serviceData: any) => {
     try {
       const { data, error } = await $supabase.from("custom_services").insert([serviceData]).select().single();
@@ -314,12 +380,10 @@ export const useCatalogManager = () => {
 
   const updateCustomService = async (id: string, serviceData: any) => {
     try {
-      const { data, error } = await $supabase
-        .from("custom_services")
-        .update(serviceData)
-        .eq("id", id)
-        .select()
-        .single();
+      // Remove any non-column fields before update
+      const { ...cleanData } = serviceData;
+
+      const { data, error } = await $supabase.from("custom_services").update(cleanData).eq("id", id).select().single();
 
       if (error) throw error;
       return { success: true, data };
@@ -426,6 +490,7 @@ export const useCatalogManager = () => {
     createCustomService,
     updateCustomService,
     deleteCustomService,
+    getServiceWithProducts,
 
     // Views
     getBestSellers,
