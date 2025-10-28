@@ -1,7 +1,7 @@
 <template>
-  <footer id="kontak" class="relative text-white bg-gradient-to-b from-maroon via-black to-black">
+  <footer id="kontak" class="relative text-white bg-gradient-to-b from-black via-[#1a0f12] to-black">
     <!-- Decorative gold line -->
-    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-gold to-transparent"></div>
+    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-black to-transparent"></div>
 
     <div class="container mx-auto max-w-7xl px-4">
       <!-- Main Footer Content -->
@@ -11,9 +11,9 @@
           <!-- Logo/Icon -->
           <div class="flex items-center gap-3 mb-4">
             <div
-              class="w-12 h-12 rounded-full bg-gradient-to-br from-maroon to-dark flex items-center justify-center shadow-lg"
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-maroon to-black flex items-center justify-center shadow-lg ring-1 ring-gold/30"
             >
-              <img src="public/img/logo.png" alt="" />
+              <img src="/img/logo.png" alt="Melati Gold" class="h-10 w-10 object-contain" />
             </div>
             <span class="font-serif text-2xl font-bold tracking-wide text-gold">Melati Gold Shop</span>
           </div>

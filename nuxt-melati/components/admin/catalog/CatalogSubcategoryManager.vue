@@ -1,25 +1,25 @@
 <template>
   <div>
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-semibold text-gray-900">Manage Subcategories</h2>
+      <h2 class="text-xl font-semibold text-gray-900">Manajemen Subkategori</h2>
       <button
         @click="openModal()"
         class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
       >
         <i class="bi bi-plus-circle mr-2"></i>
-        Add Subcategory
+        Tambah Subkategori
       </button>
     </div>
 
     <!-- Category Filter -->
     <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Category</label>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Filter berdasarkan Kategori</label>
       <select
         v-model="selectedCategoryId"
         @change="loadSubcategories"
         class="w-full md:w-64 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
       >
-        <option value="">All Categories</option>
+        <option value="">Semua Kategori</option>
         <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
       </select>
     </div>
@@ -27,7 +27,7 @@
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
-      <p class="mt-2 text-gray-600">Loading subcategories...</p>
+      <p class="mt-2 text-gray-600">Memuat subkategori...</p>
     </div>
 
     <!-- Subcategories List -->
@@ -63,9 +63,9 @@
             {{ subcategory.description || "No description" }}
           </p>
           <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
-            <span class="font-medium">Category: {{ subcategory.category?.name || "N/A" }}</span>
+            <span class="font-medium">Kategori: {{ subcategory.category?.name || "N/A" }}</span>
             <span>Slug: {{ subcategory.slug }}</span>
-            <span>Order: {{ subcategory.display_order }}</span>
+            <span>Urutan: {{ subcategory.display_order }}</span>
           </div>
         </div>
 
@@ -90,9 +90,9 @@
     <!-- Empty State -->
     <div v-else class="text-center py-12 text-gray-500">
       <i class="bi bi-diagram-3 text-4xl mb-2"></i>
-      <p>No subcategories found.</p>
+      <p>Tidak ada subkategori ditemukan.</p>
       <p class="text-sm mt-1">
-        {{ selectedCategoryId ? "Try selecting another category" : "Create one to get started" }}
+        {{ selectedCategoryId ? "Coba pilih kategori lain" : "Buat satu untuk memulai" }}
       </p>
     </div>
 

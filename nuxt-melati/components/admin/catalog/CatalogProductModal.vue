@@ -1,4 +1,3 @@
-<!-- CRITICAL Component - Product Add/Edit Modal -->
 <template>
   <div
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
@@ -8,7 +7,7 @@
       <div class="p-6">
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-semibold">{{ product ? "Edit" : "Add" }} Product</h2>
+          <h2 class="text-xl font-semibold">{{ product ? "Edit" : "Add" }} Produk</h2>
           <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
             <i class="bi bi-x-lg text-xl"></i>
           </button>
@@ -19,27 +18,27 @@
           <!-- Category & Subcategory -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium mb-2">Category *</label>
+              <label class="block text-sm font-medium mb-2">Kategori *</label>
               <select
                 v-model="form.category_id"
                 required
                 @change="filterSubcategories"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
               >
-                <option value="">Select Category</option>
+                <option value="">Pilih Kategori</option>
                 <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-2">Subcategory *</label>
+              <label class="block text-sm font-medium mb-2">Subkategori *</label>
               <select
                 v-model="form.subcategory_id"
                 required
                 :disabled="!form.category_id"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
               >
-                <option value="">Select Subcategory</option>
+                <option value="">Pilih Subkategori</option>
                 <option v-for="sub in filteredSubcategories" :key="sub.id" :value="sub.id">{{ sub.name }}</option>
               </select>
             </div>
@@ -48,7 +47,7 @@
           <!-- Title & Name -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium mb-2">Title *</label>
+              <label class="block text-sm font-medium mb-2">Judul *</label>
               <input
                 v-model="form.title"
                 type="text"
@@ -59,7 +58,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-2">Product Name</label>
+              <label class="block text-sm font-medium mb-2">Nama Produk</label>
               <input
                 v-model="form.name"
                 type="text"
@@ -71,7 +70,7 @@
 
           <!-- Description -->
           <div>
-            <label class="block text-sm font-medium mb-2">Description</label>
+            <label class="block text-sm font-medium mb-2">Deskripsi</label>
             <textarea
               v-model="form.description"
               rows="3"
@@ -83,7 +82,7 @@
           <!-- Price & Display -->
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium mb-2">Price (Rp)</label>
+              <label class="block text-sm font-medium mb-2">Harga (Rp)</label>
               <input
                 v-model.number="form.price"
                 type="number"
@@ -94,7 +93,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-2">Price Display</label>
+              <label class="block text-sm font-medium mb-2">Harga Display</label>
               <input
                 v-model="form.price_display"
                 type="text"
@@ -117,7 +116,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-2">Weight</label>
+              <label class="block text-sm font-medium mb-2">Berat</label>
               <input
                 v-model="form.weight"
                 type="text"
@@ -129,9 +128,9 @@
 
           <!-- Images Upload -->
           <div>
-            <label class="block text-sm font-medium mb-2">Product Images</label>
+            <label class="block text-sm font-medium mb-2">Gambar Produk</label>
             <p class="text-xs text-gray-500 mb-3">
-              First image will be used as thumbnail. You can upload multiple images for gallery.
+              Gambar pertama akan digunakan sebagai thumbnail. Anda dapat mengupload beberapa gambar untuk galeri.
             </p>
             <CloudinaryUploader
               v-model="imageUrls"
@@ -146,7 +145,7 @@
 
           <!-- Specs (Simple textarea for now) -->
           <div>
-            <label class="block text-sm font-medium mb-2">Specs (one per line)</label>
+            <label class="block text-sm font-medium mb-2">Spesifikasi (satu per baris)</label>
             <textarea
               v-model="specsText"
               rows="3"

@@ -1,13 +1,13 @@
 <template>
   <div>
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-semibold text-gray-900">Manage Categories</h2>
+      <h2 class="text-xl font-semibold text-gray-900">Manajemen Kategori</h2>
       <button
         @click="openModal()"
         class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
       >
         <i class="bi bi-plus-circle mr-2"></i>
-        Add Category
+        Tambah Kategori
       </button>
     </div>
 
@@ -74,7 +74,7 @@
     <!-- Empty State -->
     <div v-else-if="!loading && categories.length === 0" class="text-center py-12 text-gray-500">
       <i class="bi bi-grid-3x3-gap text-4xl mb-2"></i>
-      <p>No categories found. Create one to get started.</p>
+      <p>Tidak ada kategori ditemukan. Buat satu untuk memulai.</p>
       <p class="text-xs mt-2">Debug: Loading={{ loading }}, Categories={{ categories.length }}</p>
     </div>
 
@@ -83,8 +83,8 @@
       <h3 class="font-semibold text-yellow-900 mb-2">⚠️ Debug Info</h3>
       <div class="text-sm text-yellow-800 space-y-1">
         <p>Loading: {{ loading }}</p>
-        <p>Categories length: {{ categories.length }}</p>
-        <p>Categories data: {{ categories }}</p>
+        <p>Kategori length: {{ categories.length }}</p>
+        <p>Kategori data: {{ categories }}</p>
       </div>
     </div>
 

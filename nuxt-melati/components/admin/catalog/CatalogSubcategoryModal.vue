@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
         <h3 class="text-xl font-semibold">
-          {{ subcategory ? "Edit Subcategory" : "Add New Subcategory" }}
+          {{ subcategory ? "Edit Subkatigori" : "Tambah Subkatigori Baru" }}
         </h3>
         <button @click="$emit('close')" class="text-gray-400 hover:text-gray-600">
           <i class="bi bi-x-lg text-2xl"></i>
@@ -24,7 +24,7 @@
             required
             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
           >
-            <option value="">Select Category</option>
+            <option value="">Pilih Kategori</option>
             <option v-for="cat in categories" :key="cat.id" :value="cat.id">
               {{ cat.name }}
             </option>
@@ -34,7 +34,7 @@
         <!-- Name -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
-            Name
+            Nama Subkategori
             <span class="text-red-500">*</span>
           </label>
           <input
@@ -65,7 +65,7 @@
 
         <!-- Description -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
           <textarea
             v-model="form.description"
             rows="3"
@@ -77,7 +77,7 @@
         <!-- Cover Image -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Cover Image</label>
-          <p class="text-xs text-gray-500 mb-2">Upload cover image for this subcategory</p>
+          <p class="text-xs text-gray-500 mb-2">Upload cover image untuk Subkategori ini</p>
           <CloudinaryUploader
             v-model="imageUrls"
             @uploaded="handleImageUpload"
@@ -90,7 +90,7 @@
 
         <!-- Display Order -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Urutan Display</label>
           <input
             v-model.number="form.display_order"
             type="number"
@@ -98,13 +98,13 @@
             placeholder="0"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
           />
-          <p class="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
+          <p class="text-xs text-gray-500 mt-1">Nomor yang lebih rendah muncul pertama</p>
         </div>
 
         <!-- Active Status -->
         <div class="flex items-center">
           <input v-model="form.is_active" type="checkbox" id="is_active" class="mr-2" />
-          <label for="is_active" class="text-sm text-gray-700">Active (visible to users)</label>
+          <label for="is_active" class="text-sm text-gray-700">Aktif (terlihat oleh pengguna)</label>
         </div>
 
         <!-- Actions -->
@@ -121,7 +121,7 @@
             @click="$emit('close')"
             class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            Batal
           </button>
         </div>
       </form>

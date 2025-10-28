@@ -5,7 +5,7 @@
       <div class="mb-6">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-3xl font-bold text-gray-900">Catalog Management</h1>
+            <h1 class="text-3xl font-bold text-gray-900">Manajemen</h1>
             <p class="mt-1 text-sm text-gray-600">Kelola katalog produk, best sellers, dan layanan custom</p>
           </div>
           <NuxtLink
@@ -133,12 +133,12 @@ onMounted(() => {
 });
 
 const tabs = [
-  { key: "categories", label: "Categories", icon: "bi bi-grid-3x3-gap" },
-  { key: "subcategories", label: "Subcategories", icon: "bi bi-diagram-3" },
-  { key: "all-products", label: "All Products", icon: "bi bi-box-seam" },
+  { key: "categories", label: "Kategori", icon: "bi bi-grid-3x3-gap" },
+  { key: "subcategories", label: "Subkategori", icon: "bi bi-diagram-3" },
+  { key: "all-products", label: "Semua Produk", icon: "bi bi-box-seam" },
   { key: "featured", label: "Barang Pilihan", icon: "bi bi-star" },
   { key: "best-sellers", label: "Best Sellers", icon: "bi bi-star-fill" },
-  { key: "services", label: "Custom Services", icon: "bi bi-tools" },
+  { key: "services", label: "Layanan Kustom", icon: "bi bi-tools" },
 ];
 
 // Alert system

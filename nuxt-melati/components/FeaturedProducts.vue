@@ -112,12 +112,12 @@ function buildWhatsAppLink(p: any) {
             loading="lazy"
             class="h-56 w-full object-cover"
           />
-          <span v-if="p.karat" class="chip absolute left-3 top-3">{{ p.karat }}</span>
+          <span v-if="p.karat" class="chip absolute left-3 top-3 text-white">{{ p.karat }}</span>
           <span v-if="p.is_best_seller" class="chip absolute right-3 top-3 bg-yellow-600 text-white">Best</span>
         </div>
-        <div class="p-5 flex flex-col gap-2">
+        <div class="px-3 py-2 flex flex-col gap-2">
           <!-- Header row: name + Detail button side-by-side -->
-          <div class="flex items-center justify-between gap-2 md:gap-3 min-w-0">
+          <div class="flex items-center justify-between gap-1 md:gap-2 min-w-0">
             <h3 class="font-medium text-maroon flex-1 min-w-0 truncate leading-tight text-sm md:text-base">
               {{ p.title || p.name }}
             </h3>

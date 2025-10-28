@@ -21,7 +21,7 @@
 
           <!-- User Menu -->
           <div class="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto justify-between sm:justify-end">
-            <span class="text-sm text-gray-700">Welcome, Admin</span>
+            <span class="text-sm text-gray-700">Selamat Datang, Admin</span>
             <button
               @click="handleLogout"
               class="bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -38,7 +38,7 @@
       <!-- Welcome Section -->
       <div class="mb-6 sm:mb-8">
         <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">Dashboard</h2>
-        <p class="text-sm sm:text-base text-gray-600">Manage your jewelry gallery and website content</p>
+        <p class="text-sm sm:text-base text-gray-600">Atur galeri perhiasan dan konten situs web Melati</p>
       </div>
 
       <!-- Quick Stats -->
@@ -57,7 +57,7 @@
             </div>
             <div class="ml-3 sm:ml-4">
               <p class="text-xs sm:text-sm font-medium text-gray-600">Website</p>
-              <p class="text-lg sm:text-2xl font-bold text-gray-900">Active</p>
+              <p class="text-lg sm:text-2xl font-bold text-gray-900">Aktif</p>
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@
               </svg>
             </div>
             <div class="ml-3 sm:ml-4">
-              <p class="text-xs sm:text-sm font-medium text-gray-600">Content Sections</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600">Bagian Konten</p>
               <p class="text-lg sm:text-2xl font-bold text-gray-900">4</p>
             </div>
           </div>
@@ -94,8 +94,8 @@
               </svg>
             </div>
             <div class="ml-3 sm:ml-4">
-              <p class="text-xs sm:text-sm font-medium text-gray-600">Last Updated</p>
-              <p class="text-lg sm:text-2xl font-bold text-gray-900">Today</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600">Terakhir Diperbarui</p>
+              <p class="text-lg sm:text-2xl font-bold text-gray-900">Hari Ini</p>
             </div>
           </div>
         </div>
@@ -118,8 +118,8 @@
                 </svg>
               </div>
               <div class="ml-3">
-                <h3 class="text-base sm:text-lg font-semibold text-gray-900">Website Management</h3>
-                <p class="text-sm text-gray-600">View and manage your public website</p>
+                <h3 class="text-base sm:text-lg font-semibold text-gray-900">Manajemen Website</h3>
+                <p class="text-sm text-gray-600">Lihat dan kelola situs web publik Melati</p>
               </div>
             </div>
           </div>
@@ -139,10 +139,10 @@
                       d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                     />
                   </svg>
-                  View Website
+                  Lihat Website
                 </div>
               </NuxtLink>
-              <p class="text-sm text-gray-500 text-center">Opens your live website in a new tab</p>
+              <p class="text-sm text-gray-500 text-center">Membuka situs web langsung di tab baru</p>
             </div>
           </div>
         </div>
@@ -174,7 +174,7 @@
               </div>
               <div class="ml-3">
                 <h3 class="text-base sm:text-lg font-semibold text-gray-900">Admin Panel</h3>
-                <p class="text-sm text-gray-600">Manage content, products, and settings</p>
+                <p class="text-sm text-gray-600">Kelola konten, produk, dan pengaturan</p>
               </div>
             </div>
           </div>
@@ -186,7 +186,7 @@
                   class="bg-yellow-600 hover:bg-yellow-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
                 >
                   <i class="bi bi-grid-3x3-gap mr-2"></i>
-                  Catalog Manager
+                  Manajemen Katalog
                 </NuxtLink>
                 <NuxtLink
                   to="/admin/users"
@@ -196,7 +196,7 @@
                   Admin Users
                 </NuxtLink>
               </div>
-              <p class="text-sm text-gray-500 text-center">Manage catalog, products, services, and website content</p>
+              <p class="text-sm text-gray-500 text-center">Kelola katalog, produk, layanan, dan konten situs web</p>
             </div>
           </div>
         </div>
@@ -205,8 +205,8 @@
       <!-- Recent Activity -->
       <div class="mt-6 sm:mt-8 bg-white rounded-xl shadow-sm border border-gray-100">
         <div class="p-4 sm:p-6 border-b border-gray-100">
-          <h3 class="text-base sm:text-lg font-semibold text-gray-900">Quick Actions</h3>
-          <p class="text-sm text-gray-600">Common administrative tasks</p>
+          <h3 class="text-base sm:text-lg font-semibold text-gray-900">Tindakan Cepat</h3>
+          <p class="text-sm text-gray-600">Tugas administratif umum</p>
         </div>
         <div class="p-4 sm:p-6">
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
@@ -220,7 +220,7 @@
                 <i class="bi bi-box-seam text-yellow-600 text-sm sm:text-base"></i>
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-yellow-700 text-center">
-                Products
+                Produk
               </span>
             </NuxtLink>
 
@@ -248,7 +248,7 @@
                 <i class="bi bi-tools text-green-600 text-sm sm:text-base"></i>
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-green-700 text-center">
-                Services
+                Layanan
               </span>
             </NuxtLink>
 
@@ -262,7 +262,7 @@
                 <i class="bi bi-grid-3x3-gap text-purple-600 text-sm sm:text-base"></i>
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-purple-700 text-center">
-                Categories
+                Kategori
               </span>
             </NuxtLink>
           </div>

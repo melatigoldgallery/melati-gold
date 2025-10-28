@@ -23,7 +23,7 @@ function waLink() {
 </script>
 
 <template>
-  <section class="relative overflow-hidden py-20 bg-gradient-to-b from-black via-maroon to-maroon">
+  <section class="relative overflow-hidden py-20 bg-cream">
     <!-- Decorative Elements -->
     <div class="absolute inset-0 -z-10">
       <div class="absolute top-1/4 left-0 w-96 h-96 bg-gold/10 rounded-full blur-3xl"></div>
@@ -33,21 +33,21 @@ function waLink() {
     <div class="container text-center reveal-in">
       <!-- Icon -->
       <div
-        class="mx-auto mb-6 h-20 w-20 rounded-full bg-gradient-to-br from-maroon to-dark flex items-center justify-center shadow-elegant"
+        class="mx-auto mb-6 h-20 w-20 rounded-full bg-gradient-to-br from-maroon to-black flex items-center justify-center shadow-elegant ring-1 ring-gold/30"
       >
-        <img src="public/img/logo.png" alt="" />
+        <img src="/img/logo.png" alt="Melati Gold" class="h-10 w-10 object-contain" />
       </div>
 
       <!-- Title -->
-      <h2 class="text-4xl md:text-5xl font-serif font-bold text-white mb-4">Siap Bersinar Hari Ini?</h2>
-      <p class="mt-3 text-lg text-white/90 max-w-2xl mx-auto">
+      <h2 class="text-4xl md:text-5xl font-serif font-bold text-maroon mb-4">Siap Bersinar Hari Ini?</h2>
+      <p class="mt-3 text-lg text-black/80 max-w-2xl mx-auto">
         Temukan perhiasan emas berkualitas yang melengkapi pesona dan gaya Anda.
       </p>
 
       <!-- CTA Button -->
       <div class="mt-8">
         <button
-          class="px-8 py-4 bg-gradient-to-r from-gold to-yellow-600 text-maroon font-semibold rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 text-lg"
+          class="px-8 py-4 bg-gradient-to-r from-maroon to-black text-white font-semibold rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 text-lg ring-1 ring-gold/40"
           @click="openModal"
         >
           <i class="bi bi-cart-fill mr-2"></i>
@@ -56,7 +56,7 @@ function waLink() {
       </div>
 
       <!-- Trust Badges -->
-      <div class="mt-10 flex flex-wrap justify-center gap-6 text-white/80">
+      <div class="mt-10 flex flex-wrap justify-center gap-6 text-maroon/80">
         <div class="flex items-center gap-2">
           <i class="bi bi-shield-check text-gold text-xl"></i>
           <span class="text-sm">Emas Asli</span>
@@ -98,7 +98,7 @@ function waLink() {
             <!-- Logo -->
             <div class="text-center mb-6">
               <div
-                class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-gold to-yellow-600 shadow-lg mb-3"
+                class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-gold to-gold shadow-lg mb-3 ring-1 ring-gold/40"
               >
                 <i class="bi bi-gem text-3xl text-white"></i>
               </div>

@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center mb-6">
       <div>
         <h2 class="text-xl font-semibold text-gray-900">Best Sellers</h2>
-        <p class="text-sm text-gray-600 mt-1">Manage products marked as best sellers</p>
+        <p class="text-sm text-gray-600 mt-1">Manajemen produk terlaris</p>
       </div>
       <button
         @click="loadBestSellers"
@@ -17,7 +17,7 @@
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
-      <p class="mt-2 text-gray-600">Loading best sellers...</p>
+      <p class="mt-2 text-gray-600">Memuat produk terlaris...</p>
     </div>
 
     <!-- Best Sellers Grid -->
@@ -73,7 +73,7 @@
             class="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
           >
             <i class="bi bi-x-circle mr-1"></i>
-            Remove from Best Sellers
+            Hapus dari Best Sellers
           </button>
         </div>
       </div>
@@ -82,13 +82,13 @@
     <!-- Empty State -->
     <div v-else class="text-center py-12 text-gray-500">
       <i class="bi bi-trophy text-4xl mb-2"></i>
-      <p class="text-lg">No best sellers yet</p>
-      <p class="text-sm mt-2">Go to Products tab to mark products as best sellers</p>
+      <p class="text-lg">Tidak ada produk terlaris</p>
+      <p class="text-sm mt-2">Buka tab Produk untuk menandai produk sebagai terlaris</p>
       <NuxtLink
         to="/admin/catalog?tab=products"
         class="inline-block mt-4 px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
       >
-        Go to Products
+        Buka Produk
       </NuxtLink>
     </div>
   </div>

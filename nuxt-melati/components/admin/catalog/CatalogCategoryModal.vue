@@ -7,7 +7,7 @@
       <div class="p-6">
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-semibold">{{ category ? "Edit" : "Add" }} Category</h2>
+          <h2 class="text-xl font-semibold">{{ category ? "Edit" : "Tambah" }} Kategori</h2>
           <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
             <i class="bi bi-x-lg text-xl"></i>
           </button>
@@ -17,7 +17,7 @@
         <form @submit.prevent="save" class="space-y-4">
           <!-- Name -->
           <div>
-            <label class="block text-sm font-medium mb-2">Category Name *</label>
+            <label class="block text-sm font-medium mb-2">Nama Kategori *</label>
             <input
               v-model="form.name"
               type="text"
@@ -42,7 +42,7 @@
 
           <!-- Description -->
           <div>
-            <label class="block text-sm font-medium mb-2">Description</label>
+            <label class="block text-sm font-medium mb-2">Deskripsi</label>
             <textarea
               v-model="form.description"
               rows="3"
@@ -53,7 +53,7 @@
 
           <!-- Cover Image -->
           <div>
-            <label class="block text-sm font-medium mb-2">Cover Image</label>
+            <label class="block text-sm font-medium mb-2">Gambar Sampul</label>
             <CloudinaryUploader
               v-model="imageUrls"
               @uploaded="handleImageUpload"
@@ -66,7 +66,7 @@
 
           <!-- Icon -->
           <div>
-            <label class="block text-sm font-medium mb-2">Icon Name</label>
+            <label class="block text-sm font-medium mb-2">Nama Ikon</label>
             <input
               v-model="form.icon"
               type="text"
@@ -77,14 +77,14 @@
 
           <!-- Display Order -->
           <div>
-            <label class="block text-sm font-medium mb-2">Display Order</label>
+            <label class="block text-sm font-medium mb-2">Urutan Tampilan</label>
             <input
               v-model.number="form.display_order"
               type="number"
               min="0"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
             />
-            <p class="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
+            <p class="text-xs text-gray-500 mt-1">Nomor yang lebih rendah muncul pertama</p>
           </div>
 
           <!-- Is Active -->
@@ -95,7 +95,7 @@
               id="is_active"
               class="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
             />
-            <label for="is_active" class="ml-2 text-sm font-medium">Active (visible on website)</label>
+            <label for="is_active" class="ml-2 text-sm font-medium">Aktif (ditampilkan di situs web)</label>
           </div>
 
           <!-- Actions -->
@@ -105,14 +105,14 @@
               :disabled="saving"
               class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg font-medium disabled:opacity-50 transition-colors"
             >
-              {{ saving ? "Saving..." : "Save Category" }}
+              {{ saving ? "Saving..." : "Simpan Kategory" }}
             </button>
             <button
               type="button"
               @click="$emit('close')"
               class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors"
             >
-              Cancel
+              Batal
             </button>
           </div>
         </form>

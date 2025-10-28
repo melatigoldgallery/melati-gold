@@ -6,6 +6,7 @@
       <CatalogShowcase @open-subcategories="openSubcategories" />
       <FeaturedProducts />
       <CustomServices @open-service="openService" />
+      <CareTips />
       <Testimonials />
       <AboutUs />
       <FinalCta />

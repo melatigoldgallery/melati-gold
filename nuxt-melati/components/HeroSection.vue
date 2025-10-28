@@ -6,7 +6,7 @@ const heroSlides = [
     image: "/img/bg.png",
     title: "Welcome to Melati Gold Shop",
     subtitle:
-      "Discover our premium gold jewelry collection with exclusive designs. Trust your brilliance with the finest pieces from Melati Gold.",
+      "Discover our premium gold jewelry collection with exclusive designs from Melati Gold.",
     buttonText: "View Collection",
   },
   {
@@ -108,7 +108,7 @@ const onImageError = () => {
       </div>
 
       <!-- Overlay -->
-      <div class="absolute inset-0 bg-black/30 z-10" />
+      <div class="absolute inset-0 bg-white/25 z-10" />
     </div>
 
     <!-- Hero Content -->

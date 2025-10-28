@@ -1,13 +1,13 @@
 <template>
   <div>
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-semibold text-gray-900">Manage Products</h2>
+      <h2 class="text-xl font-semibold text-gray-900">Manajemen Produk</h2>
       <button
         @click="openModal()"
         class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
       >
         <i class="bi bi-plus-circle mr-2"></i>
-        Add Product
+        Tambah Produk
       </button>
     </div>
 
@@ -18,7 +18,7 @@
         @change="loadProducts"
         class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
       >
-        <option value="">All Categories</option>
+        <option value="">Semua Kategori</option>
         <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
       </select>
 
@@ -27,7 +27,7 @@
         @change="loadProducts"
         class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
       >
-        <option value="">All Subcategories</option>
+        <option value="">Semua Subkategori</option>
         <option v-for="sub in filteredSubcategories" :key="sub.id" :value="sub.id">{{ sub.name }}</option>
       </select>
 
@@ -36,7 +36,7 @@
         @change="loadProducts"
         class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
       >
-        <option value="">All Status</option>
+        <option value="">Semua Status</option>
         <option value="featured">Featured</option>
         <option value="best_seller">Best Seller</option>
       </select>
@@ -143,7 +143,7 @@
     <!-- Empty State -->
     <div v-else class="text-center py-12 text-gray-500">
       <i class="bi bi-box-seam text-4xl mb-2"></i>
-      <p>No products found. Create one to get started.</p>
+      <p>Tidak ada produk ditemukan. Buat untuk memulai.</p>
     </div>
 
     <!-- Modal -->
