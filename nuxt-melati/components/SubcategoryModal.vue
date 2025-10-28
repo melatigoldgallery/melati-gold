@@ -104,16 +104,16 @@ onMounted(async () => {
             </div>
 
             <!-- Subcategories Grid -->
-            <div v-else class="row g-3">
+            <div v-else class="row g-3 justify-content-center">
               <div
                 v-for="subcategory in subcategories"
                 :key="subcategory.id"
                 :class="
                   subcategories.length === 4
                     ? 'col-6 col-md-3'
-                    : subcategories.length === 3
-                    ? 'col-12 col-md-4'
-                    : 'col-12 col-md-6'
+                    : subcategories.length <= 3
+                    ? 'col-6 col-md-4'
+                    : 'col-6 col-md-6'
                 "
               >
                 <button
