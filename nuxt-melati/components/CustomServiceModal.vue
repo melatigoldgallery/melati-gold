@@ -96,12 +96,11 @@ const contactWhatsApp = () => {
       <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
         <div class="modal-content bg-white rounded-4 shadow-lg overflow-hidden">
           <!-- Header -->
-          <div class="modal-header border-0 bg-gradient-to-r from-maroon to-gold text-white">
+          <div class="modal-header border-bottom bg-white">
             <div>
-              <h5 class="modal-title mb-1">{{ service.title }}</h5>
-              <p v-if="service.subtitle" class="mb-0 small opacity-90">{{ service.subtitle }}</p>
+              <h5 class="modal-title mb-1 text-dark">Custom {{ service.title }}</h5>
             </div>
-            <button type="button" class="btn-close btn-close-white" aria-label="Close" @click="emit('close')"></button>
+            <button type="button" class="btn-close" aria-label="Close" @click="emit('close')"></button>
           </div>
 
           <div class="modal-body p-4">
@@ -153,7 +152,7 @@ const contactWhatsApp = () => {
 
               <!-- Products Grid -->
               <div v-if="products.length > 0">
-                <h6 class="fw-semibold mb-3">📦 Contoh Produk untuk Layanan Ini:</h6>
+                <h6 class="fw-semibold mb-3">📦 Contoh Produk Custom Kalung Nama</h6>
                 <div class="row g-3">
                   <div v-for="product in products" :key="product.id" class="col-6 col-md-4 col-lg-3">
                     <div
@@ -169,11 +168,8 @@ const contactWhatsApp = () => {
                           class="card-img-top object-fit-cover w-100 h-100"
                           loading="lazy"
                         />
-                        <div
-                          v-else
-                          class="w-100 h-100 bg-gradient-to-br from-maroon to-gold d-flex align-items-center justify-content-center"
-                        >
-                          <i class="bi bi-image text-white opacity-50" style="font-size: 2rem"></i>
+                        <div v-else class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                          <i class="bi bi-image text-muted opacity-50" style="font-size: 2rem"></i>
                         </div>
 
                         <!-- Stock Badge -->
@@ -235,5 +231,80 @@ const contactWhatsApp = () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Product card image container */
+.card .position-relative {
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+}
+
+/* Product image styling - Proporsional untuk desktop dan mobile */
+.card-img-top {
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 576px) {
+  /* Mobile: 2 columns dengan ukuran lebih kecil */
+  .col-6 {
+    max-width: 48%;
+  }
+
+  .card-body {
+    padding: 0.75rem !important;
+  }
+
+  .card-title {
+    font-size: 0.8rem !important;
+  }
+
+  .card-text {
+    font-size: 0.7rem !important;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  /* Tablet: 3 columns */
+  .col-md-4 {
+    flex: 0 0 auto;
+    width: 33.333333%;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+  /* Medium screens: 3 columns */
+  .col-lg-3 {
+    flex: 0 0 auto;
+    width: 33.333333%;
+  }
+}
+
+@media (min-width: 993px) {
+  /* Desktop: 4 columns */
+  .col-lg-3 {
+    flex: 0 0 auto;
+    width: 25%;
+  }
+}
+
+/* Ensure consistent card height */
+.card {
+  transition: all 0.3s ease;
+}
+
+/* Image container with fixed aspect ratio */
+.position-relative[style*="aspect-ratio"] {
+  background-color: #f8f9fa;
+}
+
+/* Badge positioning */
+.badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
 }
 </style>

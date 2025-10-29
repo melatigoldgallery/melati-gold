@@ -82,7 +82,11 @@ onMounted(async () => {
 <template>
   <Transition name="fade">
     <div v-if="show" class="modal d-block" tabindex="-1" role="dialog" @click.self="emit('close')">
-      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div
+        class="modal-dialog modal-dialog-centered"
+        :class="subcategories.length <= 2 ? 'modal-md' : 'modal-lg'"
+        role="document"
+      >
         <div class="modal-content bg-white rounded-4 shadow-lg overflow-hidden">
           <div class="modal-header border-0">
             <h5 class="modal-title">Pilih Sub-Kategori {{ category }}</h5>
@@ -111,8 +115,10 @@ onMounted(async () => {
                 :class="
                   subcategories.length === 4
                     ? 'col-6 col-md-3'
-                    : subcategories.length <= 3
+                    : subcategories.length === 3
                     ? 'col-6 col-md-4'
+                    : subcategories.length <= 2
+                    ? 'col-6 col-md-6'
                     : 'col-6 col-md-6'
                 "
               >
