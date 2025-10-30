@@ -41,66 +41,6 @@
         <p class="text-sm sm:text-base text-gray-600">Atur galeri perhiasan dan konten situs web Melati</p>
       </div>
 
-      <!-- Quick Stats -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
-          <div class="flex items-center">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"
-                />
-              </svg>
-            </div>
-            <div class="ml-3 sm:ml-4">
-              <p class="text-xs sm:text-sm font-medium text-gray-600">Website</p>
-              <p class="text-lg sm:text-2xl font-bold text-gray-900">Aktif</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
-          <div class="flex items-center">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
-            </div>
-            <div class="ml-3 sm:ml-4">
-              <p class="text-xs sm:text-sm font-medium text-gray-600">Bagian Konten</p>
-              <p class="text-lg sm:text-2xl font-bold text-gray-900">4</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100">
-          <div class="flex items-center">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </div>
-            <div class="ml-3 sm:ml-4">
-              <p class="text-xs sm:text-sm font-medium text-gray-600">Terakhir Diperbarui</p>
-              <p class="text-lg sm:text-2xl font-bold text-gray-900">Hari Ini</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Main Actions -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         <!-- Website Section -->
@@ -180,7 +120,7 @@
           </div>
           <div class="p-4 sm:p-6">
             <div class="space-y-4">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-1 gap-3">
                 <NuxtLink
                   to="/admin/catalog"
                   class="bg-yellow-600 hover:bg-yellow-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
@@ -190,7 +130,7 @@
                 </NuxtLink>
                 <NuxtLink
                   to="/admin/users"
-                  class="bg-purple-600 hover:bg-purple-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
+                  class="bg-purple-600 hover:bg-purple-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors d-none"
                 >
                   <i class="bi bi-people-fill mr-2"></i>
                   Admin Users
@@ -215,9 +155,9 @@
               class="flex flex-col items-center p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-yellow-300 hover:bg-yellow-50 transition-colors group"
             >
               <div
-                class="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-100 group-hover:bg-yellow-200 rounded-lg flex items-center justify-center mb-2"
+                class="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 group-hover:bg-yellow-200 rounded-lg flex items-center justify-center mb-2"
               >
-                <i class="bi bi-box-seam text-yellow-600 text-sm sm:text-base"></i>
+                <i class="bi bi-box-seam text-yellow-600 text-lg sm:text-xl"></i>
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-yellow-700 text-center">
                 Produk
@@ -229,9 +169,9 @@
               class="flex flex-col items-center p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors group"
             >
               <div
-                class="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 group-hover:bg-blue-200 rounded-lg flex items-center justify-center mb-2"
+                class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 group-hover:bg-blue-200 rounded-lg flex items-center justify-center mb-2"
               >
-                <i class="bi bi-star-fill text-blue-600 text-sm sm:text-base"></i>
+                <i class="bi bi-trophy-fill text-blue-600 text-lg sm:text-xl"></i>
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-blue-700 text-center">
                 Best Sellers
@@ -243,12 +183,12 @@
               class="flex flex-col items-center p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors group"
             >
               <div
-                class="w-6 h-6 sm:w-8 sm:h-8 bg-green-100 group-hover:bg-green-200 rounded-lg flex items-center justify-center mb-2"
+                class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 group-hover:bg-green-200 rounded-lg flex items-center justify-center mb-2"
               >
-                <i class="bi bi-tools text-green-600 text-sm sm:text-base"></i>
+                <i class="bi bi-gem text-green-600 text-lg sm:text-xl"></i>
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-green-700 text-center">
-                Layanan
+                Layanan Custom
               </span>
             </NuxtLink>
 
@@ -257,9 +197,9 @@
               class="flex flex-col items-center p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors group"
             >
               <div
-                class="w-6 h-6 sm:w-8 sm:h-8 bg-purple-100 group-hover:bg-purple-200 rounded-lg flex items-center justify-center mb-2"
+                class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 group-hover:bg-purple-200 rounded-lg flex items-center justify-center mb-2"
               >
-                <i class="bi bi-grid-3x3-gap text-purple-600 text-sm sm:text-base"></i>
+                <i class="bi bi-grid-3x3-gap-fill text-purple-600 text-lg sm:text-xl"></i>
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-purple-700 text-center">
                 Kategori
@@ -282,6 +222,12 @@ definePageMeta({
 useHead({
   title: "Dashboard - Melati Gold Admin",
   meta: [{ name: "description", content: "Admin dashboard for Melati Gold Gallery" }],
+  link: [
+    {
+      rel: "stylesheet",
+      href: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css",
+    },
+  ],
 });
 
 // Handle logout

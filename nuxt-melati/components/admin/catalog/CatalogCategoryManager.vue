@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-semibold text-gray-900">Manajemen Kategori</h2>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
+      <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Manajemen Kategori</h2>
       <button
         @click="openModal()"
-        class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
+        class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors text-sm sm:text-base"
       >
         <i class="bi bi-plus-circle mr-2"></i>
         Tambah Kategori
@@ -18,25 +18,25 @@
     </div>
 
     <!-- Categories List -->
-    <div v-else-if="!loading && categories.length > 0" class="space-y-4">
+    <div v-else-if="!loading && categories.length > 0" class="space-y-3 sm:space-y-4">
       <div
         v-for="category in categories"
         :key="category.id"
-        class="border rounded-lg p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors"
+        class="border rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 hover:bg-gray-50 transition-colors"
       >
         <!-- Image -->
-        <div class="flex-shrink-0">
+        <div class="flex-shrink-0 w-full sm:w-auto">
           <img
             :src="category.cover_image || '/img/placeholder.jpg'"
             :alt="category.name"
-            class="w-20 h-20 object-cover rounded-lg"
+            class="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg"
           />
         </div>
 
         <!-- Info -->
-        <div class="flex-1">
-          <div class="flex items-center gap-2">
-            <h3 class="font-semibold text-lg">{{ category.name }}</h3>
+        <div class="flex-1 w-full sm:w-auto">
+          <div class="flex flex-wrap items-center gap-2 mb-1">
+            <h3 class="font-semibold text-base sm:text-lg">{{ category.name }}</h3>
             <span
               :class="[
                 'px-2 py-1 text-xs rounded-full',
@@ -46,26 +46,30 @@
               {{ category.is_active ? "Active" : "Inactive" }}
             </span>
           </div>
-          <p class="text-sm text-gray-600 mt-1">{{ category.description || "No description" }}</p>
-          <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
+          <p class="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">
+            {{ category.description || "No description" }}
+          </p>
+          <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-gray-500">
             <span>Slug: {{ category.slug }}</span>
             <span>Order: {{ category.display_order }}</span>
           </div>
         </div>
 
         <!-- Actions -->
-        <div class="flex gap-2">
+        <div class="flex gap-2 w-full sm:w-auto">
           <button
             @click="openModal(category)"
-            class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+            class="flex-1 sm:flex-none px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
           >
             <i class="bi bi-pencil"></i>
+            <span class="sm:hidden ml-1">Edit</span>
           </button>
           <button
             @click="confirmDelete(category)"
-            class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
+            class="flex-1 sm:flex-none px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
           >
             <i class="bi bi-trash"></i>
+            <span class="sm:hidden ml-1">Hapus</span>
           </button>
         </div>
       </div>

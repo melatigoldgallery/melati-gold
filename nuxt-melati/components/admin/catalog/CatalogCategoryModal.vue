@@ -1,15 +1,15 @@
 <template>
   <div
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50"
     @click.self="$emit('close')"
   >
     <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-      <div class="p-6">
+      <div class="p-4 sm:p-6">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-semibold">{{ category ? "Edit" : "Tambah" }} Kategori</h2>
+        <div class="flex justify-between items-center mb-4 sm:mb-6">
+          <h2 class="text-lg sm:text-xl font-semibold">{{ category ? "Edit" : "Tambah" }} Kategori</h2>
           <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
-            <i class="bi bi-x-lg text-xl"></i>
+            <i class="bi bi-x-lg text-lg sm:text-xl"></i>
           </button>
         </div>
 
@@ -99,18 +99,18 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex gap-3 pt-4">
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
             <button
               type="submit"
               :disabled="saving"
-              class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg font-medium disabled:opacity-50 transition-colors"
+              class="w-full sm:flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg font-medium disabled:opacity-50 transition-colors text-sm sm:text-base"
             >
-              {{ saving ? "Saving..." : "Simpan Kategory" }}
+              {{ saving ? "Saving..." : "Simpan Kategori" }}
             </button>
             <button
               type="button"
               @click="$emit('close')"
-              class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors"
+              class="w-full sm:flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors text-sm sm:text-base"
             >
               Batal
             </button>

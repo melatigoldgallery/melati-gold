@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-semibold text-gray-900">Manajemen Subkategori</h2>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
+      <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Manajemen Subkategori</h2>
       <button
         @click="openModal()"
-        class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
+        class="w-full sm:w-auto px-3 sm:px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors text-sm sm:text-base"
       >
         <i class="bi bi-plus-circle mr-2"></i>
         Tambah Subkategori
@@ -12,12 +12,12 @@
     </div>
 
     <!-- Category Filter -->
-    <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Filter berdasarkan Kategori</label>
+    <div class="mb-4 sm:mb-6">
+      <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Filter berdasarkan Kategori</label>
       <select
         v-model="selectedCategoryId"
         @change="loadSubcategories"
-        class="w-full md:w-64 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        class="w-full sm:w-64 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
       >
         <option value="">Semua Kategori</option>
         <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
@@ -31,25 +31,25 @@
     </div>
 
     <!-- Subcategories List -->
-    <div v-else-if="subcategories.length > 0" class="space-y-4">
+    <div v-else-if="subcategories.length > 0" class="space-y-3 sm:space-y-4">
       <div
         v-for="subcategory in subcategories"
         :key="subcategory.id"
-        class="border rounded-lg p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors"
+        class="border rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 hover:bg-gray-50 transition-colors"
       >
         <!-- Image -->
-        <div class="flex-shrink-0">
+        <div class="flex-shrink-0 w-full sm:w-auto">
           <img
             :src="subcategory.cover_image || '/img/placeholder.jpg'"
             :alt="subcategory.name"
-            class="w-20 h-20 object-cover rounded-lg"
+            class="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg"
           />
         </div>
 
         <!-- Info -->
-        <div class="flex-1">
-          <div class="flex items-center gap-2">
-            <h3 class="font-semibold text-lg">{{ subcategory.name }}</h3>
+        <div class="flex-1 w-full sm:w-auto">
+          <div class="flex flex-wrap items-center gap-2 mb-1">
+            <h3 class="font-semibold text-base sm:text-lg">{{ subcategory.name }}</h3>
             <span
               :class="[
                 'px-2 py-1 text-xs rounded-full',
@@ -59,10 +59,10 @@
               {{ subcategory.is_active ? "Active" : "Inactive" }}
             </span>
           </div>
-          <p class="text-sm text-gray-600 mt-1">
+          <p class="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">
             {{ subcategory.description || "No description" }}
           </p>
-          <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-gray-500">
             <span class="font-medium">Kategori: {{ subcategory.category?.name || "N/A" }}</span>
             <span>Slug: {{ subcategory.slug }}</span>
             <span>Urutan: {{ subcategory.display_order }}</span>
@@ -70,18 +70,20 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex gap-2">
+        <div class="flex gap-2 w-full sm:w-auto">
           <button
             @click="openModal(subcategory)"
-            class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+            class="flex-1 sm:flex-none px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
           >
             <i class="bi bi-pencil"></i>
+            <span class="sm:hidden ml-1">Edit</span>
           </button>
           <button
             @click="confirmDelete(subcategory)"
-            class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
+            class="flex-1 sm:flex-none px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
           >
             <i class="bi bi-trash"></i>
+            <span class="sm:hidden ml-1">Hapus</span>
           </button>
         </div>
       </div>

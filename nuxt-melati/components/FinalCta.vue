@@ -35,7 +35,7 @@ function waLink() {
       <div
         class="mx-auto mb-6 h-20 w-20 rounded-full bg-gradient-to-br from-maroon to-black flex items-center justify-center shadow-elegant ring-1 ring-gold/30"
       >
-        <img src="/img/logo.png" alt="Melati Gold" class="h-10 w-10 object-contain" />
+        <img src="/img/logo.png" alt="Melati Gold" class="h-20 w-20 object-contain" />
       </div>
 
       <!-- Title -->

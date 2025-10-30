@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 
 const props = defineProps<{
   show: boolean;
@@ -17,6 +17,20 @@ const { getServiceWithProducts } = useCatalogManager();
 const serviceData = ref<any>(null);
 const products = ref<any[]>([]);
 const loading = ref(false);
+
+// Desktop grid columns: default up to 4 columns, shrink to product count when < 4
+const desktopCols = computed(() => {
+  const len = Array.isArray(products.value) ? products.value.length : 0;
+  return Math.max(1, Math.min(len, 4));
+});
+
+// Modal size class based on product count (desktop)
+const modalSizeClass = computed(() => {
+  const n = desktopCols.value;
+  if (n <= 1) return "modal-md";
+  if (n === 2 || n === 3) return "modal-lg";
+  return "modal-xl"; // 4 or more
+});
 
 // Load service data with products
 const loadServiceData = async () => {
@@ -93,7 +107,7 @@ const contactWhatsApp = () => {
 <template>
   <Transition name="fade">
     <div v-if="show && service" class="modal d-block" tabindex="-1" role="dialog" @click.self="emit('close')">
-      <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+      <div class="modal-dialog modal-dialog-centered" :class="modalSizeClass" role="document">
         <div class="modal-content bg-white rounded-4 shadow-lg overflow-hidden">
           <!-- Header -->
           <div class="modal-header border-bottom bg-white">
@@ -152,41 +166,43 @@ const contactWhatsApp = () => {
 
               <!-- Products Grid -->
               <div v-if="products.length > 0">
-                <h6 class="fw-semibold mb-3">📦 Contoh Produk Custom Kalung Nama</h6>
-                <div class="row g-3">
-                  <div v-for="product in products" :key="product.id" class="col-6 col-md-4 col-lg-3">
-                    <div
-                      class="card h-100 border-0 shadow-sm hover:shadow-lg transition-all cursor-pointer"
-                      @click="selectProduct(product)"
-                    >
-                      <!-- Product Image -->
-                      <div class="position-relative" style="aspect-ratio: 1/1">
-                        <img
-                          v-if="product.thumbnail_image"
-                          :src="product.thumbnail_image"
-                          :alt="product.title"
-                          class="card-img-top object-fit-cover w-100 h-100"
-                          loading="lazy"
-                        />
-                        <div v-else class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
-                          <i class="bi bi-image text-muted opacity-50" style="font-size: 2rem"></i>
+                <h6 class="fw-semibold mb-3">📦 Contoh Produk</h6>
+                <div class="product-grid-wrap" :class="`maxw-d-${desktopCols}`">
+                  <div class="product-grid" :class="`cols-d-${desktopCols}`">
+                    <div v-for="product in products" :key="product.id" class="product-cell">
+                      <div
+                        class="card h-100 border-0 shadow-sm hover:shadow-lg transition-all cursor-pointer"
+                        @click="selectProduct(product)"
+                      >
+                        <!-- Product Image -->
+                        <div class="position-relative" style="aspect-ratio: 1/1">
+                          <img
+                            v-if="product.thumbnail_image"
+                            :src="product.thumbnail_image"
+                            :alt="product.title"
+                            class="card-img-top object-fit-cover w-100 h-100"
+                            loading="lazy"
+                          />
+                          <div v-else class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-muted opacity-50" style="font-size: 2rem"></i>
+                          </div>
+
+                          <!-- Stock Badge -->
+                          <div v-if="product.stock <= 0" class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-danger">Habis</span>
+                          </div>
                         </div>
 
-                        <!-- Stock Badge -->
-                        <div v-if="product.stock <= 0" class="position-absolute top-0 end-0 m-2">
-                          <span class="badge bg-danger">Habis</span>
+                        <!-- Product Info -->
+                        <div class="card-body p-3">
+                          <h6 class="card-title small mb-1 text-truncate">{{ product.title }}</h6>
+                          <p v-if="product.subtitle" class="card-text text-muted small mb-2 text-truncate">
+                            {{ product.subtitle }}
+                          </p>
+                          <p class="fw-semibold text-warning mb-0 small">
+                            {{ formatPrice(product.price) }}
+                          </p>
                         </div>
-                      </div>
-
-                      <!-- Product Info -->
-                      <div class="card-body p-3">
-                        <h6 class="card-title small mb-1 text-truncate">{{ product.title }}</h6>
-                        <p v-if="product.subtitle" class="card-text text-muted small mb-2 text-truncate">
-                          {{ product.subtitle }}
-                        </p>
-                        <p class="fw-semibold text-warning mb-0 small">
-                          {{ formatPrice(product.price) }}
-                        </p>
                       </div>
                     </div>
                   </div>
@@ -306,5 +322,59 @@ const contactWhatsApp = () => {
 .badge {
   font-size: 0.7rem;
   padding: 0.25rem 0.5rem;
+}
+
+/* New responsive product grid (replaces Bootstrap row/cols for this section) */
+.product-grid-wrap {
+  width: 100%;
+  margin: 0 auto;
+  /* sizing tokens */
+  --col-w: 220px; /* desktop card width target */
+  --gap: 12px; /* spacing between cards */
+}
+.product-grid {
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Tablet and mobile breakpoints: keep previous intent */
+@media (max-width: 992px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop dynamic adjustments based on product count */
+@media (min-width: 993px) {
+  .product-grid.cols-d-1 {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .product-grid.cols-d-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .product-grid.cols-d-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .product-grid.cols-d-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Shrink wrapper so cards stay proportional when < 4 items */
+  .product-grid-wrap.maxw-d-1 {
+    max-width: calc(1 * var(--col-w) + 0 * var(--gap));
+  }
+  .product-grid-wrap.maxw-d-2 {
+    max-width: calc(2 * var(--col-w) + 1 * var(--gap));
+  }
+  .product-grid-wrap.maxw-d-3 {
+    max-width: calc(3 * var(--col-w) + 2 * var(--gap));
+  }
+  /* For 4 or more, allow full modal width (no cap) */
 }
 </style>

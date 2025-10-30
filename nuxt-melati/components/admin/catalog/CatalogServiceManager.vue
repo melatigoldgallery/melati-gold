@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-semibold text-gray-900">Custom Services</h2>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 sm:mb-6">
+      <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Custom Services</h2>
       <button
         @click="openModal()"
-        class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
+        class="w-full sm:w-auto px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors text-sm sm:text-base"
       >
         <i class="bi bi-plus-circle mr-2"></i>
         Add Service
@@ -18,28 +18,30 @@
     </div>
 
     <!-- Services List -->
-    <div v-else-if="services.length > 0" class="space-y-4">
+    <div v-else-if="services.length > 0" class="space-y-3 sm:space-y-4">
       <div
         v-for="service in services"
         :key="service.id"
-        class="border rounded-lg p-6 hover:bg-gray-50 transition-colors"
+        class="border rounded-lg p-4 sm:p-6 hover:bg-gray-50 transition-colors"
       >
-        <div class="flex items-start gap-4">
+        <div class="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
           <!-- Icon -->
-          <div class="flex-shrink-0 w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center">
-            <i :class="service.icon || 'bi bi-gear'" class="text-3xl text-yellow-600"></i>
+          <div
+            class="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 bg-yellow-100 rounded-lg flex items-center justify-center"
+          >
+            <i :class="service.icon || 'bi bi-gear'" class="text-2xl sm:text-3xl text-yellow-600"></i>
           </div>
 
           <!-- Content -->
-          <div class="flex-1">
-            <div class="flex items-start justify-between mb-2">
-              <div>
-                <h3 class="font-semibold text-xl text-gray-900">{{ service.title }}</h3>
-                <p class="text-sm text-gray-600 mt-1">{{ service.subtitle }}</p>
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2">
+              <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-base sm:text-xl text-gray-900">{{ service.title }}</h3>
+                <p class="text-xs sm:text-sm text-gray-600 mt-1">{{ service.subtitle }}</p>
               </div>
               <span
                 :class="[
-                  'px-3 py-1 text-xs rounded-full',
+                  'px-3 py-1 text-xs rounded-full whitespace-nowrap',
                   service.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600',
                 ]"
               >
@@ -47,7 +49,7 @@
               </span>
             </div>
 
-            <p class="text-gray-700 mb-3">{{ service.description }}</p>
+            <p class="text-sm sm:text-base text-gray-700 mb-3 line-clamp-2">{{ service.description }}</p>
 
             <!-- Features -->
             <div v-if="service.features && service.features.length > 0" class="mb-3">
@@ -58,7 +60,7 @@
             </div>
 
             <!-- Meta Info -->
-            <div class="flex items-center gap-4 text-sm text-gray-500">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
               <span v-if="service.duration">
                 <i class="bi bi-clock mr-1"></i>
                 {{ service.duration }}
@@ -72,20 +74,20 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex flex-col gap-2">
+          <div class="flex sm:flex-col gap-2 w-full sm:w-auto">
             <button
               @click="openModal(service)"
-              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+              class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs sm:text-sm transition-colors"
             >
               <i class="bi bi-pencil mr-1"></i>
-              Edit
+              <span class="hidden xs:inline">Edit</span>
             </button>
             <button
               @click="confirmDelete(service)"
-              class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
+              class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs sm:text-sm transition-colors"
             >
               <i class="bi bi-trash mr-1"></i>
-              Delete
+              <span class="hidden xs:inline">Delete</span>
             </button>
           </div>
         </div>

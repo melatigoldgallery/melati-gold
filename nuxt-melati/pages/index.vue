@@ -88,7 +88,7 @@ useHead({
   ],
 });
 
-const { getProducts: getCatalogProducts } = useCatalogManager();
+const { getProducts: getCatalogProducts, getProductById } = useCatalogManager();
 const { getProducts, getProductDetail } = useCatalogData();
 
 // State management
@@ -165,8 +165,25 @@ const closeServiceModal = () => {
 };
 
 // Open product from service (close service modal, open product detail)
-const openProductFromService = (product: any) => {
-  selectedProduct.value = product;
+const openProductFromService = async (product: any) => {
+  // Prefer fetching full product detail from DB so images/gallery are available
+  try {
+    if (product?.id) {
+      const result = await getProductById(product.id);
+      if (result.success && result.data) {
+        selectedProduct.value = result.data;
+      } else {
+        // Fallback to the minimal product object if detail fetch fails
+        selectedProduct.value = product;
+      }
+    } else {
+      selectedProduct.value = product;
+    }
+  } catch (e) {
+    // Silent fallback
+    selectedProduct.value = product;
+  }
+
   showServiceModal.value = false;
   showProductModal.value = true;
 };
