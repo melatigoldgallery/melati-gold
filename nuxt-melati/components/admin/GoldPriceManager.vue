@@ -47,7 +47,7 @@
             <button
               @click="updatePrice(price)"
               :disabled="saving === price.karat"
-              class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
+              class="px-2 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
             >
               {{ saving === price.karat ? "..." : "Simpan" }}
             </button>

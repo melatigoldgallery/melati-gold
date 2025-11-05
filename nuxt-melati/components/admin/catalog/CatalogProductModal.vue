@@ -174,6 +174,40 @@
             ></textarea>
           </div>
 
+          <!-- Custom Links (Optional Override) -->
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h4 class="text-sm font-semibold mb-3 text-gray-900">🔗 Link Custom (Opsional)</h4>
+            <p class="text-xs text-gray-500 mb-3">
+              Kosongkan untuk menggunakan link default berdasarkan kadar. Isi hanya jika produk ini perlu link khusus.
+            </p>
+
+            <div class="space-y-3">
+              <!-- Custom Shopee Link -->
+              <div>
+                <label class="block text-xs font-medium mb-2">Link Shopee Produk Spesifik</label>
+                <input
+                  v-model="form.custom_shopee_link"
+                  type="url"
+                  placeholder="https://shopee.co.id/Produk-Spesifik-i.123.456"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                />
+                <p class="text-xs text-gray-400 mt-1">Link langsung ke produk ini di Shopee</p>
+              </div>
+
+              <!-- Custom WhatsApp -->
+              <div>
+                <label class="block text-xs font-medium mb-2">Nomor WhatsApp Khusus</label>
+                <input
+                  v-model="form.custom_whatsapp_number"
+                  type="text"
+                  placeholder="6281234567890"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                />
+                <p class="text-xs text-gray-400 mt-1">Nomor WA khusus untuk produk ini (format: 62xxx)</p>
+              </div>
+            </div>
+          </div>
+
           <!-- Flags -->
           <div class="flex flex-col xs:flex-row gap-3 xs:gap-6">
             <label class="flex items-center">
@@ -251,6 +285,8 @@ const form = ref<{
   is_active: boolean;
   stock_status: string;
   display_order: number;
+  custom_shopee_link: string;
+  custom_whatsapp_number: string;
 }>({
   category_id: "",
   subcategory_id: "",
@@ -269,6 +305,8 @@ const form = ref<{
   is_active: true,
   stock_status: "available",
   display_order: 0,
+  custom_shopee_link: "",
+  custom_whatsapp_number: "",
 });
 
 // Computed

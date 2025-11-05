@@ -2,6 +2,9 @@
 // Fetch featured products from database
 const { getProducts } = useCatalogManager();
 
+// 🚀 Image optimization
+const { presets } = useImageOptimization();
+
 // State
 const products = ref<any[]>([]);
 const loading = ref(true);
@@ -20,6 +23,14 @@ const loadFeaturedProducts = async () => {
   }
 
   loading.value = false;
+};
+
+// Optimize images
+const getOptimizedImage = (imageUrl: string, preset: 'thumbnail' | 'detail' = 'thumbnail') => {
+  if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
+    return imageUrl || '/img/placeholder.jpg';
+  }
+  return preset === 'thumbnail' ? presets.thumbnail(imageUrl) : presets.detail(imageUrl);
 };
 
 // Format price to Indonesian Rupiah
@@ -106,10 +117,12 @@ function buildWhatsAppLink(p: any) {
         class="glass overflow-hidden rounded-2xl transition hover:-translate-y-1 hover:shadow-elegant reveal-up"
       >
         <div class="relative">
+          <!-- ✨ Optimized image with lazy loading -->
           <img
-            :src="p.thumbnail_image || '/img/placeholder.jpg'"
+            :src="getOptimizedImage(p.thumbnail_image, 'thumbnail')"
             :alt="p.title || p.name"
             loading="lazy"
+            decoding="async"
             class="h-56 w-full object-cover"
           />
           <span v-if="p.karat" class="chip absolute left-3 top-3 text-white">{{ p.karat }}</span>
@@ -150,10 +163,13 @@ function buildWhatsAppLink(p: any) {
           <div class="grid md:grid-cols-2 gap-4 p-5">
             <!-- Images -->
             <div>
+              <!-- ✨ Optimized main image (high quality for modal) -->
               <img
-                :src="mainImage || selected?.thumbnail_image || '/img/placeholder.jpg'"
+                :src="getOptimizedImage(mainImage || selected?.thumbnail_image, 'detail')"
                 :alt="selected?.title || selected?.name || 'Produk'"
                 class="w-full h-64 object-cover rounded-lg"
+                loading="lazy"
+                decoding="async"
               />
               <div v-if="selected?.images?.length" class="mt-3 flex gap-2 overflow-x-auto">
                 <button
@@ -162,7 +178,14 @@ function buildWhatsAppLink(p: any) {
                   class="rounded-lg overflow-hidden border hover:border-gold focus:ring-1 focus:ring-gold"
                   @click="mainImage = img"
                 >
-                  <img :src="img" :alt="`Thumbnail ${idx + 1}`" class="h-16 w-20 object-cover" loading="lazy" />
+                  <!-- ✨ Optimized thumbnails -->
+                  <img
+                    :src="getOptimizedImage(img, 'thumbnail')"
+                    :alt="`Thumbnail ${idx + 1}`"
+                    class="h-16 w-20 object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </button>
               </div>
             </div>

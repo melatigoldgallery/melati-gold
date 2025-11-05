@@ -7,6 +7,10 @@ const emit = defineEmits<{
 
 // Fetch categories from database
 const { getCategories } = useCatalogManager();
+
+// 🚀 Image optimization
+const { presets } = useImageOptimization();
+
 const categories = ref<any[]>([]);
 const loading = ref(true);
 
@@ -154,6 +158,15 @@ onMounted(() => {
   requestAnimationFrame(() => updateLayout());
   onUnmounted(() => window.removeEventListener("resize", onResize));
 });
+
+// Optimize category cover images
+const getOptimizedCoverImage = (imageUrl: string) => {
+  if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
+    return imageUrl || '/img/placeholder.jpg';
+  }
+  // Use card preset for category covers (600x600)
+  return presets.card(imageUrl);
+};
 </script>
 
 <template>
@@ -208,11 +221,13 @@ onMounted(() => {
                     role="button"
                     tabindex="0"
                   >
+                    <!-- ✨ Optimized image -->
                     <img
-                      :src="category.cover_image || '/img/placeholder.jpg'"
+                      :src="getOptimizedCoverImage(category.cover_image)"
                       :alt="category.name"
                       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
+                      decoding="async"
                     />
 
                     <div

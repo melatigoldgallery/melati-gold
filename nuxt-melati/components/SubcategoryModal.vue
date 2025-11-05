@@ -81,18 +81,27 @@ onMounted(async () => {
 
 <template>
   <Transition name="fade">
-    <div v-if="show" class="modal d-block" tabindex="-1" role="dialog" @click.self="emit('close')">
+    <div 
+      v-if="show" 
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
+      @click.self="emit('close')"
+    >
       <div
-        class="modal-dialog modal-dialog-centered"
-        :class="subcategories.length <= 2 ? 'modal-md' : 'modal-lg'"
-        role="document"
+        class="relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto"
+        :class="subcategories.length <= 2 ? 'max-w-md' : 'max-w-3xl'"
       >
-        <div class="modal-content bg-white rounded-4 shadow-lg overflow-hidden">
-          <div class="modal-header border-0">
-            <h5 class="modal-title">Pilih Sub-Kategori {{ category }}</h5>
-            <button type="button" class="btn-close" aria-label="Close" @click="emit('close')"></button>
-          </div>
-          <div class="modal-body">
+        <div class="sticky top-0 z-10 flex items-center justify-between gap-4 p-4 bg-white border-b">
+          <h5 class="text-lg font-semibold text-neutral-800">Pilih Sub-Kategori {{ category }}</h5>
+          <button 
+            type="button" 
+            class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Close" 
+            @click="emit('close')"
+          >
+            <i class="bi bi-x-lg text-xl"></i>
+          </button>
+        </div>
+        <div class="p-4">
             <!-- Loading State -->
             <div v-if="loading" class="text-center py-5">
               <div class="spinner-border text-warning" role="status">

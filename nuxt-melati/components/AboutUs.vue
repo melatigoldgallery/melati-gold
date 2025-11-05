@@ -9,15 +9,15 @@
         </p>
         <ul class="mt-5 space-y-2 text-neutral-700">
           <li class="flex items-start gap-2">
-            <i class="fa-solid fa-check text-gold mt-1"></i>
+            <i class="bi bi-check-circle-fill text-gold mt-1"></i>
             <span>Material premium dan proses produksi yang teliti.</span>
           </li>
           <li class="flex items-start gap-2">
-            <i class="fa-solid fa-check text-gold mt-1"></i>
+            <i class="bi bi-check-circle-fill text-gold mt-1"></i>
             <span>Pelayanan personal untuk pengalaman belanja yang berkesan.</span>
           </li>
           <li class="flex items-start gap-2">
-            <i class="fa-solid fa-check text-gold mt-1"></i>
+            <i class="bi bi-check-circle-fill text-gold mt-1"></i>
             <span>Koleksi baru setiap musim.</span>
           </li>
         </ul>

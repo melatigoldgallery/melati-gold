@@ -106,18 +106,31 @@ const contactWhatsApp = () => {
 
 <template>
   <Transition name="fade">
-    <div v-if="show && service" class="modal d-block" tabindex="-1" role="dialog" @click.self="emit('close')">
-      <div class="modal-dialog modal-dialog-centered" :class="modalSizeClass" role="document">
-        <div class="modal-content bg-white rounded-4 shadow-lg overflow-hidden">
-          <!-- Header -->
-          <div class="modal-header border-bottom bg-white">
-            <div>
-              <h5 class="modal-title mb-1 text-dark">Custom {{ service.title }}</h5>
-            </div>
-            <button type="button" class="btn-close" aria-label="Close" @click="emit('close')"></button>
+    <div 
+      v-if="show && service" 
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
+      @click.self="emit('close')"
+    >
+      <div 
+        class="relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto"
+        :class="modalSizeClass"
+      >
+        <!-- Header -->
+        <div class="sticky top-0 z-10 flex items-start justify-between gap-4 p-4 border-b bg-white">
+          <div>
+            <h5 class="text-lg font-semibold text-neutral-800">Custom {{ service.title }}</h5>
           </div>
+          <button 
+            type="button" 
+            class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Close" 
+            @click="emit('close')"
+          >
+            <i class="bi bi-x-lg text-xl"></i>
+          </button>
+        </div>
 
-          <div class="modal-body p-4">
+        <div class="p-4">
             <!-- Loading State -->
             <div v-if="loading" class="text-center py-5">
               <div class="spinner-border text-warning" role="status">

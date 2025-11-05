@@ -51,7 +51,14 @@
           :key="index"
           class="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden"
         >
-          <img :src="url" :alt="`Preview ${index + 1}`" class="w-full h-full object-cover" />
+          <!-- ✨ Optimized preview thumbnail -->
+          <img 
+            :src="getOptimizedPreview(url)" 
+            :alt="`Preview ${index + 1}`" 
+            class="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
 
           <!-- Overlay with actions -->
           <div
@@ -104,7 +111,7 @@
       </p>
     </div>
 
-    <!-- Image Viewer Modal -->
+    <!-- ✨ Image Viewer Modal with optimized image -->
     <div
       v-if="viewerUrl"
       class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-[60]"
@@ -115,7 +122,12 @@
           <i class="bi bi-x-lg"></i>
           Close
         </button>
-        <img :src="viewerUrl" alt="Full view" class="w-full h-auto rounded-lg" />
+        <img 
+          :src="getOptimizedViewer(viewerUrl)" 
+          alt="Full view" 
+          class="w-full h-auto rounded-lg"
+          loading="lazy"
+        />
       </div>
     </div>
   </div>
@@ -140,6 +152,9 @@ const emit = defineEmits<{
 
 const { uploadFile } = useCloudinary();
 
+// 🚀 Image optimization for previews
+const { presets } = useImageOptimization();
+
 // State
 const fileInput = ref<HTMLInputElement | null>(null);
 const isDragging = ref(false);
@@ -154,6 +169,22 @@ const acceptText = computed(() => {
   const maxSizeMB = props.maxSize || 5;
   return `PNG, JPG, WebP up to ${maxSizeMB}MB`;
 });
+
+// Optimize preview images (thumbnail size for grid)
+const getOptimizedPreview = (url: string) => {
+  if (!url || !url.includes('cloudinary.com')) {
+    return url;
+  }
+  return presets.thumbnail(url); // 400x400 for preview grid
+};
+
+// Optimize viewer image (detail size for modal)
+const getOptimizedViewer = (url: string) => {
+  if (!url || !url.includes('cloudinary.com')) {
+    return url;
+  }
+  return presets.detail(url); // 1000x1000 for viewer modal
+};
 
 // Initialize with existing URLs
 onMounted(() => {

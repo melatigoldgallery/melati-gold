@@ -1,6 +1,7 @@
 // Composable untuk manage catalog (Categories, Subcategories, Products, Custom Services)
 export const useCatalogManager = () => {
   const { $supabase } = useNuxtApp();
+  const cache = useCacheManager();
 
   if (!$supabase) {
     throw new Error("Supabase client is not available");
@@ -13,23 +14,42 @@ export const useCatalogManager = () => {
   };
 
   // ============================================
-  // CATEGORIES MANAGEMENT
+  // CATEGORIES MANAGEMENT (with caching)
   // ============================================
 
-  const getCategories = async () => {
+  const getCategories = async (useCache = true) => {
     try {
-      console.log("[useCatalogManager] Fetching categories from Supabase...");
+      const cacheKey = cache.generateKey('catalog_categories');
 
+      // If cache enabled, try cache first
+      if (useCache) {
+        return await cache.fetchWithCache(
+          cacheKey,
+          async () => {
+            console.log("[useCatalogManager] Fetching categories from Supabase...");
+
+            const { data, error } = await $supabase
+              .from("catalog_categories")
+              .select("*")
+              .order("display_order", { ascending: true });
+
+            if (error) throw error;
+
+            console.log("[useCatalogManager] Success! Categories count:", data?.length || 0);
+            return { success: true, data: data || [] };
+          },
+          { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
+        );
+      }
+
+      // No cache, fetch directly
       const { data, error } = await $supabase
         .from("catalog_categories")
         .select("*")
         .order("display_order", { ascending: true });
 
-      console.log("[useCatalogManager] Supabase response:", { data, error });
-
       if (error) throw error;
 
-      console.log("[useCatalogManager] Success! Categories count:", data?.length || 0);
       return { success: true, data: data || [] };
     } catch (error) {
       console.error("[useCatalogManager] Error fetching categories:", error);

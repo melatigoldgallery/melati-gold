@@ -85,6 +85,11 @@
         <div v-else-if="activeTab === 'gold-prices'" class="p-3 sm:p-6">
           <GoldPriceManager :key="`gold-${componentKey}`" @alert="showAlert" />
         </div>
+
+        <!-- Karat Configuration Tab -->
+        <div v-else-if="activeTab === 'karat-config'" class="p-3 sm:p-6">
+          <KaratConfigManager :key="`karat-${componentKey}`" />
+        </div>
       </div>
     </div>
   </div>
@@ -146,6 +151,7 @@ const tabs = [
   { key: "best-sellers", label: "Best Sellers", shortLabel: "Best", icon: "bi bi-trophy-fill" },
   { key: "services", label: "Layanan Kustom", shortLabel: "Layanan", icon: "bi bi-gem" },
   { key: "gold-prices", label: "Harga Emas", shortLabel: "Harga", icon: "bi bi-cash-coin" },
+  { key: "karat-config", label: "Konfigurasi Kadar", shortLabel: "Kadar", icon: "bi bi-gear" },
 ];
 
 // Alert system

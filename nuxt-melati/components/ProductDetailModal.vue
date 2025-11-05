@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, ref } from "vue";
 
 const props = defineProps<{
   show: boolean;
@@ -10,6 +10,12 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "close"): void;
 }>();
+
+// 🚀 Image optimization
+const { presets } = useImageOptimization();
+
+// Carousel state
+const currentSlide = ref(0);
 
 // Derived values to handle both demo and db product shapes
 const displayName = computed(() => props.product && (props.product.name || props.product.title || ""));
@@ -35,113 +41,160 @@ const displaySpecs = computed(() => {
   return props.product.specs || props.product.specs || [];
 });
 
-// Function to navigate to specific slide when clicking thumbnail
+// Optimize images for carousel (main view - high quality)
+const getOptimizedMainImage = (imageUrl: string) => {
+  if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
+    return imageUrl;
+  }
+  return presets.detail(imageUrl); // 1000x1000, high quality
+};
+
+// Optimize thumbnail images (smaller size)
+const getOptimizedThumbImage = (imageUrl: string) => {
+  if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
+    return imageUrl;
+  }
+  return presets.thumbnail(imageUrl); // 400x400, compressed
+};
+
+// Carousel navigation
 const goToSlide = (index: number) => {
-  if (typeof window !== "undefined" && (window as any).bootstrap) {
-    const carouselElement = document.getElementById("productCarousel");
-    if (carouselElement) {
-      const bootstrap = (window as any).bootstrap;
-      const carousel = bootstrap.Carousel.getInstance(carouselElement) || new bootstrap.Carousel(carouselElement);
-      carousel.to(index);
-    }
+  currentSlide.value = index;
+};
+
+const nextSlide = () => {
+  if (currentSlide.value < displayImages.value.length - 1) {
+    currentSlide.value++;
+  } else {
+    currentSlide.value = 0;
   }
 };
 
-// Initialize carousel on mount
-onMounted(() => {
-  if (typeof window !== "undefined" && (window as any).bootstrap) {
-    const carouselElement = document.getElementById("productCarousel");
-    if (carouselElement) {
-      const bootstrap = (window as any).bootstrap;
-      new bootstrap.Carousel(carouselElement, {
-        interval: false, // Disable auto-sliding
-        touch: true, // Enable touch/swipe gestures
-      });
-    }
+const prevSlide = () => {
+  if (currentSlide.value > 0) {
+    currentSlide.value--;
+  } else {
+    currentSlide.value = displayImages.value.length - 1;
   }
-});
+};
 </script>
 
 <template>
   <Transition name="fade">
-    <div v-if="show && product" class="modal d-block" tabindex="-1" @click.self="emit('close')">
-      <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content rounded-4 overflow-hidden">
-          <div class="modal-body p-0">
-            <div class="row g-0">
-              <div class="col-12 col-lg-7 p-3 p-lg-4">
-                <div id="productCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-touch="true">
-                  <!-- Carousel Indicators -->
-                  <div class="carousel-indicators" v-if="displayImages.length > 1">
-                    <button
-                      v-for="(img, i) in displayImages"
-                      :key="'ind' + i"
-                      type="button"
-                      data-bs-target="#productCarousel"
-                      :data-bs-slide-to="i"
-                      :class="{ active: i === 0 }"
-                      :aria-current="i === 0 ? 'true' : 'false'"
-                      :aria-label="`Slide ${i + 1}`"
-                    ></button>
-                  </div>
+    <div 
+      v-if="show && product" 
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
+      @click.self="emit('close')"
+    >
+      <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+        <!-- Close Button -->
+        <button
+          @click="emit('close')"
+          class="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white/90 hover:bg-white shadow-lg transition-colors"
+          aria-label="Close"
+        >
+          <i class="bi bi-x-lg text-xl"></i>
+        </button>
 
-                  <div class="carousel-inner rounded-3 overflow-hidden">
-                    <div class="carousel-item" :class="{ active: i === 0 }" v-for="(img, i) in displayImages" :key="i">
-                      <img :src="img" class="d-block w-100" :alt="displayName" />
-                    </div>
-                  </div>
-
-                  <!-- Navigation buttons (only show if more than 1 image) -->
-                  <template v-if="displayImages.length > 1">
-                    <button
-                      class="carousel-control-prev"
-                      type="button"
-                      data-bs-target="#productCarousel"
-                      data-bs-slide="prev"
-                    >
-                      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                      <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button
-                      class="carousel-control-next"
-                      type="button"
-                      data-bs-target="#productCarousel"
-                      data-bs-slide="next"
-                    >
-                      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                      <span class="visually-hidden">Next</span>
-                    </button>
-                  </template>
-                </div>
-                <div class="d-flex gap-2 mt-3 flex-wrap justify-content-center">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+          <!-- Left: Image Carousel -->
+          <div class="p-4 lg:p-6">
+            <div class="relative">
+              <!-- Main Carousel Image -->
+              <div class="relative rounded-xl overflow-hidden bg-gray-100 mb-4">
+                <div class="aspect-[4/5] w-full max-w-md mx-auto">
                   <img
-                    v-for="(img, i) in displayImages"
-                    :key="'t' + i"
-                    :src="img"
-                    class="thumb"
-                    @click="goToSlide(i)"
-                    role="button"
-                    :aria-label="`Go to image ${i + 1}`"
+                    :src="getOptimizedMainImage(displayImages[currentSlide])"
+                    :alt="displayName"
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
+
+                <!-- Navigation Buttons -->
+                <template v-if="displayImages.length > 1">
+                  <button
+                    @click="prevSlide"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
+                    aria-label="Previous image"
+                  >
+                    <i class="bi bi-chevron-left text-xl"></i>
+                  </button>
+                  <button
+                    @click="nextSlide"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
+                    aria-label="Next image"
+                  >
+                    <i class="bi bi-chevron-right text-xl"></i>
+                  </button>
+                </template>
+
+                <!-- Indicators -->
+                <div v-if="displayImages.length > 1" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                  <button
+                    v-for="(img, i) in displayImages"
+                    :key="'ind' + i"
+                    @click="goToSlide(i)"
+                    class="w-2 h-2 rounded-full transition-all"
+                    :class="i === currentSlide ? 'bg-gold w-6' : 'bg-white/70 hover:bg-white'"
+                    :aria-label="`Go to slide ${i + 1}`"
+                  ></button>
+                </div>
               </div>
 
-              <div class="col-12 col-lg-5 p-4 p-lg-5 bg-light">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                  <h4 class="mb-0">{{ product.name || product.title }}</h4>
-                  <button type="button" class="btn-close" @click="emit('close')"></button>
-                </div>
-                <p class="text-muted">{{ product.description || product.subtitle || "" }}</p>
-                <ul class="small">
-                  <li v-for="(s, i) in displaySpecs" :key="i">{{ s }}</li>
-                </ul>
-                <div class="h5 text-maroon fw-semibold">{{ product.price || product.price_formatted || "" }}</div>
-                <a :href="whatsappLink" target="_blank" class="btn btn-success mt-3">
-                  <i class="fab fa-whatsapp me-2"></i>
-                  Chat WhatsApp
-                </a>
+              <!-- Thumbnails -->
+              <div class="flex gap-2 flex-wrap justify-center">
+                <button
+                  v-for="(img, i) in displayImages"
+                  :key="'t' + i"
+                  @click="goToSlide(i)"
+                  class="w-12 h-12 rounded-lg overflow-hidden border-2 transition-all"
+                  :class="i === currentSlide ? 'border-gold scale-105' : 'border-gray-200 hover:border-gold'"
+                  :aria-label="`Go to image ${i + 1}`"
+                >
+                  <img
+                    :src="getOptimizedThumbImage(img)"
+                    :alt="`${displayName} thumbnail ${i + 1}`"
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </button>
               </div>
             </div>
+          </div>
+
+          <!-- Right: Product Info -->
+          <div class="p-6 lg:p-8 bg-gray-50">
+            <h3 class="text-2xl lg:text-3xl font-semibold text-neutral-800 mb-3">
+              {{ product.name || product.title }}
+            </h3>
+            <p class="text-neutral-600 mb-4">
+              {{ product.description || product.subtitle || "" }}
+            </p>
+
+            <!-- Specs -->
+            <ul v-if="displaySpecs.length" class="space-y-2 text-sm text-neutral-700 mb-4">
+              <li v-for="(s, i) in displaySpecs" :key="i" class="flex items-start gap-2">
+                <i class="bi bi-check-circle-fill text-gold mt-0.5"></i>
+                <span>{{ s }}</span>
+              </li>
+            </ul>
+
+            <!-- Price -->
+            <div class="text-2xl font-bold text-maroon mb-6">
+              {{ product.price || product.price_formatted || "" }}
+            </div>
+
+            <!-- WhatsApp Button -->
+            <a
+              :href="whatsappLink"
+              target="_blank"
+              class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl"
+            >
+              <i class="bi bi-whatsapp text-xl"></i>
+              Chat WhatsApp
+            </a>
           </div>
         </div>
       </div>
@@ -157,87 +210,5 @@ onMounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-.modal {
-  background: rgba(0, 0, 0, 0.55);
-}
-/* Carousel main image styling */
-.carousel-item img {
-  width: 100%;
-  max-width: 420px;
-  height: auto;
-  max-height: 420px;
-  aspect-ratio: 4/5;
-  object-fit: cover;
-  margin: 0 auto;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-}
-
-@media (max-width: 1200px) {
-  .carousel-item img {
-    max-width: 320px;
-    max-height: 320px;
-  }
-}
-@media (max-width: 768px) {
-  .carousel-item img {
-    max-width: 220px;
-    max-height: 220px;
-  }
-}
-
-/* Thumbnail styling */
-.thumb {
-  width: 48px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 2px solid #eee;
-  transition: border-color 0.2s, transform 0.2s;
-  cursor: pointer;
-}
-.thumb:hover {
-  border-color: #b48c5a;
-  transform: scale(1.05);
-}
-
-/* Carousel indicators styling */
-.carousel-indicators {
-  margin-bottom: 0.5rem;
-}
-.carousel-indicators button {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #b48c5a;
-  opacity: 0.5;
-  transition: opacity 0.3s;
-}
-.carousel-indicators button.active {
-  opacity: 1;
-}
-
-/* Carousel controls styling */
-.carousel-control-prev,
-.carousel-control-next {
-  width: 40px;
-  height: 40px;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.carousel:hover .carousel-control-prev,
-.carousel:hover .carousel-control-next {
-  opacity: 1;
-}
-.carousel-control-prev {
-  left: 10px;
-}
-.carousel-control-next {
-  right: 10px;
 }
 </style>
