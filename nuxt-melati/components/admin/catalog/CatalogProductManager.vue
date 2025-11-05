@@ -85,7 +85,7 @@
           </div>
 
           <p class="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
-            {{ product.price_display || formatPrice(product.price) }}
+            {{ formatPrice(product.price) }}
           </p>
           <p class="text-xs text-gray-500 truncate">{{ product.category?.name }} → {{ product.subcategory?.name }}</p>
 

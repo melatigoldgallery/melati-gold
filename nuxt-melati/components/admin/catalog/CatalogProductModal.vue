@@ -7,7 +7,7 @@
       <div class="p-4 sm:p-6">
         <!-- Header -->
         <div class="flex justify-between items-center mb-4 sm:mb-6">
-          <h2 class="text-lg sm:text-xl font-semibold">{{ product ? "Edit" : "Add" }} Produk</h2>
+          <h2 class="text-lg sm:text-xl font-semibold">{{ product ? "Edit" : "Tambah" }} Produk</h2>
           <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
             <i class="bi bi-x-lg text-lg sm:text-xl"></i>
           </button>
@@ -44,28 +44,16 @@
             </div>
           </div>
 
-          <!-- Title & Name -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div>
-              <label class="block text-xs sm:text-sm font-medium mb-2">Judul *</label>
-              <input
-                v-model="form.title"
-                type="text"
-                required
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                placeholder="e.g., Kalung Fashion Elegan"
-              />
-            </div>
-
-            <div>
-              <label class="block text-xs sm:text-sm font-medium mb-2">Nama Produk</label>
-              <input
-                v-model="form.name"
-                type="text"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                placeholder="e.g., Kalung Fashion Modern"
-              />
-            </div>
+          <!-- Title -->
+          <div>
+            <label class="block text-xs sm:text-sm font-medium mb-2">Nama Produk *</label>
+            <input
+              v-model="form.title"
+              type="text"
+              required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="Contoh: Kalung Fashion Elegan 18K"
+            />
           </div>
 
           <!-- Description -->
@@ -79,50 +67,82 @@
             ></textarea>
           </div>
 
-          <!-- Price & Display -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div>
-              <label class="block text-xs sm:text-sm font-medium mb-2">Harga (Rp)</label>
-              <input
-                v-model.number="form.price"
-                type="number"
-                step="1000"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                placeholder="3500000"
-              />
-            </div>
-
-            <div>
-              <label class="block text-xs sm:text-sm font-medium mb-2">Harga Display</label>
-              <input
-                v-model="form.price_display"
-                type="text"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                placeholder="Rp 3.500.000"
-              />
-            </div>
+          <!-- Price -->
+          <div>
+            <label class="block text-xs sm:text-sm font-medium mb-2">Harga (Rp) *</label>
+            <input
+              v-model.number="form.price"
+              type="number"
+              step="1000"
+              min="0"
+              required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="3500000"
+            />
+            <p class="text-xs text-gray-500 mt-1">Masukkan harga dalam Rupiah (tanpa titik/koma).</p>
           </div>
 
           <!-- Karat & Weight -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label class="block text-xs sm:text-sm font-medium mb-2">Karat</label>
-              <input
+              <label class="block text-xs sm:text-sm font-medium mb-2">Kadar Emas *</label>
+              <select
                 v-model="form.karat"
-                type="text"
+                required
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                placeholder="e.g., 18K, 22K"
-              />
+              >
+                <option value="">Pilih Kadar</option>
+                <option v-for="gp in goldPrices" :key="gp.karat" :value="gp.karat">
+                  {{ gp.karat }} ({{ formatPrice(gp.price_per_gram) }}/gram)
+                </option>
+              </select>
             </div>
 
             <div>
-              <label class="block text-xs sm:text-sm font-medium mb-2">Berat</label>
-              <input
-                v-model="form.weight"
-                type="text"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                placeholder="e.g., 4.5 gram"
-              />
+              <label class="block text-xs sm:text-sm font-medium mb-2">Berat *</label>
+              <div class="flex gap-2">
+                <input
+                  v-model.number="form.weight_grams"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  required
+                  class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  placeholder="4.5"
+                />
+                <span class="self-center text-sm text-gray-600 whitespace-nowrap">gram</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Calculated Price Display -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1">
+                <label class="flex items-center gap-2 mb-3">
+                  <input v-model="form.price_override" type="checkbox" class="rounded" />
+                  <span class="text-sm font-medium text-gray-900">Override Harga Manual</span>
+                </label>
+
+                <div v-if="form.price_override">
+                  <label class="block text-xs font-medium text-gray-700 mb-2">Harga Custom (Rp)</label>
+                  <input
+                    v-model.number="form.price"
+                    type="number"
+                    step="1000"
+                    min="0"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    placeholder="3500000"
+                  />
+                  <p class="text-xs text-yellow-600 mt-2">⚠️ Harga ini tidak akan berubah saat harga emas update</p>
+                </div>
+
+                <div v-else class="space-y-1">
+                  <p class="text-xs text-gray-600">Harga Otomatis:</p>
+                  <p class="text-xl font-bold text-blue-600">{{ formatPrice(calculatedPrice) }}</p>
+                  <p class="text-xs text-gray-500">{{ form.weight_grams || 0 }} gram × {{ currentGoldPricePerGram }}</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -179,7 +199,7 @@
               :disabled="saving"
               class="w-full sm:flex-1 bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded-lg font-medium disabled:opacity-50 text-sm sm:text-base"
             >
-              {{ saving ? "Saving..." : "Save Product" }}
+              {{ saving ? "Menyimpan..." : "Simpan Produk" }}
             </button>
             <button
               type="button"
@@ -205,22 +225,24 @@ const props = defineProps<{
 const emit = defineEmits(["close", "saved"]);
 
 const { createProduct, updateProduct } = useCatalogManager();
+const { getGoldPrices, calculatePrice } = useGoldPricing();
 
 // State
 const saving = ref(false);
 const specsText = ref("");
 const imageUrls = ref<string[]>([]);
+const goldPrices = ref<any[]>([]);
 
 const form = ref<{
   category_id: string;
   subcategory_id: string;
   title: string;
-  name: string;
   description: string;
   price: number;
-  price_display: string;
   karat: string;
   weight: string;
+  weight_grams: number;
+  price_override: boolean;
   thumbnail_image: string;
   images: string[];
   specs: string[];
@@ -233,12 +255,12 @@ const form = ref<{
   category_id: "",
   subcategory_id: "",
   title: "",
-  name: "",
   description: "",
   price: 0,
-  price_display: "",
   karat: "",
   weight: "",
+  weight_grams: 0,
+  price_override: false,
   thumbnail_image: "",
   images: [],
   specs: [],
@@ -249,10 +271,51 @@ const form = ref<{
   display_order: 0,
 });
 
-// Filtered subcategories
+// Computed
 const filteredSubcategories = computed(() => {
   if (!form.value.category_id) return [];
   return props.subcategories.filter((sub: any) => sub.category_id === form.value.category_id);
+});
+
+const calculatedPrice = computed(() => {
+  if (!form.value.weight_grams || !form.value.karat) return 0;
+  return calculatePrice(form.value.weight_grams, form.value.karat, goldPrices.value);
+});
+
+const currentGoldPricePerGram = computed(() => {
+  const gp = goldPrices.value.find((g) => g.karat === form.value.karat);
+  return gp ? formatPrice(gp.price_per_gram) : "-";
+});
+
+// Load gold prices
+const loadGoldPrices = async () => {
+  const result = await getGoldPrices();
+  if (result.success) goldPrices.value = result.data;
+};
+
+// Format price
+const formatPrice = (price: number) => {
+  if (!price) return "Rp 0";
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(price);
+};
+
+// Update weight string when grams change
+watch(
+  () => form.value.weight_grams,
+  (grams) => {
+    if (grams) form.value.weight = `${grams} gram`;
+  }
+);
+
+// Auto-update price when not overridden
+watch([() => form.value.weight_grams, () => form.value.karat], () => {
+  if (!form.value.price_override) {
+    form.value.price = calculatedPrice.value;
+  }
 });
 
 const filterSubcategories = () => {
@@ -261,6 +324,8 @@ const filterSubcategories = () => {
 
 // Initialize
 onMounted(() => {
+  loadGoldPrices();
+
   if (props.product) {
     form.value = { ...props.product };
     specsText.value = (props.product.specs || []).join("\n");
@@ -270,6 +335,12 @@ onMounted(() => {
       imageUrls.value = [...props.product.images];
     } else if (props.product.thumbnail_image) {
       imageUrls.value = [props.product.thumbnail_image];
+    }
+
+    // Parse existing weight if numeric not set
+    if (!form.value.weight_grams && form.value.weight) {
+      const match = form.value.weight.match(/[\d.]+/);
+      if (match) form.value.weight_grams = parseFloat(match[0]);
     }
   }
 });

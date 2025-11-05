@@ -123,9 +123,7 @@ function buildWhatsAppLink(p: any) {
             </h3>
           </div>
           <!-- Optional brief info under name -->
-          <p class="text-sm text-neutral-600">
-            {{ p.karat ? p.karat + " • " : "" }}{{ p.price_display || formatPrice(p.price) }}
-          </p>
+          <p class="text-sm text-neutral-600">{{ p.karat ? p.karat + " • " : "" }}{{ formatPrice(p.price) }}</p>
 
           <button
             class="btn-outline shrink-0 text-[11px] md:text-sm px-2 py-1 md:px-3 md:py-1.5 whitespace-nowrap rounded-md"
@@ -184,7 +182,7 @@ function buildWhatsAppLink(p: any) {
               </div>
               <div class="text-sm text-neutral-700">
                 <span class="font-medium text-neutral-900">Harga:</span>
-                {{ selected?.price_display || formatPrice(selected?.price) }}
+                {{ formatPrice(selected?.price) }}
               </div>
               <div v-if="selected?.description" class="pt-2 text-sm text-neutral-700">
                 <span class="font-medium text-neutral-900">Deskripsi:</span>

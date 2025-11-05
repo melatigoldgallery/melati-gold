@@ -80,6 +80,11 @@
         <div v-else-if="activeTab === 'services'" class="p-3 sm:p-6">
           <CatalogServiceManager :key="`svc-${componentKey}`" @alert="showAlert" />
         </div>
+
+        <!-- Gold Price Settings Tab -->
+        <div v-else-if="activeTab === 'gold-prices'" class="p-3 sm:p-6">
+          <GoldPriceManager :key="`gold-${componentKey}`" @alert="showAlert" />
+        </div>
       </div>
     </div>
   </div>
@@ -140,6 +145,7 @@ const tabs = [
   { key: "featured", label: "Barang Pilihan", shortLabel: "Pilihan", icon: "bi bi-star" },
   { key: "best-sellers", label: "Best Sellers", shortLabel: "Best", icon: "bi bi-trophy-fill" },
   { key: "services", label: "Layanan Kustom", shortLabel: "Layanan", icon: "bi bi-gem" },
+  { key: "gold-prices", label: "Harga Emas", shortLabel: "Harga", icon: "bi bi-cash-coin" },
 ];
 
 // Alert system
