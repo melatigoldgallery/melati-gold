@@ -19,7 +19,7 @@ export const useCatalogManager = () => {
 
   const getCategories = async (useCache = true) => {
     try {
-      const cacheKey = cache.generateKey('catalog_categories');
+      const cacheKey = cache.generateKey("catalog_categories");
 
       // If cache enabled, try cache first
       if (useCache) {
@@ -62,6 +62,11 @@ export const useCatalogManager = () => {
       const { data, error } = await $supabase.from("catalog_categories").insert([categoryData]).select().single();
 
       if (error) throw error;
+
+      // Invalidate categories cache after create
+      cache.clearPrefix("catalog_categories");
+      console.log("[useCatalogManager] Cache invalidated after creating category");
+
       return { success: true, data };
     } catch (error) {
       console.error("Error creating category:", error);
@@ -82,6 +87,11 @@ export const useCatalogManager = () => {
         .single();
 
       if (error) throw error;
+
+      // Invalidate categories cache after update
+      cache.clearPrefix("catalog_categories");
+      console.log("[useCatalogManager] Cache invalidated after updating category");
+
       return { success: true, data };
     } catch (error) {
       console.error("Error updating category:", error);
@@ -94,6 +104,11 @@ export const useCatalogManager = () => {
       const { error } = await $supabase.from("catalog_categories").delete().eq("id", id);
 
       if (error) throw error;
+
+      // Invalidate categories cache after delete
+      cache.clearPrefix("catalog_categories");
+      console.log("[useCatalogManager] Cache invalidated after deleting category");
+
       return { success: true };
     } catch (error) {
       console.error("Error deleting category:", error);
@@ -102,29 +117,47 @@ export const useCatalogManager = () => {
   };
 
   // ============================================
-  // SUBCATEGORIES MANAGEMENT
+  // SUBCATEGORIES MANAGEMENT (Optimized with caching)
   // ============================================
 
-  const getSubcategories = async (categoryId?: string) => {
+  const getSubcategories = async (categoryId?: string, useCache = true) => {
     try {
-      let query = $supabase
-        .from("catalog_subcategories")
-        .select(
-          `
-          *,
-          category:catalog_categories(id, name, slug)
-        `
-        )
-        .order("display_order", { ascending: true });
+      const cacheKey = cache.generateKey("catalog_subcategories", { categoryId });
 
-      if (categoryId) {
-        query = query.eq("category_id", categoryId);
+      // Cache strategy
+      if (useCache) {
+        return await cache.fetchWithCache(
+          cacheKey,
+          async () => {
+            console.log("[useCatalogManager] Fetching subcategories from Supabase...");
+            return await fetchSubcategoriesFromDB();
+          },
+          { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
+        );
       }
 
-      const { data, error } = await query;
+      return await fetchSubcategoriesFromDB();
 
-      if (error) throw error;
-      return { success: true, data: data || [] };
+      async function fetchSubcategoriesFromDB() {
+        let query = $supabase!
+          .from("catalog_subcategories")
+          .select(
+            `
+            *,
+            category:catalog_categories(id, name, slug)
+          `
+          )
+          .order("display_order", { ascending: true });
+
+        if (categoryId) {
+          query = query.eq("category_id", categoryId);
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+        return { success: true, data: data || [] };
+      }
     } catch (error) {
       console.error("Error fetching subcategories:", error);
       return { success: false, error: getErrorMessage(error), data: [] };
@@ -136,6 +169,11 @@ export const useCatalogManager = () => {
       const { data, error } = await $supabase.from("catalog_subcategories").insert([subcategoryData]).select().single();
 
       if (error) throw error;
+
+      // Invalidate subcategories cache after create
+      cache.clearPrefix("catalog_subcategories");
+      console.log("[useCatalogManager] Cache invalidated after creating subcategory");
+
       return { success: true, data };
     } catch (error) {
       console.error("Error creating subcategory:", error);
@@ -156,6 +194,11 @@ export const useCatalogManager = () => {
         .single();
 
       if (error) throw error;
+
+      // Invalidate subcategories cache after update
+      cache.clearPrefix("catalog_subcategories");
+      console.log("[useCatalogManager] Cache invalidated after updating subcategory");
+
       return { success: true, data };
     } catch (error) {
       console.error("Error updating subcategory:", error);
@@ -168,6 +211,11 @@ export const useCatalogManager = () => {
       const { error } = await $supabase.from("catalog_subcategories").delete().eq("id", id);
 
       if (error) throw error;
+
+      // Invalidate subcategories cache after delete
+      cache.clearPrefix("catalog_subcategories");
+      console.log("[useCatalogManager] Cache invalidated after deleting subcategory");
+
       return { success: true };
     } catch (error) {
       console.error("Error deleting subcategory:", error);
@@ -176,7 +224,7 @@ export const useCatalogManager = () => {
   };
 
   // ============================================
-  // PRODUCTS MANAGEMENT
+  // PRODUCTS MANAGEMENT (Optimized with pagination & caching)
   // ============================================
 
   const getProducts = async (filters?: {
@@ -184,34 +232,111 @@ export const useCatalogManager = () => {
     subcategoryId?: string;
     isFeatured?: boolean;
     isBestSeller?: boolean;
+    page?: number;
+    limit?: number;
+    useCache?: boolean;
+    selectAll?: boolean; // For admin - need all columns
   }) => {
     try {
-      let query = $supabase
-        .from("catalog_products")
-        .select(
-          `
-          *,
-          category:catalog_categories(id, name, slug),
-          subcategory:catalog_subcategories(id, name, slug)
-        `
-        )
-        .eq("is_active", true)
-        .order("display_order", { ascending: true });
+      const page = filters?.page || 1;
+      const limit = filters?.limit || 50; // Default 50 items per page
+      const useCache = filters?.useCache !== false; // Default true
+      const selectAll = filters?.selectAll || false;
 
-      if (filters) {
-        if (filters.categoryId) query = query.eq("category_id", filters.categoryId);
-        if (filters.subcategoryId) query = query.eq("subcategory_id", filters.subcategoryId);
-        if (filters.isFeatured !== undefined) query = query.eq("is_featured", filters.isFeatured);
-        if (filters.isBestSeller !== undefined) query = query.eq("is_best_seller", filters.isBestSeller);
+      // Calculate pagination
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+
+      // Generate cache key based on filters
+      const cacheKey = cache.generateKey("catalog_products", {
+        categoryId: filters?.categoryId,
+        subcategoryId: filters?.subcategoryId,
+        isFeatured: filters?.isFeatured,
+        isBestSeller: filters?.isBestSeller,
+        page,
+        limit,
+        selectAll,
+      });
+
+      // Cache strategy
+      if (useCache) {
+        return await cache.fetchWithCache(
+          cacheKey,
+          async () => {
+            return await fetchProductsFromDB();
+          },
+          { ttl: 5 * 60 * 1000 } // Cache for 5 minutes
+        );
       }
 
-      const { data, error } = await query;
+      return await fetchProductsFromDB();
 
-      if (error) throw error;
-      return { success: true, data: data || [] };
+      // Fetch function
+      async function fetchProductsFromDB() {
+        // Select specific columns for list view (save ~60% bandwidth)
+        const selectColumns = selectAll
+          ? `
+            *,
+            category:catalog_categories(id, name, slug),
+            subcategory:catalog_subcategories(id, name, slug)
+          `
+          : `
+            id,
+            title,
+            thumbnail_image,
+            price,
+            price_display,
+            karat,
+            weight,
+            is_featured,
+            is_best_seller,
+            is_active,
+            stock_status,
+            display_order,
+            category_id,
+            subcategory_id,
+            category:catalog_categories(id, name, slug),
+            subcategory:catalog_subcategories(id, name, slug)
+          `;
+
+        let query = $supabase!
+          .from("catalog_products")
+          .select(selectColumns, { count: "exact" })
+          .eq("is_active", true)
+          .order("display_order", { ascending: true })
+          .range(from, to);
+
+        if (filters) {
+          if (filters.categoryId) query = query.eq("category_id", filters.categoryId);
+          if (filters.subcategoryId) query = query.eq("subcategory_id", filters.subcategoryId);
+          if (filters.isFeatured !== undefined) query = query.eq("is_featured", filters.isFeatured);
+          if (filters.isBestSeller !== undefined) query = query.eq("is_best_seller", filters.isBestSeller);
+        }
+
+        const { data, error, count } = await query;
+
+        if (error) throw error;
+
+        return {
+          success: true,
+          data: data || [],
+          pagination: {
+            page,
+            limit,
+            total: count || 0,
+            totalPages: Math.ceil((count || 0) / limit),
+            hasMore: (count || 0) > to + 1,
+          },
+        };
+      }
     } catch (error) {
       console.error("Error fetching products:", error);
-      return { success: false, error: getErrorMessage(error), data: [] };
+      return {
+        success: false,
+        error: getErrorMessage(error),
+        data: [],
+        pagination: { page: 1, limit: 50, total: 0, totalPages: 0, hasMore: false },
+      };
     }
   };
 
@@ -242,6 +367,13 @@ export const useCatalogManager = () => {
       const { data, error } = await $supabase.from("catalog_products").insert([productData]).select().single();
 
       if (error) throw error;
+
+      // Invalidate products cache after create
+      cache.clearPrefix("catalog_products");
+      cache.clearPrefix("v_featured_products");
+      cache.clearPrefix("v_best_sellers");
+      console.log("[useCatalogManager] Cache invalidated after creating product");
+
       return { success: true, data };
     } catch (error) {
       console.error("Error creating product:", error);
@@ -257,6 +389,13 @@ export const useCatalogManager = () => {
       const { data, error } = await $supabase.from("catalog_products").update(cleanData).eq("id", id).select().single();
 
       if (error) throw error;
+
+      // Invalidate products cache after update
+      cache.clearPrefix("catalog_products");
+      cache.clearPrefix("v_featured_products");
+      cache.clearPrefix("v_best_sellers");
+      console.log("[useCatalogManager] Cache invalidated after updating product");
+
       return { success: true, data };
     } catch (error) {
       console.error("Error updating product:", error);
@@ -269,6 +408,13 @@ export const useCatalogManager = () => {
       const { error } = await $supabase.from("catalog_products").delete().eq("id", id);
 
       if (error) throw error;
+
+      // Invalidate products cache after delete
+      cache.clearPrefix("catalog_products");
+      cache.clearPrefix("v_featured_products");
+      cache.clearPrefix("v_best_sellers");
+      console.log("[useCatalogManager] Cache invalidated after deleting product");
+
       return { success: true };
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -283,6 +429,12 @@ export const useCatalogManager = () => {
       });
 
       if (error) throw error;
+
+      // Invalidate products and featured cache after toggle
+      cache.clearPrefix("catalog_products");
+      cache.clearPrefix("v_featured_products");
+      console.log("[useCatalogManager] Cache invalidated after toggling featured");
+
       return { success: true };
     } catch (error) {
       console.error("Error toggling featured:", error);
@@ -297,6 +449,12 @@ export const useCatalogManager = () => {
       });
 
       if (error) throw error;
+
+      // Invalidate products and best sellers cache after toggle
+      cache.clearPrefix("catalog_products");
+      cache.clearPrefix("v_best_sellers");
+      console.log("[useCatalogManager] Cache invalidated after toggling best seller");
+
       return { success: true };
     } catch (error) {
       console.error("Error toggling best seller:", error);
@@ -305,19 +463,36 @@ export const useCatalogManager = () => {
   };
 
   // ============================================
-  // CUSTOM SERVICES MANAGEMENT
+  // CUSTOM SERVICES MANAGEMENT (Optimized with caching)
   // ============================================
 
-  const getCustomServices = async () => {
+  const getCustomServices = async (useCache = true) => {
     try {
-      const { data, error } = await $supabase
-        .from("custom_services")
-        .select("*")
-        .eq("is_active", true)
-        .order("display_order", { ascending: true });
+      const cacheKey = cache.generateKey("custom_services");
 
-      if (error) throw error;
-      return { success: true, data: data || [] };
+      if (useCache) {
+        return await cache.fetchWithCache(
+          cacheKey,
+          async () => {
+            console.log("[useCatalogManager] Fetching custom services from Supabase...");
+            return await fetchServicesFromDB();
+          },
+          { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
+        );
+      }
+
+      return await fetchServicesFromDB();
+
+      async function fetchServicesFromDB() {
+        const { data, error } = await $supabase!
+          .from("custom_services")
+          .select("*")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true });
+
+        if (error) throw error;
+        return { success: true, data: data || [] };
+      }
     } catch (error) {
       console.error("Error fetching custom services:", error);
       return { success: false, error: getErrorMessage(error), data: [] };
@@ -391,6 +566,11 @@ export const useCatalogManager = () => {
       const { data, error } = await $supabase.from("custom_services").insert([serviceData]).select().single();
 
       if (error) throw error;
+
+      // Invalidate custom services cache after create
+      cache.clearPrefix("custom_services");
+      console.log("[useCatalogManager] Cache invalidated after creating custom service");
+
       return { success: true, data };
     } catch (error) {
       console.error("Error creating service:", error);
@@ -406,6 +586,11 @@ export const useCatalogManager = () => {
       const { data, error } = await $supabase.from("custom_services").update(cleanData).eq("id", id).select().single();
 
       if (error) throw error;
+
+      // Invalidate custom services cache after update
+      cache.clearPrefix("custom_services");
+      console.log("[useCatalogManager] Cache invalidated after updating custom service");
+
       return { success: true, data };
     } catch (error) {
       console.error("Error updating service:", error);
@@ -418,6 +603,11 @@ export const useCatalogManager = () => {
       const { error } = await $supabase.from("custom_services").delete().eq("id", id);
 
       if (error) throw error;
+
+      // Invalidate custom services cache after delete
+      cache.clearPrefix("custom_services");
+      console.log("[useCatalogManager] Cache invalidated after deleting custom service");
+
       return { success: true };
     } catch (error) {
       console.error("Error deleting service:", error);
@@ -426,39 +616,73 @@ export const useCatalogManager = () => {
   };
 
   // ============================================
-  // BEST SELLERS - menggunakan view
+  // BEST SELLERS & FEATURED - Optimized with caching
   // ============================================
 
-  const getBestSellers = async (limit?: number) => {
+  const getBestSellers = async (limit?: number, useCache = true) => {
     try {
-      let query = $supabase.from("v_best_sellers").select("*");
+      const cacheKey = cache.generateKey("v_best_sellers", { limit });
 
-      if (limit) {
-        query = query.limit(limit);
+      if (useCache) {
+        return await cache.fetchWithCache(
+          cacheKey,
+          async () => {
+            console.log("[useCatalogManager] Fetching best sellers from Supabase...");
+            return await fetchBestSellersFromDB();
+          },
+          { ttl: 5 * 60 * 1000 } // Cache for 5 minutes
+        );
       }
 
-      const { data, error } = await query;
+      return await fetchBestSellersFromDB();
 
-      if (error) throw error;
-      return { success: true, data: data || [] };
+      async function fetchBestSellersFromDB() {
+        let query = $supabase!.from("v_best_sellers").select("*");
+
+        if (limit) {
+          query = query.limit(limit);
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+        return { success: true, data: data || [] };
+      }
     } catch (error) {
       console.error("Error fetching best sellers:", error);
       return { success: false, error: getErrorMessage(error), data: [] };
     }
   };
 
-  const getFeaturedProducts = async (limit?: number) => {
+  const getFeaturedProducts = async (limit?: number, useCache = true) => {
     try {
-      let query = $supabase.from("v_featured_products").select("*");
+      const cacheKey = cache.generateKey("v_featured_products", { limit });
 
-      if (limit) {
-        query = query.limit(limit);
+      if (useCache) {
+        return await cache.fetchWithCache(
+          cacheKey,
+          async () => {
+            console.log("[useCatalogManager] Fetching featured products from Supabase...");
+            return await fetchFeaturedFromDB();
+          },
+          { ttl: 5 * 60 * 1000 } // Cache for 5 minutes
+        );
       }
 
-      const { data, error } = await query;
+      return await fetchFeaturedFromDB();
 
-      if (error) throw error;
-      return { success: true, data: data || [] };
+      async function fetchFeaturedFromDB() {
+        let query = $supabase!.from("v_featured_products").select("*");
+
+        if (limit) {
+          query = query.limit(limit);
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+        return { success: true, data: data || [] };
+      }
     } catch (error) {
       console.error("Error fetching featured products:", error);
       return { success: false, error: getErrorMessage(error), data: [] };
@@ -476,6 +700,21 @@ export const useCatalogManager = () => {
       );
 
       await Promise.all(promises);
+
+      // Invalidate cache based on table
+      if (table === "catalog_categories") {
+        cache.clearPrefix("catalog_categories");
+      } else if (table === "catalog_subcategories") {
+        cache.clearPrefix("catalog_subcategories");
+      } else if (table === "catalog_products") {
+        cache.clearPrefix("catalog_products");
+        cache.clearPrefix("v_featured_products");
+        cache.clearPrefix("v_best_sellers");
+      } else if (table === "custom_services") {
+        cache.clearPrefix("custom_services");
+      }
+      console.log(`[useCatalogManager] Cache invalidated after bulk updating display order in ${table}`);
+
       return { success: true };
     } catch (error) {
       console.error("Error bulk updating display order:", error);

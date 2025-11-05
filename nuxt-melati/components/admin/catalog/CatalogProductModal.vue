@@ -250,6 +250,9 @@
 </template>
 
 <script setup lang="ts">
+// Lazy load CloudinaryUploader - only loads when modal is opened
+const CloudinaryUploader = defineAsyncComponent(() => import("~/components/CloudinaryUploader.vue"));
+
 const props = defineProps<{
   product?: any;
   categories: any[];

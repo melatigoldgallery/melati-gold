@@ -248,6 +248,9 @@
 </template>
 
 <script setup lang="ts">
+// Lazy load CloudinaryUploader
+const CloudinaryUploader = defineAsyncComponent(() => import("~/components/CloudinaryUploader.vue"));
+
 const props = defineProps<{
   service?: any;
 }>();

@@ -77,6 +77,13 @@
 </template>
 
 <script setup lang="ts">
+// Lazy load heavy components with image galleries and modals
+const ProductDetailModal = defineAsyncComponent(() => import("~/components/ProductDetailModal.vue"));
+
+const SubcategoryModal = defineAsyncComponent(() => import("~/components/SubcategoryModal.vue"));
+
+const LookbookGrid = defineAsyncComponent(() => import("~/components/LookbookGrid.vue"));
+
 useHead({
   title: "Melati Gold Shop",
   meta: [{ name: "description", content: "Discover exquisite jewelry at Melati Gold Shop." }],

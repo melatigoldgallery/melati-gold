@@ -81,8 +81,8 @@ onMounted(async () => {
 
 <template>
   <Transition name="fade">
-    <div 
-      v-if="show" 
+    <div
+      v-if="show"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
       @click.self="emit('close')"
     >
@@ -92,71 +92,70 @@ onMounted(async () => {
       >
         <div class="sticky top-0 z-10 flex items-center justify-between gap-4 p-4 bg-white border-b">
           <h5 class="text-lg font-semibold text-neutral-800">Pilih Sub-Kategori {{ category }}</h5>
-          <button 
-            type="button" 
+          <button
+            type="button"
             class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-            aria-label="Close" 
+            aria-label="Close"
             @click="emit('close')"
           >
             <i class="bi bi-x-lg text-xl"></i>
           </button>
         </div>
         <div class="p-4">
-            <!-- Loading State -->
-            <div v-if="loading" class="text-center py-5">
-              <div class="spinner-border text-warning" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-              <p class="mt-2 text-muted">Memuat sub-kategori...</p>
+          <!-- Loading State -->
+          <div v-if="loading" class="text-center py-5">
+            <div class="spinner-border text-warning" role="status">
+              <span class="visually-hidden">Loading...</span>
             </div>
+            <p class="mt-2 text-muted">Memuat sub-kategori...</p>
+          </div>
 
-            <!-- Empty State -->
-            <div v-else-if="subcategories.length === 0" class="text-center py-5 text-muted">
-              <i class="bi bi-inbox fs-1 mb-2 d-block"></i>
-              <p>Belum ada sub-kategori untuk {{ category }}</p>
-            </div>
+          <!-- Empty State -->
+          <div v-else-if="subcategories.length === 0" class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 mb-2 d-block"></i>
+            <p>Belum ada sub-kategori untuk {{ category }}</p>
+          </div>
 
-            <!-- Subcategories Grid -->
-            <div v-else class="row g-3 justify-content-center">
-              <div
-                v-for="subcategory in subcategories"
-                :key="subcategory.id"
-                :class="
-                  subcategories.length === 4
-                    ? 'col-6 col-md-3'
-                    : subcategories.length === 3
-                    ? 'col-6 col-md-4'
-                    : subcategories.length <= 2
-                    ? 'col-6 col-md-6'
-                    : 'col-6 col-md-6'
-                "
+          <!-- Subcategories Grid -->
+          <div v-else class="row g-3 justify-content-center">
+            <div
+              v-for="subcategory in subcategories"
+              :key="subcategory.id"
+              :class="
+                subcategories.length === 4
+                  ? 'col-6 col-md-3'
+                  : subcategories.length === 3
+                  ? 'col-6 col-md-4'
+                  : subcategories.length <= 2
+                  ? 'col-6 col-md-6'
+                  : 'col-6 col-md-6'
+              "
+            >
+              <button
+                class="w-100 btn p-0 border-0 bg-transparent"
+                @click="emit('select', subcategory.id, subcategory.name)"
               >
-                <button
-                  class="w-100 btn p-0 border-0 bg-transparent"
-                  @click="emit('select', subcategory.id, subcategory.name)"
-                >
-                  <div class="position-relative rounded-3 overflow-hidden subcard">
-                    <!-- Image with fallback -->
-                    <img
-                      v-if="subcategory.cover_image"
-                      :src="subcategory.cover_image"
-                      :alt="subcategory.name"
-                      class="w-100 h-100 object-fit-cover"
-                      loading="lazy"
-                    />
-                    <div
-                      v-else
-                      class="w-100 h-100 d-flex align-items-center justify-content-center bg-gradient"
-                      style="background: linear-gradient(135deg, #8b6914 0%, #d4af37 100%)"
-                    >
-                      <i class="bi bi-gem fs-1 text-white opacity-50"></i>
-                    </div>
-                    <div class="overlay d-flex align-items-center justify-content-center">
-                      <span class="text-white fw-semibold fs-6">{{ subcategory.name }}</span>
-                    </div>
+                <div class="position-relative rounded-3 overflow-hidden subcard">
+                  <!-- Image with fallback -->
+                  <img
+                    v-if="subcategory.cover_image"
+                    :src="subcategory.cover_image"
+                    :alt="subcategory.name"
+                    class="w-100 h-100 object-fit-cover"
+                    loading="lazy"
+                  />
+                  <div
+                    v-else
+                    class="w-100 h-100 d-flex align-items-center justify-content-center bg-gradient"
+                    style="background: linear-gradient(135deg, #8b6914 0%, #d4af37 100%)"
+                  >
+                    <i class="bi bi-gem fs-1 text-white opacity-50"></i>
                   </div>
-                </button>
-              </div>
+                  <div class="overlay d-flex align-items-center justify-content-center">
+                    <span class="text-white fw-semibold fs-6">{{ subcategory.name }}</span>
+                  </div>
+                </div>
+              </button>
             </div>
           </div>
         </div>

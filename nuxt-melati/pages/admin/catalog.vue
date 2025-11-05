@@ -96,6 +96,35 @@
 </template>
 
 <script setup lang="ts">
+// Lazy load heavy admin components
+const CatalogCategoryManager = defineAsyncComponent(
+  () => import("~/components/admin/catalog/CatalogCategoryManager.vue")
+);
+
+const CatalogSubcategoryManager = defineAsyncComponent(
+  () => import("~/components/admin/catalog/CatalogSubcategoryManager.vue")
+);
+
+const CatalogProductManager = defineAsyncComponent(
+  () => import("~/components/admin/catalog/CatalogProductManager.vue")
+);
+
+const CatalogFeaturedManager = defineAsyncComponent(
+  () => import("~/components/admin/catalog/CatalogFeaturedManager.vue")
+);
+
+const CatalogBestSellerManager = defineAsyncComponent(
+  () => import("~/components/admin/catalog/CatalogBestSellerManager.vue")
+);
+
+const CatalogServiceManager = defineAsyncComponent(
+  () => import("~/components/admin/catalog/CatalogServiceManager.vue")
+);
+
+const GoldPriceManager = defineAsyncComponent(() => import("~/components/admin/GoldPriceManager.vue"));
+
+const KaratConfigManager = defineAsyncComponent(() => import("~/components/admin/KaratConfigManager.vue"));
+
 definePageMeta({
   middleware: "auth",
   layout: false,

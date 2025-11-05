@@ -106,24 +106,21 @@ const contactWhatsApp = () => {
 
 <template>
   <Transition name="fade">
-    <div 
-      v-if="show && service" 
+    <div
+      v-if="show && service"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
       @click.self="emit('close')"
     >
-      <div 
-        class="relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto"
-        :class="modalSizeClass"
-      >
+      <div class="relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto" :class="modalSizeClass">
         <!-- Header -->
         <div class="sticky top-0 z-10 flex items-start justify-between gap-4 p-4 border-b bg-white">
           <div>
             <h5 class="text-lg font-semibold text-neutral-800">Custom {{ service.title }}</h5>
           </div>
-          <button 
-            type="button" 
+          <button
+            type="button"
             class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-            aria-label="Close" 
+            aria-label="Close"
             @click="emit('close')"
           >
             <i class="bi bi-x-lg text-xl"></i>
@@ -131,110 +128,109 @@ const contactWhatsApp = () => {
         </div>
 
         <div class="p-4">
-            <!-- Loading State -->
-            <div v-if="loading" class="text-center py-5">
-              <div class="spinner-border text-warning" role="status">
-                <span class="visually-hidden">Loading...</span>
+          <!-- Loading State -->
+          <div v-if="loading" class="text-center py-5">
+            <div class="spinner-border text-warning" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Memuat contoh produk...</p>
+          </div>
+
+          <!-- Content -->
+          <div v-else>
+            <!-- Service Description -->
+            <div v-if="serviceData" class="mb-4 p-4 bg-light rounded-3">
+              <p class="text-muted mb-3">{{ serviceData.description }}</p>
+
+              <!-- Features -->
+              <div v-if="serviceData.features && serviceData.features.length > 0" class="mb-3">
+                <h6 class="fw-semibold mb-2">✨ Keunggulan Layanan:</h6>
+                <ul class="list-unstyled mb-0">
+                  <li v-for="(feature, idx) in serviceData.features" :key="idx" class="mb-1">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    <span>{{ feature }}</span>
+                  </li>
+                </ul>
               </div>
-              <p class="mt-2 text-muted">Memuat contoh produk...</p>
+
+              <!-- Meta Info -->
+              <div class="d-flex gap-4 text-sm">
+                <span v-if="serviceData.duration" class="text-muted">
+                  <i class="bi bi-clock me-1"></i>
+                  {{ serviceData.duration }}
+                </span>
+                <span v-if="serviceData.price_info" class="text-warning fw-semibold">
+                  <i class="bi bi-tag me-1"></i>
+                  {{ serviceData.price_info }}
+                </span>
+              </div>
+
+              <!-- WhatsApp Button -->
+              <div class="mt-3">
+                <button @click="contactWhatsApp" class="btn btn-success">
+                  <i class="bi bi-whatsapp me-2"></i>
+                  Konsultasi via WhatsApp
+                </button>
+              </div>
             </div>
 
-            <!-- Content -->
-            <div v-else>
-              <!-- Service Description -->
-              <div v-if="serviceData" class="mb-4 p-4 bg-light rounded-3">
-                <p class="text-muted mb-3">{{ serviceData.description }}</p>
-
-                <!-- Features -->
-                <div v-if="serviceData.features && serviceData.features.length > 0" class="mb-3">
-                  <h6 class="fw-semibold mb-2">✨ Keunggulan Layanan:</h6>
-                  <ul class="list-unstyled mb-0">
-                    <li v-for="(feature, idx) in serviceData.features" :key="idx" class="mb-1">
-                      <i class="bi bi-check-circle-fill text-success me-2"></i>
-                      <span>{{ feature }}</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <!-- Meta Info -->
-                <div class="d-flex gap-4 text-sm">
-                  <span v-if="serviceData.duration" class="text-muted">
-                    <i class="bi bi-clock me-1"></i>
-                    {{ serviceData.duration }}
-                  </span>
-                  <span v-if="serviceData.price_info" class="text-warning fw-semibold">
-                    <i class="bi bi-tag me-1"></i>
-                    {{ serviceData.price_info }}
-                  </span>
-                </div>
-
-                <!-- WhatsApp Button -->
-                <div class="mt-3">
-                  <button @click="contactWhatsApp" class="btn btn-success">
-                    <i class="bi bi-whatsapp me-2"></i>
-                    Konsultasi via WhatsApp
-                  </button>
-                </div>
-              </div>
-
-              <!-- Products Grid -->
-              <div v-if="products.length > 0">
-                <h6 class="fw-semibold mb-3">📦 Contoh Produk</h6>
-                <div class="product-grid-wrap" :class="`maxw-d-${desktopCols}`">
-                  <div class="product-grid" :class="`cols-d-${desktopCols}`">
-                    <div v-for="product in products" :key="product.id" class="product-cell">
-                      <div
-                        class="card h-100 border-0 shadow-sm hover:shadow-lg transition-all cursor-pointer"
-                        @click="selectProduct(product)"
-                      >
-                        <!-- Product Image -->
-                        <div class="position-relative" style="aspect-ratio: 1/1">
-                          <img
-                            v-if="product.thumbnail_image"
-                            :src="product.thumbnail_image"
-                            :alt="product.title"
-                            class="card-img-top object-fit-cover w-100 h-100"
-                            loading="lazy"
-                          />
-                          <div v-else class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
-                            <i class="bi bi-image text-muted opacity-50" style="font-size: 2rem"></i>
-                          </div>
-
-                          <!-- Stock Badge -->
-                          <div v-if="product.stock <= 0" class="position-absolute top-0 end-0 m-2">
-                            <span class="badge bg-danger">Habis</span>
-                          </div>
+            <!-- Products Grid -->
+            <div v-if="products.length > 0">
+              <h6 class="fw-semibold mb-3">📦 Contoh Produk</h6>
+              <div class="product-grid-wrap" :class="`maxw-d-${desktopCols}`">
+                <div class="product-grid" :class="`cols-d-${desktopCols}`">
+                  <div v-for="product in products" :key="product.id" class="product-cell">
+                    <div
+                      class="card h-100 border-0 shadow-sm hover:shadow-lg transition-all cursor-pointer"
+                      @click="selectProduct(product)"
+                    >
+                      <!-- Product Image -->
+                      <div class="position-relative" style="aspect-ratio: 1/1">
+                        <img
+                          v-if="product.thumbnail_image"
+                          :src="product.thumbnail_image"
+                          :alt="product.title"
+                          class="card-img-top object-fit-cover w-100 h-100"
+                          loading="lazy"
+                        />
+                        <div v-else class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                          <i class="bi bi-image text-muted opacity-50" style="font-size: 2rem"></i>
                         </div>
 
-                        <!-- Product Info -->
-                        <div class="card-body p-3">
-                          <h6 class="card-title small mb-1 text-truncate">{{ product.title }}</h6>
-                          <p v-if="product.subtitle" class="card-text text-muted small mb-2 text-truncate">
-                            {{ product.subtitle }}
-                          </p>
-                          <p class="fw-semibold text-warning mb-0 small">
-                            {{ formatPrice(product.price) }}
-                          </p>
+                        <!-- Stock Badge -->
+                        <div v-if="product.stock <= 0" class="position-absolute top-0 end-0 m-2">
+                          <span class="badge bg-danger">Habis</span>
                         </div>
+                      </div>
+
+                      <!-- Product Info -->
+                      <div class="card-body p-3">
+                        <h6 class="card-title small mb-1 text-truncate">{{ product.title }}</h6>
+                        <p v-if="product.subtitle" class="card-text text-muted small mb-2 text-truncate">
+                          {{ product.subtitle }}
+                        </p>
+                        <p class="fw-semibold text-warning mb-0 small">
+                          {{ formatPrice(product.price) }}
+                        </p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Empty State -->
-              <div v-else class="text-center py-5">
-                <i class="bi bi-box-seam text-muted" style="font-size: 3rem"></i>
-                <p class="text-muted mt-3 mb-0">
-                  Belum ada contoh produk untuk layanan ini.
-                  <br />
-                  Silakan hubungi kami untuk konsultasi lebih lanjut.
-                </p>
-                <button @click="contactWhatsApp" class="btn btn-success mt-3">
-                  <i class="bi bi-whatsapp me-2"></i>
-                  Konsultasi via WhatsApp
-                </button>
-              </div>
+            <!-- Empty State -->
+            <div v-else class="text-center py-5">
+              <i class="bi bi-box-seam text-muted" style="font-size: 3rem"></i>
+              <p class="text-muted mt-3 mb-0">
+                Belum ada contoh produk untuk layanan ini.
+                <br />
+                Silakan hubungi kami untuk konsultasi lebih lanjut.
+              </p>
+              <button @click="contactWhatsApp" class="btn btn-success mt-3">
+                <i class="bi bi-whatsapp me-2"></i>
+                Konsultasi via WhatsApp
+              </button>
             </div>
           </div>
         </div>
