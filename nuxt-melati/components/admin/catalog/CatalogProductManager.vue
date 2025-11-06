@@ -316,7 +316,8 @@ const loadProducts = async () => {
     totalItems.value = result.data.length;
     currentPage.value = 1;
   } else {
-    emit("alert", "Failed to load products: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    emit("alert", "Failed to load products: " + errorMsg, "error");
   }
   loading.value = false;
 };
@@ -378,7 +379,8 @@ const confirmDelete = async (product: any) => {
     emit("alert", "Product deleted successfully!", "success");
     loadProducts();
   } else {
-    emit("alert", "Failed to delete product: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    emit("alert", "Failed to delete product: " + errorMsg, "error");
   }
 };
 

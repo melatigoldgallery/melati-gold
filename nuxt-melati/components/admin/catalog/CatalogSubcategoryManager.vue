@@ -137,7 +137,8 @@ const loadSubcategories = async () => {
   if (result.success) {
     subcategories.value = result.data;
   } else {
-    emit("alert", "Failed to load subcategories: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    emit("alert", "Failed to load subcategories: " + errorMsg, "error");
   }
   loading.value = false;
 };
@@ -174,7 +175,8 @@ const confirmDelete = async (subcategory: any) => {
     emit("alert", "Subcategory deleted successfully!", "success");
     loadSubcategories();
   } else {
-    emit("alert", "Failed to delete subcategory: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    emit("alert", "Failed to delete subcategory: " + errorMsg, "error");
   }
 };
 

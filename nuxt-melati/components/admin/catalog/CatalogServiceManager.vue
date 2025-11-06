@@ -123,7 +123,8 @@ const loadServices = async () => {
   if (result.success) {
     services.value = result.data;
   } else {
-    emit("alert", "Failed to load services: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    emit("alert", "Failed to load services: " + errorMsg, "error");
   }
   loading.value = false;
 };
@@ -156,7 +157,8 @@ const confirmDelete = async (service: any) => {
     emit("alert", "Service deleted successfully!", "success");
     loadServices();
   } else {
-    emit("alert", "Failed to delete service: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    emit("alert", "Failed to delete service: " + errorMsg, "error");
   }
 };
 

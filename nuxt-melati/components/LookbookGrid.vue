@@ -9,8 +9,18 @@ const emit = defineEmits<{
   (e: "open", product: any): void; // Emit full product object
 }>();
 
-// 🚀 Image optimization
-const { presets } = useImageOptimization();
+// 🚀 Image optimization - inline functions
+const optimizeCloudinaryImage = (url: string, width: number, height: number, quality: number | "auto" = "auto") => {
+  if (!url || !url.includes("cloudinary.com")) {
+    return url;
+  }
+  const transformations = `w_${width},h_${height},c_fill,f_auto,q_${quality}`;
+  return url.replace("/upload/", `/upload/${transformations}/`);
+};
+
+const presets = {
+  card: (url: string) => optimizeCloudinaryImage(url, 600, 600, "auto"),
+};
 
 // Desktop columns: default 6, but if items < 6, use items.length (min 1)
 const desktopCols = computed(() => {
@@ -20,13 +30,13 @@ const desktopCols = computed(() => {
 
 // Optimize images untuk grid thumbnail
 const getOptimizedImage = (product: any) => {
-  const imageUrl = product.thumbnail_image || product.images?.[0] || '/img/placeholder.jpg';
-  
+  const imageUrl = product.thumbnail_image || product.images?.[0] || "/img/placeholder.jpg";
+
   // Skip optimization untuk local images
-  if (!imageUrl.includes('cloudinary.com')) {
+  if (!imageUrl.includes("cloudinary.com")) {
     return imageUrl;
   }
-  
+
   // Use card preset (600x600, auto-compressed)
   return presets.card(imageUrl);
 };
@@ -37,12 +47,7 @@ const getOptimizedImage = (product: any) => {
     <div class="lookbook-grid" :class="`cols-d-${desktopCols}`">
       <div v-for="product in items" :key="product.id" class="item" @click="emit('open', product)">
         <!-- ✨ Optimized image with lazy loading -->
-        <img
-          :src="getOptimizedImage(product)"
-          :alt="product.title || product.name"
-          loading="lazy"
-          decoding="async"
-        />
+        <img :src="getOptimizedImage(product)" :alt="product.title || product.name" loading="lazy" decoding="async" />
         <div class="hover-overlay">
           <span>Lihat Detail</span>
         </div>

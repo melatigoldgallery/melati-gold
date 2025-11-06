@@ -52,9 +52,9 @@
           class="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden"
         >
           <!-- ✨ Optimized preview thumbnail -->
-          <img 
-            :src="getOptimizedPreview(url)" 
-            :alt="`Preview ${index + 1}`" 
+          <img
+            :src="getOptimizedPreview(url)"
+            :alt="`Preview ${index + 1}`"
             class="w-full h-full object-cover"
             loading="lazy"
             decoding="async"
@@ -122,12 +122,7 @@
           <i class="bi bi-x-lg"></i>
           Close
         </button>
-        <img 
-          :src="getOptimizedViewer(viewerUrl)" 
-          alt="Full view" 
-          class="w-full h-auto rounded-lg"
-          loading="lazy"
-        />
+        <img :src="getOptimizedViewer(viewerUrl)" alt="Full view" class="w-full h-auto rounded-lg" loading="lazy" />
       </div>
     </div>
   </div>
@@ -152,8 +147,19 @@ const emit = defineEmits<{
 
 const { uploadFile } = useCloudinary();
 
-// 🚀 Image optimization for previews
-const { presets } = useImageOptimization();
+// 🚀 Image optimization - inline functions
+const optimizeCloudinaryImage = (url: string, width: number, height: number, quality: number | "auto" = "auto") => {
+  if (!url || !url.includes("cloudinary.com")) {
+    return url;
+  }
+  const transformations = `w_${width},h_${height},c_fill,f_auto,q_${quality}`;
+  return url.replace("/upload/", `/upload/${transformations}/`);
+};
+
+const presets = {
+  thumbnail: (url: string) => optimizeCloudinaryImage(url, 400, 400, "auto"),
+  detail: (url: string) => optimizeCloudinaryImage(url, 1000, 1000, 90),
+};
 
 // State
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -172,7 +178,7 @@ const acceptText = computed(() => {
 
 // Optimize preview images (thumbnail size for grid)
 const getOptimizedPreview = (url: string) => {
-  if (!url || !url.includes('cloudinary.com')) {
+  if (!url || !url.includes("cloudinary.com")) {
     return url;
   }
   return presets.thumbnail(url); // 400x400 for preview grid
@@ -180,7 +186,7 @@ const getOptimizedPreview = (url: string) => {
 
 // Optimize viewer image (detail size for modal)
 const getOptimizedViewer = (url: string) => {
-  if (!url || !url.includes('cloudinary.com')) {
+  if (!url || !url.includes("cloudinary.com")) {
     return url;
   }
   return presets.detail(url); // 1000x1000 for viewer modal

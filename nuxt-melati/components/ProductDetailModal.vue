@@ -11,8 +11,19 @@ const emit = defineEmits<{
   (e: "close"): void;
 }>();
 
-// 🚀 Image optimization
-const { presets } = useImageOptimization();
+// 🚀 Image optimization - inline functions
+const optimizeCloudinaryImage = (url: string, width: number, height: number, quality: number | "auto" = "auto") => {
+  if (!url || !url.includes("cloudinary.com")) {
+    return url;
+  }
+  const transformations = `w_${width},h_${height},c_fill,f_auto,q_${quality}`;
+  return url.replace("/upload/", `/upload/${transformations}/`);
+};
+
+const presets = {
+  detail: (url: string) => optimizeCloudinaryImage(url, 1000, 1000, 90),
+  thumbnail: (url: string) => optimizeCloudinaryImage(url, 400, 400, "auto"),
+};
 
 // Carousel state
 const currentSlide = ref(0);
@@ -43,7 +54,7 @@ const displaySpecs = computed(() => {
 
 // Optimize images for carousel (main view - high quality)
 const getOptimizedMainImage = (imageUrl: string) => {
-  if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
+  if (!imageUrl || !imageUrl.includes("cloudinary.com")) {
     return imageUrl;
   }
   return presets.detail(imageUrl); // 1000x1000, high quality
@@ -51,7 +62,7 @@ const getOptimizedMainImage = (imageUrl: string) => {
 
 // Optimize thumbnail images (smaller size)
 const getOptimizedThumbImage = (imageUrl: string) => {
-  if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
+  if (!imageUrl || !imageUrl.includes("cloudinary.com")) {
     return imageUrl;
   }
   return presets.thumbnail(imageUrl); // 400x400, compressed
@@ -81,8 +92,8 @@ const prevSlide = () => {
 
 <template>
   <Transition name="fade">
-    <div 
-      v-if="show && product" 
+    <div
+      v-if="show && product"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
       @click.self="emit('close')"
     >

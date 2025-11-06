@@ -31,7 +31,49 @@ const props = defineProps<{
   product: any;
 }>();
 
-const { getProductContact, getWhatsAppLink } = useKaratConfig();
+// Inline implementation for product contact
+const { $supabase } = useNuxtApp();
+const supabase = $supabase as any;
+
+const getProductContact = async (product: any) => {
+  try {
+    // Get karat config based on product's karat
+    const { data, error } = await supabase
+      .from("karat_configs")
+      .select("*")
+      .contains("karat_list", [product.karat])
+      .single();
+
+    if (error) throw error;
+
+    if (data) {
+      // Replace placeholders in message template
+      let message = data.whatsapp_message_template || "Halo, saya tertarik dengan {product_name}";
+      message = message.replace("{product_name}", product.title || product.name);
+      message = message.replace("{karat}", product.karat || "");
+      message = message.replace("{price}", product.price ? `Rp ${product.price.toLocaleString()}` : "");
+
+      return {
+        shopee_url: data.shopee_store_url || "",
+        whatsapp_number: data.whatsapp_number || "",
+        whatsapp_message: message,
+      };
+    }
+  } catch (error) {
+    console.error("Error getting product contact:", error);
+  }
+
+  // Fallback to default
+  return {
+    shopee_url: "",
+    whatsapp_number: "6281234567890",
+    whatsapp_message: `Halo, saya tertarik dengan ${product.title || product.name}`,
+  };
+};
+
+const getWhatsAppLink = (number: string, message: string) => {
+  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+};
 
 // Load contact info untuk produk ini
 const contact = ref({

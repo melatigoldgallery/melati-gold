@@ -149,7 +149,31 @@
 </template>
 
 <script setup lang="ts">
-const { getConfigs, updateConfig } = useKaratConfig();
+// Inline implementation for karat config management
+const { $supabase } = useNuxtApp();
+const supabase = $supabase as any;
+
+const getConfigs = async () => {
+  try {
+    const { data, error } = await supabase.from("karat_configs").select("*").order("id");
+
+    if (error) throw error;
+    return { success: true, data: data || [] };
+  } catch (error: any) {
+    return { success: false, error: error.message, data: [] };
+  }
+};
+
+const updateConfig = async (id: number, updates: any) => {
+  try {
+    const { data, error } = await supabase.from("karat_configs").update(updates).eq("id", id).select().single();
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
 
 const loading = ref(true);
 const saving = ref(false);

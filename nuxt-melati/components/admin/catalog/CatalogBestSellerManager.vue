@@ -110,7 +110,8 @@ const loadBestSellers = async () => {
   if (result.success) {
     bestSellers.value = result.data;
   } else {
-    emit("alert", "Failed to load best sellers: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    emit("alert", "Failed to load best sellers: " + errorMsg, "error");
   }
   loading.value = false;
 };
@@ -124,7 +125,8 @@ const toggleBestSeller = async (productId: string) => {
     emit("alert", "Product removed from best sellers!", "success");
     loadBestSellers();
   } else {
-    emit("alert", "Failed to update product: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    emit("alert", "Failed to update product: " + errorMsg, "error");
   }
 };
 

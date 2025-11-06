@@ -2,8 +2,19 @@
 // Fetch featured products from database
 const { getProducts } = useCatalogManager();
 
-// 🚀 Image optimization
-const { presets } = useImageOptimization();
+// 🚀 Image optimization - inline functions
+const optimizeCloudinaryImage = (url: string, width: number, height: number, quality: number | "auto" = "auto") => {
+  if (!url || !url.includes("cloudinary.com")) {
+    return url;
+  }
+  const transformations = `w_${width},h_${height},c_fill,f_auto,q_${quality}`;
+  return url.replace("/upload/", `/upload/${transformations}/`);
+};
+
+const presets = {
+  thumbnail: (url: string) => optimizeCloudinaryImage(url, 400, 400, "auto"),
+  detail: (url: string) => optimizeCloudinaryImage(url, 1000, 1000, 90),
+};
 
 // State
 const products = ref<any[]>([]);
@@ -26,11 +37,11 @@ const loadFeaturedProducts = async () => {
 };
 
 // Optimize images
-const getOptimizedImage = (imageUrl: string, preset: 'thumbnail' | 'detail' = 'thumbnail') => {
-  if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
-    return imageUrl || '/img/placeholder.jpg';
+const getOptimizedImage = (imageUrl: string, preset: "thumbnail" | "detail" = "thumbnail") => {
+  if (!imageUrl || !imageUrl.includes("cloudinary.com")) {
+    return imageUrl || "/img/placeholder.jpg";
   }
-  return preset === 'thumbnail' ? presets.thumbnail(imageUrl) : presets.detail(imageUrl);
+  return preset === "thumbnail" ? presets.thumbnail(imageUrl) : presets.detail(imageUrl);
 };
 
 // Format price to Indonesian Rupiah

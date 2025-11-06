@@ -7,10 +7,6 @@ const emit = defineEmits<{
 
 // Fetch categories from database
 const { getCategories } = useCatalogManager();
-
-// 🚀 Image optimization
-const { presets } = useImageOptimization();
-
 const categories = ref<any[]>([]);
 const loading = ref(true);
 
@@ -158,15 +154,6 @@ onMounted(() => {
   requestAnimationFrame(() => updateLayout());
   onUnmounted(() => window.removeEventListener("resize", onResize));
 });
-
-// Optimize category cover images
-const getOptimizedCoverImage = (imageUrl: string) => {
-  if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
-    return imageUrl || '/img/placeholder.jpg';
-  }
-  // Use card preset for category covers (600x600)
-  return presets.card(imageUrl);
-};
 </script>
 
 <template>
@@ -216,22 +203,20 @@ const getOptimizedCoverImage = (imageUrl: string) => {
                   :style="{ flex: `0 0 ${slideWidthPx}px` }"
                 >
                   <div
-                    class="group relative block w-full overflow-hidden rounded-2xl bg-gray-900 transition-all duration-300 hover:-translate-y-1 aspect-[3/4]"
+                    class="group relative block w-full overflow-hidden rounded-1xl transition-all duration-300 hover:-translate-y-1 aspect-[3/4]"
                     @click="emit('open-subcategories', category)"
                     role="button"
                     tabindex="0"
                   >
-                    <!-- ✨ Optimized image -->
                     <img
-                      :src="getOptimizedCoverImage(category.cover_image)"
+                      :src="category.cover_image || '/img/placeholder.jpg'"
                       :alt="category.name"
                       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
-                      decoding="async"
                     />
 
                     <div
-                      class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-95 transition-opacity duration-300 group-hover:opacity-100"
+                      class="absolute inset-0 bg-gradient-to-t from-black via-black/5 to-transparent opacity-95 transition-opacity duration-300 group-hover:opacity-100"
                     ></div>
 
                     <div class="absolute inset-0 flex flex-col justify-end p-4 sm:p-5">

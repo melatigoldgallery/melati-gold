@@ -117,7 +117,8 @@ const loadFeaturedProducts = async () => {
   if (result.success) {
     featuredProducts.value = result.data;
   } else {
-    emit("alert", "Failed to load featured products: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    emit("alert", "Failed to load featured products: " + errorMsg, "error");
   }
   loading.value = false;
 };
@@ -131,7 +132,8 @@ const removeFeatured = async (product: any) => {
     emit("alert", "Product removed from featured!", "success");
     loadFeaturedProducts();
   } else {
-    emit("alert", "Failed to update product: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    emit("alert", "Failed to update product: " + errorMsg, "error");
   }
 };
 

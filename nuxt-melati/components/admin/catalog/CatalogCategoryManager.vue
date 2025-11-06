@@ -120,8 +120,9 @@ const loadCategories = async () => {
     categories.value = result.data;
     console.log("[CatalogCategoryManager] Categories loaded:", categories.value.length, "items");
   } else {
-    console.error("[CatalogCategoryManager] Error:", result.error);
-    emit("alert", "Failed to load categories: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    console.error("[CatalogCategoryManager] Error:", errorMsg);
+    emit("alert", "Failed to load categories: " + errorMsg, "error");
   }
   loading.value = false;
 };
@@ -158,7 +159,8 @@ const confirmDelete = async (category: any) => {
     emit("alert", "Category deleted successfully!", "success");
     loadCategories();
   } else {
-    emit("alert", "Failed to delete category: " + result.error, "error");
+    const errorMsg = "error" in result ? result.error : "Unknown error";
+    emit("alert", "Failed to delete category: " + errorMsg, "error");
   }
 };
 
