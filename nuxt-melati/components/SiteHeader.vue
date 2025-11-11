@@ -40,7 +40,7 @@ onUnmounted(() => {
         @click="open = !open"
         aria-label="Toggle menu"
       >
-        <i class="fa-solid text-xl" :class="open ? 'fa-xmark' : 'fa-bars'" />
+        <i class="bi text-2xl" :class="open ? 'bi-x-lg' : 'bi-list'" />
       </button>
 
       <nav class="hidden md:flex items-center gap-6">

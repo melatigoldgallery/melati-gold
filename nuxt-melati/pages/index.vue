@@ -16,7 +16,7 @@
     <!-- Subcategory Modal -->
     <SubcategoryModal
       :show="showSubcategoryModal"
-      :category="selectedCategoryName"
+      :category="selectedCategory"
       @close="closeSubcategoryModal"
       @select="selectSubcategory"
     />
@@ -26,7 +26,7 @@
       <Transition name="fade">
         <div
           v-if="showLookbookModal"
-          class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+          class="fixed inset-0 bg-black/60 z-[55] flex items-center justify-center p-4"
           @click.self="closeLookbookModal"
         >
           <div class="bg-white rounded-2xl max-w-7xl w-full max-h-[90vh] overflow-y-auto p-6">
@@ -103,7 +103,7 @@ const showSubcategoryModal = ref(false);
 const showLookbookModal = ref(false);
 const showProductModal = ref(false);
 const showServiceModal = ref(false);
-const selectedCategory = ref<string | null>(null);
+const selectedCategory = ref<any>(null);
 const selectedCategoryName = ref<string | null>(null);
 const selectedSubcategory = ref<string | null>(null);
 const selectedSubcategoryName = ref<string>("");
@@ -114,6 +114,7 @@ const loadingProducts = ref(false);
 
 // Open subcategory modal
 const openSubcategories = (category: any) => {
+  selectedCategory.value = category;
   selectedCategoryName.value = category.name || category;
   showSubcategoryModal.value = true;
 };

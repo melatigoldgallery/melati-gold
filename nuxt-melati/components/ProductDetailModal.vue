@@ -38,15 +38,6 @@ const displayImages = computed(() => {
   return [];
 });
 
-const whatsappLink = computed(() => {
-  if (!props.product) return `https://wa.me/6281234567890`;
-  const base = `https://wa.me/6281234567890`;
-  const productName = displayName.value || "produk";
-  const service = props.serviceContext?.title ? ` untuk layanan ${props.serviceContext.title}` : "";
-  const text = `Halo, saya ingin tanya tentang ${productName}${service}. Bisa dibantu?`;
-  return `${base}?text=${encodeURIComponent(text)}`;
-});
-
 const displaySpecs = computed(() => {
   if (!props.product) return [];
   return props.product.specs || props.product.specs || [];
@@ -94,7 +85,7 @@ const prevSlide = () => {
   <Transition name="fade">
     <div
       v-if="show && product"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4"
+      class="fixed inset-0 z-[65] flex items-center justify-center bg-black/55 p-4"
       @click.self="emit('close')"
     >
       <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -197,15 +188,8 @@ const prevSlide = () => {
               {{ product.price || product.price_formatted || "" }}
             </div>
 
-            <!-- WhatsApp Button -->
-            <a
-              :href="whatsappLink"
-              target="_blank"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl"
-            >
-              <i class="bi bi-whatsapp text-xl"></i>
-              Chat WhatsApp
-            </a>
+            <!-- Contact Buttons (Shopee & WhatsApp) -->
+            <ProductContactButtons :product="product" />
           </div>
         </div>
       </div>

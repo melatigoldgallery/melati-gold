@@ -155,7 +155,7 @@ const supabase = $supabase as any;
 
 const getConfigs = async () => {
   try {
-    const { data, error } = await supabase.from("karat_configs").select("*").order("id");
+    const { data, error } = await supabase.from("karat_configurations").select("*").order("id");
 
     if (error) throw error;
     return { success: true, data: data || [] };
@@ -164,9 +164,9 @@ const getConfigs = async () => {
   }
 };
 
-const updateConfig = async (id: number, updates: any) => {
+const updateConfig = async (id: string, updates: any) => {
   try {
-    const { data, error } = await supabase.from("karat_configs").update(updates).eq("id", id).select().single();
+    const { data, error } = await supabase.from("karat_configurations").update(updates).eq("id", id).select().single();
 
     if (error) throw error;
     return { success: true, data };

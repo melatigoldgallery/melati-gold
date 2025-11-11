@@ -39,7 +39,7 @@ const getProductContact = async (product: any) => {
   try {
     // Get karat config based on product's karat
     const { data, error } = await supabase
-      .from("karat_configs")
+      .from("karat_configurations")
       .select("*")
       .contains("karat_list", [product.karat])
       .single();
