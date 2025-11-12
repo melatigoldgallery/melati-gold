@@ -46,8 +46,8 @@
             </p>
             <p class="flex items-center gap-2">
               <i class="bi bi-whatsapp text-gold"></i>
-              <a href="https://wa.me/6281234567890" target="_blank" class="hover:text-gold transition-colors">
-                +62 812-3456-7890
+              <a href="https://wa.me/6281237846320" target="_blank" class="hover:text-gold transition-colors">
+                +62 812-3784-6320
               </a>
             </p>
           </div>
@@ -62,7 +62,7 @@
           <p class="text-white/80 text-sm mb-4">Dapatkan update produk terbaru</p>
           <div class="flex gap-3">
             <a
-              href="https://instagram.com/melatigoldshop"
+              href="https://instagram.com/melatigoldshopbali"
               target="_blank"
               aria-label="Instagram"
               class="group w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/30 hover:from-gold hover:to-yellow-600 transition-all duration-300"
@@ -70,23 +70,23 @@
               <i class="bi bi-instagram text-gold group-hover:text-white transition-colors"></i>
             </a>
             <a
-              href="https://tiktok.com/@melatigoldshop"
+              href="https://tiktok.com/@flowshopbali"
               target="_blank"
               aria-label="TikTok"
               class="group w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/30 hover:from-gold hover:to-yellow-600 transition-all duration-300"
             >
               <i class="bi bi-tiktok text-gold group-hover:text-white transition-colors"></i>
             </a>
-            <a
+            <!-- <a
               href="https://facebook.com/melatigoldshop"
               target="_blank"
               aria-label="Facebook"
               class="group w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/30 hover:from-gold hover:to-yellow-600 transition-all duration-300"
             >
               <i class="bi bi-facebook text-gold group-hover:text-white transition-colors"></i>
-            </a>
+            </a> -->
             <a
-              href="https://wa.me/6281234567890"
+              href="https://wa.me/6281237846320"
               target="_blank"
               aria-label="WhatsApp"
               class="group w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/30 hover:from-gold hover:to-yellow-600 transition-all duration-300"

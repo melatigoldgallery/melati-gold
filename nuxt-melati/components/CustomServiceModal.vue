@@ -209,9 +209,6 @@ const contactWhatsApp = () => {
                         <p v-if="product.subtitle" class="card-text text-muted small mb-2 text-truncate">
                           {{ product.subtitle }}
                         </p>
-                        <p class="fw-semibold text-warning mb-0 small">
-                          {{ formatPrice(product.price) }}
-                        </p>
                       </div>
                     </div>
                   </div>

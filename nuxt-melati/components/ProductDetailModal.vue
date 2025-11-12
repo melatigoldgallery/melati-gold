@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
   show: boolean;
@@ -10,6 +10,77 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "close"): void;
 }>();
+
+const { getProductById } = useCatalogManager();
+
+// Local state for product detail
+const productDetail = ref<any>(null);
+const loading = ref(false);
+
+// Fetch product detail jika data tidak lengkap
+const loadProductDetail = async () => {
+  if (!props.product) {
+    productDetail.value = null;
+    return;
+  }
+
+  // Cek apakah data sudah lengkap (punya images array dan description)
+  const hasCompleteData =
+    props.product.images && Array.isArray(props.product.images) && props.product.description !== undefined;
+
+  if (hasCompleteData) {
+    console.log("[ProductDetailModal] Product data already complete, using provided data");
+    productDetail.value = props.product;
+    return;
+  }
+
+  // Data tidak lengkap, fetch dari database
+  console.log("[ProductDetailModal] Fetching complete product data for ID:", props.product.id);
+  loading.value = true;
+
+  try {
+    const result = await getProductById(props.product.id);
+
+    if (result.success && result.data) {
+      console.log("[ProductDetailModal] Product detail loaded:", result.data);
+      productDetail.value = result.data;
+    } else {
+      console.error("[ProductDetailModal] Failed to load product:", result.error);
+      // Fallback ke data yang ada
+      productDetail.value = props.product;
+    }
+  } catch (error) {
+    console.error("[ProductDetailModal] Error loading product:", error);
+    // Fallback ke data yang ada
+    productDetail.value = props.product;
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Watch untuk product changes
+watch(
+  () => props.product,
+  async (newProduct) => {
+    if (newProduct && props.show) {
+      await loadProductDetail();
+    }
+  },
+  { immediate: true }
+);
+
+// Watch untuk show changes
+watch(
+  () => props.show,
+  async (isShown) => {
+    if (isShown && props.product) {
+      await loadProductDetail();
+    } else if (!isShown) {
+      // Reset currentSlide when modal closes
+      currentSlide.value = 0;
+    }
+  }
+);
 
 // 🚀 Image optimization - inline functions
 const optimizeCloudinaryImage = (url: string, width: number, height: number, quality: number | "auto" = "auto") => {
@@ -28,19 +99,38 @@ const presets = {
 // Carousel state
 const currentSlide = ref(0);
 
+// Format price to Rupiah
+const formatPrice = (price: number) => {
+  if (!price) return "Rp 0";
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(price);
+};
+
 // Derived values to handle both demo and db product shapes
-const displayName = computed(() => props.product && (props.product.name || props.product.title || ""));
+const displayName = computed(
+  () => productDetail.value && (productDetail.value.name || productDetail.value.title || "")
+);
 const displayImages = computed(() => {
-  if (!props.product) return [];
-  if (props.product.images && props.product.images.length) return props.product.images;
-  if (props.product.gallery_images && props.product.gallery_images.length) return props.product.gallery_images;
-  if (props.product.thumbnail_image) return [props.product.thumbnail_image];
+  if (!productDetail.value) return [];
+  if (productDetail.value.images && productDetail.value.images.length) return productDetail.value.images;
+  if (productDetail.value.gallery_images && productDetail.value.gallery_images.length)
+    return productDetail.value.gallery_images;
+  if (productDetail.value.thumbnail_image) return [productDetail.value.thumbnail_image];
   return [];
 });
 
 const displaySpecs = computed(() => {
-  if (!props.product) return [];
-  return props.product.specs || props.product.specs || [];
+  if (!productDetail.value) return [];
+  return productDetail.value.specs || [];
+});
+
+const displayPrice = computed(() => {
+  if (!productDetail.value) return "Rp 0";
+  const price = productDetail.value.price || 0;
+  return formatPrice(price);
 });
 
 // Optimize images for carousel (main view - high quality)
@@ -98,7 +188,16 @@ const prevSlide = () => {
           <i class="bi bi-x-lg text-xl"></i>
         </button>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+        <!-- Loading State -->
+        <div v-if="loading" class="flex items-center justify-center min-h-[400px]">
+          <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gold"></div>
+            <p class="mt-4 text-gray-600">Memuat detail produk...</p>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div v-else-if="productDetail" class="grid grid-cols-1 lg:grid-cols-2 gap-0">
           <!-- Left: Image Carousel -->
           <div class="p-4 lg:p-6">
             <div class="relative">
@@ -169,10 +268,10 @@ const prevSlide = () => {
           <!-- Right: Product Info -->
           <div class="p-6 lg:p-8 bg-gray-50">
             <h3 class="text-2xl lg:text-3xl font-semibold text-neutral-800 mb-3">
-              {{ product.name || product.title }}
+              {{productDetail.title || "" }}
             </h3>
-            <p class="text-neutral-600 mb-4">
-              {{ product.description || product.subtitle || "" }}
+            <p v-if="productDetail.description" class="text-neutral-600 mb-4">
+              {{ productDetail.description || "" }}
             </p>
 
             <!-- Specs -->
@@ -184,12 +283,15 @@ const prevSlide = () => {
             </ul>
 
             <!-- Price -->
-            <div class="text-2xl font-bold text-maroon mb-6">
-              {{ product.price || product.price_formatted || "" }}
+            <div class="mb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl font-bold text-maroon">±{{ displayPrice }}</span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">*Harga dapat berubah mengikuti harga emas</p>
             </div>
 
             <!-- Contact Buttons (Shopee & WhatsApp) -->
-            <ProductContactButtons :product="product" />
+            <ProductContactButtons :product="productDetail" />
           </div>
         </div>
       </div>

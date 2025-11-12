@@ -5,8 +5,7 @@ const heroSlides = [
     id: 1,
     image: "/img/bg.png",
     title: "Welcome to Melati Gold Shop",
-    subtitle:
-      "Discover our premium gold jewelry collection with exclusive designs from Melati Gold.",
+    subtitle: "Discover our premium gold jewelry collection with exclusive designs from Melati Gold.",
     buttonText: "View Collection",
   },
   {
@@ -219,10 +218,10 @@ const onImageError = () => {
     animation: zoomIn 20s ease-in-out infinite alternate;
   }
 
-  /* Logo sizing for mobile */
+  /* Logo sizing for mobile - DIPERBESAR */
   img[alt="Melati Gold Logo"] {
-    width: 6rem !important;
-    height: 6rem !important;
+    width: 10rem !important;
+    height: 10rem !important;
   }
 
   /* Title sizing for mobile */

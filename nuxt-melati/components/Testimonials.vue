@@ -7,7 +7,6 @@ const screenshots = [
   "/img/Screenshot (660).png",
   "/img/Screenshot (661).png",
   "/img/Screenshot (662).png",
-  "/img/Screenshot (663).png",
   "/img/Screenshot (664).png",
   "/img/Screenshot (665).png",
   "/img/Screenshot (666).png",

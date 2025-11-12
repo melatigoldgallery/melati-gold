@@ -57,14 +57,15 @@ function getMetrics() {
 }
 
 function goTo(index: number) {
-  const { vp, slides, maxIndex, maxOffset } = getMetrics();
+  const { vp, slides, maxIndex, maxOffset, slideWidth, gap } = getMetrics();
   if (!vp || slides.length === 0) return;
   // Clamp to page-bound index to avoid partial trailing space
   if (index < 0) index = 0;
   if (index > maxIndex) index = maxIndex;
-  const target = slides[index];
-  const raw = target.offsetLeft;
-  const clamped = Math.min(raw, maxOffset);
+
+  // Calculate offset based on card width and gap for precise positioning
+  const calculatedOffset = index * (slideWidth + gap);
+  const clamped = Math.min(calculatedOffset, maxOffset);
   offsetPx.value = clamped;
   activeIndex.value = index;
 }
@@ -158,7 +159,7 @@ onMounted(() => {
 
 <template>
   <section id="produk" class="relative bg-gradient-to-b from-cream via-white to-cream py-16 overflow-hidden">
-    <div class="mx-auto max-w-7xl px-2 md:px-4">
+    <div class="container mx-auto max-w-7xl px-4">
       <div class="mb-12 text-center reveal-up">
         <h2 class="section-title text-maroon">Katalog Produk</h2>
         <p class="mt-4 text-lg text-neutral-600 max-w-2xl mx-auto">

@@ -29,7 +29,7 @@
           class="aspect-[4/3] w-full rounded-2xl object-cover ring-1 ring-black/5 shadow-xl"
         />
         <img
-          src="/img/Screenshot (663).png"
+          src="/img/Screenshot (662).png"
           alt="Galeri tambahan"
           class="absolute -bottom-6 -left-6 hidden h-32 w-44 rounded-xl object-cover ring-1 ring-black/5 shadow-md md:block"
         />

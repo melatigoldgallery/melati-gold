@@ -4,5 +4,7 @@
     <main class="relative">
       <slot />
     </main>
+    <!-- Toast Notifications -->
+    <ToastNotification />
   </div>
 </template>

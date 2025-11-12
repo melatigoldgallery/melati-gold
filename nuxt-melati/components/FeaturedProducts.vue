@@ -13,13 +13,13 @@ const optimizeCloudinaryImage = (url: string, width: number, height: number, qua
 
 const presets = {
   thumbnail: (url: string) => optimizeCloudinaryImage(url, 400, 400, "auto"),
-  detail: (url: string) => optimizeCloudinaryImage(url, 1000, 1000, 90),
 };
 
 // State
 const products = ref<any[]>([]);
 const loading = ref(true);
 const selectedProduct = ref<any>(null);
+const showProductModal = ref(false);
 
 // Load featured products
 const loadFeaturedProducts = async () => {
@@ -37,11 +37,11 @@ const loadFeaturedProducts = async () => {
 };
 
 // Optimize images
-const getOptimizedImage = (imageUrl: string, preset: "thumbnail" | "detail" = "thumbnail") => {
+const getOptimizedImage = (imageUrl: string) => {
   if (!imageUrl || !imageUrl.includes("cloudinary.com")) {
     return imageUrl || "/img/placeholder.jpg";
   }
-  return preset === "thumbnail" ? presets.thumbnail(imageUrl) : presets.detail(imageUrl);
+  return presets.thumbnail(imageUrl);
 };
 
 // Format price to Indonesian Rupiah
@@ -53,52 +53,22 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
+// Open product detail modal
+const openDetail = (product: any) => {
+  selectedProduct.value = product;
+  showProductModal.value = true;
+};
+
+// Close modal
+const closeProductModal = () => {
+  showProductModal.value = false;
+  selectedProduct.value = null;
+};
+
 // Load on mount
 onMounted(() => {
   loadFeaturedProducts();
 });
-
-// Modal state
-const selected = ref<any>(null);
-const mainImage = ref<string>("");
-const isOpen = ref(false);
-
-function openDetail(p: any) {
-  selected.value = p;
-  mainImage.value = p.images?.[0] || p.thumbnail_image;
-  isOpen.value = true;
-}
-
-function closeModal() {
-  isOpen.value = false;
-  selected.value = null;
-}
-
-function formatIDR(n: number | undefined) {
-  if (!n && n !== 0) return "-";
-  return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
-}
-
-function onKeyDown(e: KeyboardEvent) {
-  if (e.key === "Escape" && isOpen.value) closeModal();
-}
-
-onMounted(() => {
-  loadFeaturedProducts();
-  window.addEventListener("keydown", onKeyDown);
-});
-
-onUnmounted(() => window.removeEventListener("keydown", onKeyDown));
-
-// WhatsApp contact
-const whatsappNumber = "6281234567890"; // Ganti dengan nomor WA toko (format internasional tanpa +)
-function buildWhatsAppLink(p: any) {
-  const base = `https://wa.me/${whatsappNumber}`;
-  const text = p
-    ? `Halo, saya tertarik dengan ${p.title || p.name} (Kadar: ${p.karat}, Berat: ${p.weight}). Apakah masih tersedia?`
-    : "Halo, saya tertarik dengan produk Anda.";
-  return `${base}?text=${encodeURIComponent(text)}`;
-}
 </script>
 
 <template>
@@ -130,7 +100,7 @@ function buildWhatsAppLink(p: any) {
         <div class="relative">
           <!-- ✨ Optimized image with lazy loading -->
           <img
-            :src="getOptimizedImage(p.thumbnail_image, 'thumbnail')"
+            :src="getOptimizedImage(p.thumbnail_image)"
             :alt="p.title || p.name"
             loading="lazy"
             decoding="async"
@@ -159,89 +129,7 @@ function buildWhatsAppLink(p: any) {
       </article>
     </div>
 
-    <!-- Modal: Product Detail -->
-    <transition name="fade">
-      <div
-        v-if="isOpen"
-        class="fixed inset-0 z-50 bg-black/60 backdrop-blur-[1px] flex items-center justify-center p-4"
-        @click.self="closeModal"
-      >
-        <div class="bg-white w-full max-w-4xl rounded-2xl overflow-hidden shadow-elegant">
-          <div class="flex items-center justify-between px-5 py-4 border-b">
-            <h3 class="text-lg font-semibold text-maroon">{{ selected?.title || selected?.name }}</h3>
-            <button class="chip" @click="closeModal">Tutup</button>
-          </div>
-          <div class="grid md:grid-cols-2 gap-4 p-5">
-            <!-- Images -->
-            <div>
-              <!-- ✨ Optimized main image (high quality for modal) -->
-              <img
-                :src="getOptimizedImage(mainImage || selected?.thumbnail_image, 'detail')"
-                :alt="selected?.title || selected?.name || 'Produk'"
-                class="w-full h-64 object-cover rounded-lg"
-                loading="lazy"
-                decoding="async"
-              />
-              <div v-if="selected?.images?.length" class="mt-3 flex gap-2 overflow-x-auto">
-                <button
-                  v-for="(img, idx) in selected?.images"
-                  :key="idx"
-                  class="rounded-lg overflow-hidden border hover:border-gold focus:ring-1 focus:ring-gold"
-                  @click="mainImage = img"
-                >
-                  <!-- ✨ Optimized thumbnails -->
-                  <img
-                    :src="getOptimizedImage(img, 'thumbnail')"
-                    :alt="`Thumbnail ${idx + 1}`"
-                    class="h-16 w-20 object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </button>
-              </div>
-            </div>
-            <!-- Details -->
-            <div class="space-y-2">
-              <div class="text-sm text-neutral-700">
-                <span class="font-medium text-neutral-900">Nama:</span>
-                {{ selected?.title || selected?.name }}
-              </div>
-              <div v-if="selected?.karat" class="text-sm text-neutral-700">
-                <span class="font-medium text-neutral-900">Kadar:</span>
-                {{ selected?.karat }}
-              </div>
-              <div v-if="selected?.weight" class="text-sm text-neutral-700">
-                <span class="font-medium text-neutral-900">Berat:</span>
-                {{ selected?.weight }}
-              </div>
-              <div class="text-sm text-neutral-700">
-                <span class="font-medium text-neutral-900">Harga:</span>
-                {{ formatPrice(selected?.price) }}
-              </div>
-              <div v-if="selected?.description" class="pt-2 text-sm text-neutral-700">
-                <span class="font-medium text-neutral-900">Deskripsi:</span>
-                {{ selected?.description }}
-              </div>
-              <div v-if="selected?.specs?.length" class="pt-2 text-sm text-neutral-700">
-                <span class="font-medium text-neutral-900">Spesifikasi:</span>
-                <ul class="list-disc list-inside mt-1">
-                  <li v-for="(spec, idx) in selected.specs" :key="idx">{{ spec }}</li>
-                </ul>
-              </div>
-              <div class="pt-4">
-                <a
-                  :href="buildWhatsAppLink(selected)"
-                  target="_blank"
-                  rel="noopener"
-                  class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition"
-                >
-                  WhatsApp
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </transition>
+    <!-- Product Detail Modal -->
+    <ProductDetailModal :show="showProductModal" :product="selectedProduct" @close="closeProductModal" />
   </section>
 </template>

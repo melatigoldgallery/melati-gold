@@ -58,13 +58,14 @@ function getMetrics() {
 }
 
 function goTo(index: number) {
-  const { vp, slides, maxIndex, maxOffset } = getMetrics();
+  const { vp, slides, maxIndex, maxOffset, slideWidth, gap } = getMetrics();
   if (!vp || slides.length === 0) return;
   if (index < 0) index = 0;
   if (index > maxIndex) index = maxIndex;
-  const target = slides[index];
-  const raw = target.offsetLeft;
-  const clamped = Math.min(raw, maxOffset);
+
+  // Calculate offset based on card width and gap for precise positioning
+  const calculatedOffset = index * (slideWidth + gap);
+  const clamped = Math.min(calculatedOffset, maxOffset);
   offsetPx.value = clamped;
   activeIndex.value = index;
 }
@@ -199,7 +200,7 @@ onMounted(() => {
                   :style="{ flex: `0 0 ${slideWidthPx}px` }"
                 >
                   <div
-                    class="group relative block w-full overflow-hidden rounded-2xl bg-gray-900 transition-all duration-300 hover:-translate-y-1 aspect-[3/4]"
+                    class="group relative block w-full overflow-hidden rounded-1xl bg-gray-900 transition-all duration-300 hover:-translate-y-1 aspect-[3/4]"
                     @click="openService(service)"
                     role="button"
                     tabindex="0"
@@ -232,7 +233,7 @@ onMounted(() => {
                     </div>
 
                     <div
-                      class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-95 transition-opacity duration-300 group-hover:opacity-100"
+                      class="absolute inset-0 bg-gradient-to-t from-black via-black/5 to-transparent opacity-95 transition-opacity duration-300 group-hover:opacity-100"
                     ></div>
                     <div class="absolute inset-0 flex items-end p-4 sm:p-5">
                       <div>

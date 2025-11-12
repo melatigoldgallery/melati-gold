@@ -51,6 +51,21 @@
             </div>
           </div>
 
+          <!-- Tokopedia Link -->
+          <div class="flex items-start gap-2">
+            <i class="bi bi-bag-check-fill text-gray-400 text-sm sm:text-base mt-0.5 flex-shrink-0"></i>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs text-gray-500 mb-0.5">Link Tokopedia</p>
+              <a
+                :href="config.tokopedia_store_url"
+                target="_blank"
+                class="text-green-600 hover:underline text-xs sm:text-sm break-all line-clamp-2"
+              >
+                {{ config.tokopedia_store_url || "-" }}
+              </a>
+            </div>
+          </div>
+
           <!-- WhatsApp -->
           <div class="flex items-start gap-2">
             <i class="bi bi-whatsapp text-gray-400 text-sm sm:text-base mt-0.5 flex-shrink-0"></i>
@@ -90,6 +105,18 @@
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
               />
               <p class="text-xs text-gray-500 mt-1">Link ke halaman toko Shopee Anda (bukan produk spesifik)</p>
+            </div>
+
+            <!-- Tokopedia URL -->
+            <div>
+              <label class="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">Link Toko Tokopedia</label>
+              <input
+                v-model="editForm.tokopedia_store_url"
+                type="url"
+                placeholder="https://www.tokopedia.com/toko-anda"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <p class="text-xs text-gray-500 mt-1">Link ke halaman toko Tokopedia Anda (bukan produk spesifik)</p>
             </div>
 
             <!-- WhatsApp Number -->
@@ -181,6 +208,7 @@ const configs = ref<any[]>([]);
 const editingConfig = ref<any>(null);
 const editForm = ref({
   shopee_store_url: "",
+  tokopedia_store_url: "",
   whatsapp_number: "",
   whatsapp_message_template: "",
 });
@@ -200,6 +228,7 @@ const editConfig = (config: any) => {
   editingConfig.value = config;
   editForm.value = {
     shopee_store_url: config.shopee_store_url || "",
+    tokopedia_store_url: config.tokopedia_store_url || "",
     whatsapp_number: config.whatsapp_number || "",
     whatsapp_message_template: config.whatsapp_message_template || "",
   };
@@ -226,6 +255,7 @@ const cancelEdit = () => {
   editingConfig.value = null;
   editForm.value = {
     shopee_store_url: "",
+    tokopedia_store_url: "",
     whatsapp_number: "",
     whatsapp_message_template: "",
   };

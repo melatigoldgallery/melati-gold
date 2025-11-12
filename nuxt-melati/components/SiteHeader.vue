@@ -7,12 +7,37 @@ const handleScroll = () => {
   isScrolled.value = window.scrollY > 50;
 };
 
+// Close menu when clicking outside
+const closeMenu = () => {
+  open.value = false;
+};
+
+// Handle ESC key to close menu
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === "Escape" && open.value) {
+    closeMenu();
+  }
+};
+
+// Prevent body scroll when menu is open
+watch(open, (isOpen) => {
+  if (isOpen) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+});
+
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
+  window.addEventListener("keydown", handleKeydown);
 });
 
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
+  window.removeEventListener("keydown", handleKeydown);
+  // Cleanup: restore body scroll
+  document.body.style.overflow = "";
 });
 </script>
 
@@ -77,19 +102,22 @@ onUnmounted(() => {
       </nav>
     </div>
 
+    <!-- Mobile Menu Dropdown with Backdrop -->
     <transition name="fade">
-      <div v-if="open" class="md:hidden border-t border-white/20 bg-black/80 backdrop-blur-md">
-        <nav class="container mx-auto max-w-6xl py-3 px-4 grid gap-2">
-          <a href="#produk" class="py-3 text-gold hover:text-white transition-colors" @click="open = false">Produk</a>
-          <a href="#best-produk" class="py-3 text-gold hover:text-white transition-colors" @click="open = false">
-            Best Seller
-          </a>
-          <a href="#testimoni" class="py-3 text-gold hover:text-white transition-colors" @click="open = false">
-            Testimoni
-          </a>
-          <a href="#tentang" class="py-3 text-gold hover:text-white transition-colors" @click="open = false">Tentang</a>
-          <a href="#kontak" class="py-3 text-gold hover:text-white transition-colors" @click="open = false">Kontak</a>
-        </nav>
+      <div v-if="open" class="md:hidden fixed inset-0 top-[60px] z-40 bg-black/50 backdrop-blur-sm" @click="closeMenu">
+        <div class="bg-black/95 backdrop-blur-md border-t border-white/20" @click.stop>
+          <nav class="container mx-auto max-w-6xl py-3 px-4 grid gap-2">
+            <a href="#produk" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">Produk</a>
+            <a href="#best-produk" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
+              Best Seller
+            </a>
+            <a href="#testimoni" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
+              Testimoni
+            </a>
+            <a href="#tentang" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">Tentang</a>
+            <a href="#kontak" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">Kontak</a>
+          </nav>
+        </div>
       </div>
     </transition>
   </header>

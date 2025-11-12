@@ -12,6 +12,18 @@
       <span>Beli di Shopee</span>
     </a>
 
+    <!-- Tombol Tokopedia -->
+    <a
+      v-if="contact.tokopedia_url"
+      :href="contact.tokopedia_url"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex-1 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium text-center transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+    >
+      <i class="bi bi-bag-check-fill text-base sm:text-lg"></i>
+      <span>Beli di Tokopedia</span>
+    </a>
+
     <!-- Tombol WhatsApp -->
     <a
       v-if="contact.whatsapp_number"
@@ -55,6 +67,7 @@ const getProductContact = async (product: any) => {
 
       return {
         shopee_url: data.shopee_store_url || "",
+        tokopedia_url: data.tokopedia_store_url || "",
         whatsapp_number: data.whatsapp_number || "",
         whatsapp_message: message,
       };
@@ -66,6 +79,7 @@ const getProductContact = async (product: any) => {
   // Fallback to default
   return {
     shopee_url: "",
+    tokopedia_url: "",
     whatsapp_number: "6281234567890",
     whatsapp_message: `Halo, saya tertarik dengan ${product.title || product.name}`,
   };
@@ -78,6 +92,7 @@ const getWhatsAppLink = (number: string, message: string) => {
 // Load contact info untuk produk ini
 const contact = ref({
   shopee_url: "",
+  tokopedia_url: "",
   whatsapp_number: "",
   whatsapp_message: "",
 });

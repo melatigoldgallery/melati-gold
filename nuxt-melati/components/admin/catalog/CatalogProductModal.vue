@@ -67,19 +67,15 @@
             ></textarea>
           </div>
 
-          <!-- Price -->
+          <!-- Specs (Simple textarea for now) -->
           <div>
-            <label class="block text-xs sm:text-sm font-medium mb-2">Harga (Rp) *</label>
-            <input
-              v-model.number="form.price"
-              type="number"
-              step="1000"
-              min="0"
-              required
+            <label class="block text-xs sm:text-sm font-medium mb-2">Spesifikasi (satu per baris)</label>
+            <textarea
+              v-model="specsText"
+              rows="3"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              placeholder="3500000"
-            />
-            <p class="text-xs text-gray-500 mt-1">Masukkan harga dalam Rupiah (tanpa titik/koma).</p>
+              placeholder="Emas 18K&#10;Berat: 4.5 gram&#10;Panjang: 45cm"
+            ></textarea>
           </div>
 
           <!-- Karat & Weight -->
@@ -113,6 +109,21 @@
                 <span class="self-center text-sm text-gray-600 whitespace-nowrap">gram</span>
               </div>
             </div>
+          </div>
+
+          <!-- Price -->
+          <div>
+            <label class="block text-xs sm:text-sm font-medium mb-2">Harga (Rp) *</label>
+            <input
+              v-model.number="form.price"
+              type="number"
+              step="1000"
+              min="0"
+              required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="3500000"
+            />
+            <p class="text-xs text-gray-500 mt-1">Masukkan harga dalam Rupiah (tanpa titik/koma).</p>
           </div>
 
           <!-- Calculated Price Display -->
@@ -161,17 +172,6 @@
               :maxSize="5"
               :showUrls="false"
             />
-          </div>
-
-          <!-- Specs (Simple textarea for now) -->
-          <div>
-            <label class="block text-xs sm:text-sm font-medium mb-2">Spesifikasi (satu per baris)</label>
-            <textarea
-              v-model="specsText"
-              rows="3"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              placeholder="Emas 18K&#10;Berat: 4.5 gram&#10;Panjang: 45cm"
-            ></textarea>
           </div>
 
           <!-- Custom Links (Optional Override) -->
@@ -263,12 +263,14 @@ const emit = defineEmits(["close", "saved"]);
 
 const { createProduct, updateProduct } = useCatalogManager();
 const { getGoldPrices, calculatePrice } = useGoldPricing();
+const toast = useToast();
 
 // State
 const saving = ref(false);
 const specsText = ref("");
 const imageUrls = ref<string[]>([]);
 const goldPrices = ref<any[]>([]);
+const isInitializing = ref(false);
 
 const form = ref<{
   category_id: string;
@@ -354,7 +356,8 @@ watch(
 
 // Auto-update price when not overridden
 watch([() => form.value.weight_grams, () => form.value.karat], () => {
-  if (!form.value.price_override) {
+  // Jangan auto-update saat inisialisasi atau saat override aktif
+  if (!isInitializing.value && !form.value.price_override) {
     form.value.price = calculatedPrice.value;
   }
 });
@@ -364,12 +367,19 @@ const filterSubcategories = () => {
 };
 
 // Initialize
-onMounted(() => {
-  loadGoldPrices();
+onMounted(async () => {
+  isInitializing.value = true; // Set flag
+
+  await loadGoldPrices();
 
   if (props.product) {
     form.value = { ...props.product };
     specsText.value = (props.product.specs || []).join("\n");
+
+    // Debug: Verify data loaded
+    console.log("[CatalogProductModal] Editing product:", props.product.title);
+    console.log("[CatalogProductModal] Description loaded:", props.product.description);
+    console.log("[CatalogProductModal] Specs loaded:", props.product.specs);
 
     // Initialize imageUrls with existing images
     if (props.product.images && props.product.images.length > 0) {
@@ -383,12 +393,27 @@ onMounted(() => {
       const match = form.value.weight.match(/[\d.]+/);
       if (match) form.value.weight_grams = parseFloat(match[0]);
     }
+
+    // Auto-detect apakah harga berbeda dari kalkulasi otomatis
+    await nextTick(); // Tunggu goldPrices loaded
+
+    const autoPrice = calculatePrice(form.value.weight_grams || 0, form.value.karat || "", goldPrices.value);
+
+    // Jika harga produk berbeda dari kalkulasi otomatis, tandai sebagai override
+    if (form.value.price !== autoPrice && form.value.price > 0) {
+      form.value.price_override = true;
+    }
   }
+
+  isInitializing.value = false; // Release flag
 });
 
 // Watch specs text
 watch(specsText, (newValue: string) => {
-  form.value.specs = newValue.split("\n").filter((s: string) => s.trim());
+  // Jangan auto-update saat inisialisasi
+  if (!isInitializing.value) {
+    form.value.specs = newValue.split("\n").filter((s: string) => s.trim());
+  }
 });
 
 // Handle images upload
@@ -412,13 +437,22 @@ const save = async () => {
     const result = props.product ? await updateProduct(props.product.id, form.value) : await createProduct(form.value);
 
     if (result.success) {
+      // Show success toast
+      toast.success(
+        props.product
+          ? `Produk "${form.value.title}" berhasil diupdate!`
+          : `Produk "${form.value.title}" berhasil ditambahkan!`,
+        4000
+      );
       emit("saved");
     } else {
-      alert("Failed to save: " + result.error);
+      // Show error toast
+      toast.error(`Gagal menyimpan produk: ${result.error || "Terjadi kesalahan"}`, 5000);
     }
   } catch (error) {
     console.error("Save error:", error);
-    alert("An error occurred");
+    // Show error toast
+    toast.error("Terjadi kesalahan saat menyimpan produk. Silakan coba lagi.", 5000);
   } finally {
     saving.value = false;
   }

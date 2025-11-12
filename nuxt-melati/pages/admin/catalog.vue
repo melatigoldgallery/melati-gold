@@ -92,6 +92,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <ToastNotification />
   </div>
 </template>
 
