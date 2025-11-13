@@ -127,8 +127,10 @@ watch(
                 >
                   <i class="bi bi-gem text-6xl text-white opacity-50"></i>
                 </div>
-                <div class="overlay flex items-center justify-center">
-                  <span class="text-white font-semibold">{{ subcategory.name }}</span>
+                <div class="overlay">
+                  <div class="subcategory-text">
+                    <span class="text-white font-semibold text-sm">{{ subcategory.name }}</span>
+                  </div>
                 </div>
               </div>
             </button>
@@ -150,16 +152,34 @@ watch(
 }
 .subcard {
   aspect-ratio: 4/5;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.subcard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 .subcard img {
   transition: transform 0.4s ease;
 }
 .subcard:hover img {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.15));
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 60%);
+  display: flex;
+  align-items: flex-end;
+  padding: 0.75rem;
+}
+.subcategory-text {
+  width: 100%;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+  text-align: center;
+  transition: border-color 0.3s ease;
+}
+.subcard:hover .subcategory-text {
+  border-bottom-color: rgba(212, 175, 55, 0.9);
 }
 </style>
