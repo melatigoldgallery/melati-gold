@@ -107,7 +107,7 @@ const onImageError = () => {
       </div>
 
       <!-- Overlay -->
-      <div class="absolute inset-0 bg-dark/20 z-10" />
+      <div class="absolute inset-0 z-10" />
     </div>
 
     <!-- Hero Content -->
