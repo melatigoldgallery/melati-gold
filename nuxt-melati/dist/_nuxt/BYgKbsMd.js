@@ -1,1 +1,0 @@
-import{P as i,D as o}from"#entry";const m=i((s,g)=>{{const t=localStorage.getItem("isLoggedIn"),e=localStorage.getItem("loginTime");if(t!=="true"||!e)return o("/login");const n=1440*60*1e3,r=Date.now(),a=parseInt(e);if(r-a>=n)return localStorage.removeItem("isLoggedIn"),localStorage.removeItem("loginTime"),localStorage.removeItem("user"),o("/login")}});export{m as default};

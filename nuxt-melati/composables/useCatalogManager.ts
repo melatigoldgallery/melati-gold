@@ -26,7 +26,6 @@ export const useCatalogManager = () => {
         return await cache.fetchWithCache(
           cacheKey,
           async () => {
-
             const { data, error } = await $supabase
               .from("catalog_categories")
               .select("*")
@@ -493,7 +492,6 @@ export const useCatalogManager = () => {
         .eq("id", serviceId)
         .single();
 
-
       if (serviceError) throw serviceError;
       if (!service) {
         return { success: false, error: "Service not found", data: null };
@@ -502,7 +500,6 @@ export const useCatalogManager = () => {
       // Get example products if available
       let products: any[] = [];
       if (service.example_products && service.example_products.length > 0) {
-
         const { data: productsData, error: productsError } = await $supabase
           .from("catalog_products")
           .select(
@@ -726,5 +723,5 @@ export const useCatalogManager = () => {
 
     // Bulk Operations
     bulkUpdateDisplayOrder,
-  };
+  } as const;
 };

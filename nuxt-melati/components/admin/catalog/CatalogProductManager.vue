@@ -215,8 +215,15 @@
 <script setup lang="ts">
 const emit = defineEmits(["alert"]);
 
-const { getProducts, getCategories, getSubcategories, deleteProduct, toggleProductFeatured, toggleProductBestSeller } =
-  useCatalogManager();
+const {
+  getProducts,
+  getProductById,
+  getCategories,
+  getSubcategories,
+  deleteProduct,
+  toggleProductFeatured,
+  toggleProductBestSeller,
+} = useCatalogManager();
 
 // State
 const products = ref<any[]>([]);
@@ -333,8 +340,22 @@ const loadSubcategories = async () => {
 };
 
 // Modal handlers
-const openModal = (product?: any) => {
-  selectedProduct.value = product || null;
+const openModal = async (product?: any) => {
+  if (product) {
+    // Fetch full product data with all fields
+    loading.value = true;
+    const result = await getProductById(product.id);
+    loading.value = false;
+
+    if (result.success) {
+      selectedProduct.value = result.data;
+    } else {
+      emit("alert", "Failed to load product details", "error");
+      return;
+    }
+  } else {
+    selectedProduct.value = null;
+  }
   showModal.value = true;
 };
 

@@ -164,6 +164,7 @@
               Gambar pertama akan digunakan sebagai thumbnail. Anda dapat mengupload beberapa gambar untuk galeri.
             </p>
             <CloudinaryUploader
+              :key="product?.id || 'new'"
               v-model="imageUrls"
               @uploaded="handleImagesUpload"
               folder="products"
@@ -373,8 +374,12 @@ onMounted(async () => {
   await loadGoldPrices();
 
   if (props.product) {
+    // Copy all product data
     form.value = { ...props.product };
-    specsText.value = (props.product.specs || []).join("\n");
+
+    // Explicitly set description and specs after form assignment
+    form.value.description = props.product.description || "";
+    form.value.specs = Array.isArray(props.product.specs) ? [...props.product.specs] : [];
 
     // Initialize imageUrls with existing images
     if (props.product.images && props.product.images.length > 0) {
@@ -400,13 +405,19 @@ onMounted(async () => {
     }
   }
 
+  // Set specsText AFTER initialization flag is released
+  await nextTick();
+  if (props.product && props.product.specs) {
+    specsText.value = (props.product.specs || []).join("\n");
+  }
+
   isInitializing.value = false; // Release flag
 });
 
 // Watch specs text
 watch(specsText, (newValue: string) => {
   // Jangan auto-update saat inisialisasi
-  if (!isInitializing.value) {
+  if (!isInitializing.value && newValue !== undefined) {
     form.value.specs = newValue.split("\n").filter((s: string) => s.trim());
   }
 });
