@@ -1,7 +1,3 @@
-/**
- * Composable untuk mengelola konfigurasi kadar emas
- * Menangani link Shopee & WhatsApp per kategori kadar
- */
 
 interface KaratConfig {
   id: string;

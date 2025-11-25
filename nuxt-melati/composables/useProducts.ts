@@ -11,12 +11,6 @@ export function useProducts() {
     try {
       pending.value = true;
       error.value = null;
-      // if (config.public.supabaseUrl && config.public.supabaseAnonKey) {
-      //   const client = useSupabaseClient()
-      //   const { data, error: err } = await client.from('products').select('*').limit(8)
-      //   if (err) throw err
-      //   products.value = data as Product[]
-      // } else {
       products.value = [
         { id: "1", name: "Cincin Berlian", price: 4500000, image: "/img/ring.jpg", karat: "17K" },
         { id: "2", name: "Anting Elegan", price: 2800000, image: "/img/earrings1.jpg", karat: "16K" },

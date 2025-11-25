@@ -164,7 +164,6 @@
               Gambar pertama akan digunakan sebagai thumbnail. Anda dapat mengupload beberapa gambar untuk galeri.
             </p>
             <CloudinaryUploader
-              :key="`uploader-${imageUrls.join(',')}`"
               v-model="imageUrls"
               @uploaded="handleImagesUpload"
               folder="products"
@@ -262,7 +261,7 @@ const props = defineProps<{
 
 const emit = defineEmits(["close", "saved"]);
 
-const { createProduct, updateProduct, getProductById } = useCatalogManager();
+const { createProduct, updateProduct } = useCatalogManager();
 const { getGoldPrices, calculatePrice } = useGoldPricing();
 const toast = useToast();
 
@@ -369,65 +368,47 @@ const filterSubcategories = () => {
 
 // Initialize
 onMounted(async () => {
-  isInitializing.value = true;
+  isInitializing.value = true; // Set flag
 
   await loadGoldPrices();
 
   if (props.product) {
-    // Fetch complete product data from database
-    console.log("[CatalogProductModal] Fetching complete product data for ID:", props.product.id);
-    const result = await getProductById(props.product.id);
+    form.value = { ...props.product };
+    specsText.value = (props.product.specs || []).join("\n");
 
-    if (result.success && result.data) {
-      console.log("[CatalogProductModal] Complete data loaded:", result.data);
-      form.value = { ...result.data };
+    // Initialize imageUrls with existing images
+    if (props.product.images && props.product.images.length > 0) {
+      imageUrls.value = [...props.product.images];
+    } else if (props.product.thumbnail_image) {
+      imageUrls.value = [props.product.thumbnail_image];
+    }
 
-      // Populate specs properly
-      const specsArray = result.data.specs || [];
-      specsText.value = specsArray.join("\n");
-      form.value.specs = [...specsArray];
+    // Parse existing weight if numeric not set
+    if (!form.value.weight_grams && form.value.weight) {
+      const match = form.value.weight.match(/[\d.]+/);
+      if (match) form.value.weight_grams = parseFloat(match[0]);
+    }
 
-      // Initialize imageUrls with ALL images
-      if (result.data.images && result.data.images.length > 0) {
-        imageUrls.value = [...result.data.images];
-      } else if (result.data.thumbnail_image) {
-        imageUrls.value = [result.data.thumbnail_image];
-      }
+    // Auto-detect apakah harga berbeda dari kalkulasi otomatis
+    await nextTick(); // Tunggu goldPrices loaded
 
-      // Parse existing weight if numeric not set
-      if (!form.value.weight_grams && form.value.weight) {
-        const match = form.value.weight.match(/[\d.]+/);
-        if (match) form.value.weight_grams = parseFloat(match[0]);
-      }
+    const autoPrice = calculatePrice(form.value.weight_grams || 0, form.value.karat || "", goldPrices.value);
 
-      // Auto-detect price override
-      await nextTick();
-      const autoPrice = calculatePrice(form.value.weight_grams || 0, form.value.karat || "", goldPrices.value);
-      if (form.value.price !== autoPrice && form.value.price > 0) {
-        form.value.price_override = true;
-      }
-    } else {
-      console.error("[CatalogProductModal] Failed to fetch complete data, using props");
-      // Fallback to props data
-      form.value = { ...props.product };
-      const specsArray = props.product.specs || [];
-      specsText.value = specsArray.join("\n");
-      form.value.specs = [...specsArray];
-
-      if (props.product.images && props.product.images.length > 0) {
-        imageUrls.value = [...props.product.images];
-      } else if (props.product.thumbnail_image) {
-        imageUrls.value = [props.product.thumbnail_image];
-      }
+    // Jika harga produk berbeda dari kalkulasi otomatis, tandai sebagai override
+    if (form.value.price !== autoPrice && form.value.price > 0) {
+      form.value.price_override = true;
     }
   }
 
-  isInitializing.value = false;
+  isInitializing.value = false; // Release flag
 });
 
-// Watch specs text - simplified
+// Watch specs text
 watch(specsText, (newValue: string) => {
-  form.value.specs = newValue.split("\n").filter((s: string) => s.trim());
+  // Jangan auto-update saat inisialisasi
+  if (!isInitializing.value) {
+    form.value.specs = newValue.split("\n").filter((s: string) => s.trim());
+  }
 });
 
 // Handle images upload

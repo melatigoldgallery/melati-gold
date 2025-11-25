@@ -1,57 +1,57 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch } from 'vue'
 
 const props = defineProps<{
-  show: boolean;
-  category: any;
-}>();
+  show: boolean
+  category: any
+}>()
 
 const emit = defineEmits<{
-  (e: "close"): void;
-  (e: "select", subcategoryId: string, subcategoryName: string): void;
-}>();
+  (e: 'close'): void
+  (e: 'select', subcategoryId: string, subcategoryName: string): void
+}>()
 
 // Fetch subcategories from database
-const { getSubcategories } = useCatalogManager();
+const { getSubcategories } = useCatalogManager()
 
-const subcategories = ref<any[]>([]);
-const loading = ref(false);
+const subcategories = ref<any[]>([])
+const loading = ref(false)
 
 // Load subcategories when category changes
 const loadSubcategories = async (categoryId: string) => {
   if (!categoryId) {
-    subcategories.value = [];
-    return;
+    subcategories.value = []
+    return
   }
 
-  loading.value = true;
-  const result = await getSubcategories(categoryId);
+  loading.value = true
+  const result = await getSubcategories(categoryId)
 
   if (result.success) {
     // Filter only active subcategories and sort by display_order
     subcategories.value = result.data
       .filter((sub: any) => sub.is_active)
-      .sort((a: any, b: any) => a.display_order - b.display_order);
+      .sort((a: any, b: any) => a.display_order - b.display_order)
   } else {
-    subcategories.value = [];
+    subcategories.value = []
   }
 
-  loading.value = false;
-};
+  loading.value = false
+}
 
 // Watch for show and category changes
 watch(
   () => [props.show, props.category],
   async ([isShown, category]) => {
     if (isShown && category && category.id) {
-      await loadSubcategories(category.id);
+      await loadSubcategories(category.id)
     } else if (!isShown) {
       // Reset when modal closes
-      subcategories.value = [];
+      subcategories.value = []
     }
   },
   { immediate: true }
-);
+)
 </script>
 
 <template>
@@ -65,11 +65,19 @@ watch(
     >
       <div
         class="relative bg-white rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto"
-        :class="subcategories.length <= 2 ? 'max-w-md' : 'max-w-3xl'"
+        :class="{
+          'max-w-md': subcategories.length <= 2,
+          'max-w-2xl': subcategories.length === 3,
+          'max-w-4xl': subcategories.length >= 4,
+        }"
         role="document"
       >
-        <div class="sticky top-0 z-10 flex items-center justify-between gap-4 p-4 bg-white border-b">
-          <h5 class="text-lg font-semibold text-neutral-800">Pilih Sub-Kategori {{ category?.name || "" }}</h5>
+        <div
+          class="sticky top-0 z-10 flex items-center justify-between gap-4 py-2 px-4 bg-white border-b"
+        >
+          <h5 class="text-lg font-semibold text-neutral-800">
+            Sub-Kategori {{ category?.name || '' }}
+          </h5>
           <button
             type="button"
             class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
@@ -91,7 +99,7 @@ watch(
           <!-- Empty State -->
           <div v-else-if="subcategories.length === 0" class="text-center py-12 text-gray-500">
             <i class="bi bi-inbox text-6xl mb-3 block"></i>
-            <p>Belum ada sub-kategori untuk {{ category?.name || "" }}</p>
+            <p>Belum ada sub-kategori untuk {{ category?.name || '' }}</p>
           </div>
 
           <!-- Subcategories Grid -->
@@ -99,9 +107,9 @@ watch(
             v-else
             class="grid gap-3 justify-items-center"
             :class="{
-              'grid-cols-2 md:grid-cols-4': subcategories.length === 4,
-              'grid-cols-2 md:grid-cols-3': subcategories.length === 3,
               'grid-cols-2': subcategories.length <= 2,
+              'grid-cols-2 md:grid-cols-3': subcategories.length === 3,
+              'grid-cols-2 md:grid-cols-4': subcategories.length === 4,
               'grid-cols-2 md:grid-cols-3 lg:grid-cols-4': subcategories.length > 4,
             }"
           >
@@ -127,10 +135,8 @@ watch(
                 >
                   <i class="bi bi-gem text-6xl text-white opacity-50"></i>
                 </div>
-                <div class="overlay">
-                  <div class="subcategory-text">
-                    <span class="text-white font-semibold text-sm">{{ subcategory.name }}</span>
-                  </div>
+                <div class="overlay flex items-end justify-center">
+                  <span class="text-white font-semibold mb-2">{{ subcategory.name }}</span>
                 </div>
               </div>
             </button>
@@ -152,34 +158,16 @@ watch(
 }
 .subcard {
   aspect-ratio: 4/5;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.subcard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 .subcard img {
   transition: transform 0.4s ease;
 }
 .subcard:hover img {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 60%);
-  display: flex;
-  align-items: flex-end;
-  padding: 0.75rem;
-}
-.subcategory-text {
-  width: 100%;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.5);
-  text-align: center;
-  transition: border-color 0.3s ease;
-}
-.subcard:hover .subcategory-text {
-  border-bottom-color: rgba(212, 175, 55, 0.9);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.15));
 }
 </style>

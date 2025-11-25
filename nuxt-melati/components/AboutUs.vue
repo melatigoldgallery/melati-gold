@@ -1,10 +1,12 @@
 <template>
-  <section id="tentang" class="bg-cream py-16 md:py-24 lg:py-32">
+  <section id="tentang" class="bg-cream py-10 md:py-16">
     <div class="container">
       <div class="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
         <!-- Content -->
         <div class="reveal-right">
-          <h2 class="section-title tracking-tight leading-tight text-center lg:text-left">Tentang Melati Gold</h2>
+          <h2 class="section-title tracking-tight leading-tight text-center lg:text-left">
+            Tentang Melati Gold
+          </h2>
 
           <div class="mb-3 flex justify-center lg:justify-start">
             <span
@@ -13,15 +15,16 @@
               Sejak 1983
             </span>
           </div>
-          <p class="mt-6 text-neutral-700 text-base md:text-lg leading-relaxed text-justify">
-            Melati Gold Shop telah menjadi destinasi terpercaya bagi para pecinta perhiasan emas di Bali sejak tahun
-            1983. Dengan lebih dari empat dekade pengalaman, kami terus berkembang dan berinovasi dalam menyajikan
-            koleksi perhiasan berkualitas dengan desain modern.
+          <p class="mt-6 mx-3 text-neutral-700 text-base md:text-lg leading-relaxed text-justify">
+            Melati Gold Shop telah menjadi destinasi terpercaya bagi para pecinta perhiasan emas di
+            Bali sejak tahun 1983. Dengan lebih dari empat dekade pengalaman, kami terus berkembang
+            dan berinovasi dalam menyajikan koleksi perhiasan berkualitas dengan desain modern.
           </p>
-          <p class="mt-4 text-neutral-700 text-base md:text-lg leading-relaxed text-justify">
-            Berlokasi di Jalan Diponegoro No. 116, Denpasar, toko kami yang ketiga ini dibuka pada tahun 2018 sebagai
-            komitmen kami untuk memberikan layanan terbaik kepada pelanggan setia. Kami bangga menjadi mitra dari
-            berbagai pabrik emas ternama dan menyediakan logam mulia dengan standar internasional.
+          <p class="mt-4 mx-3 text-neutral-700 text-base md:text-lg leading-relaxed text-justify">
+            Berlokasi di Jalan Diponegoro No. 116, Denpasar, toko kami yang ketiga ini dibuka pada
+            tahun 2018 sebagai komitmen kami untuk memberikan layanan terbaik kepada pelanggan
+            setia. Kami bangga menjadi mitra dari berbagai pabrik emas ternama dan menyediakan logam
+            mulia dengan standar internasional.
           </p>
 
           <!-- Features List -->
@@ -33,7 +36,9 @@
                 <i class="bi bi-check-circle-fill text-gold text-lg"></i>
               </div>
               <div class="flex-1 pt-1.5">
-                <span class="text-neutral-800 font-medium">Kemitraan dengan pabrik emas terpercaya</span>
+                <span class="text-neutral-800 font-medium"
+                  >Kemitraan dengan pabrik emas terpercaya</span
+                >
                 <p class="text-sm text-neutral-600 mt-0.5">Jaminan kualitas dan keaslian produk</p>
               </div>
             </li>
@@ -45,7 +50,9 @@
               </div>
               <div class="flex-1 pt-1.5">
                 <span class="text-neutral-800 font-medium">Pelayanan personal dan profesional</span>
-                <p class="text-sm text-neutral-600 mt-0.5">Pengalaman berbelanja yang berkesan dan memuaskan</p>
+                <p class="text-sm text-neutral-600 mt-0.5">
+                  Pengalaman berbelanja yang berkesan dan memuaskan
+                </p>
               </div>
             </li>
             <li class="flex items-start gap-4 group">
@@ -65,7 +72,7 @@
         <!-- Images -->
         <div class="relative reveal-up order-first lg:order-last">
           <!-- Mobile: Logo -->
-          <div class="lg:hidden flex justify-center items-center py-8">
+          <div class="lg:hidden flex justify-center items-center py-0">
             <img src="/img/logo.png" alt="Logo Melati Gold" class="w-48 h-auto object-contain" />
           </div>
 

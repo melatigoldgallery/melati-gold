@@ -1,8 +1,3 @@
-/**
- * Toast Notification Composable
- * Lightweight toast notification system for Nuxt 3
- * No external dependencies required
- */
 
 export interface ToastMessage {
   id: string;

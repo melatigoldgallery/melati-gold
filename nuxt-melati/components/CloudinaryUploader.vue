@@ -203,11 +203,10 @@ onMounted(() => {
 watch(
   () => props.modelValue,
   (newVal) => {
-    if (newVal && newVal.length > 0) {
+    if (newVal && JSON.stringify(newVal) !== JSON.stringify(previewUrls.value)) {
       previewUrls.value = [...newVal];
     }
-  },
-  { immediate: true }
+  }
 );
 
 // Trigger file input

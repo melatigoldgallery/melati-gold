@@ -111,17 +111,13 @@ const selectedCategory = ref<any>(null);
 // Load categories
 const loadCategories = async () => {
   loading.value = true;
-  console.log("[CatalogCategoryManager] Loading categories...");
 
   const result = await getCategories();
-  console.log("[CatalogCategoryManager] Result:", result);
 
   if (result.success) {
     categories.value = result.data;
-    console.log("[CatalogCategoryManager] Categories loaded:", categories.value.length, "items");
   } else {
     const errorMsg = "error" in result ? result.error : "Unknown error";
-    console.error("[CatalogCategoryManager] Error:", errorMsg);
     emit("alert", "Failed to load categories: " + errorMsg, "error");
   }
   loading.value = false;
@@ -166,16 +162,7 @@ const confirmDelete = async (category: any) => {
 
 // Initialize
 onMounted(() => {
-  console.log("[CatalogCategoryManager] Component mounted, calling loadCategories...");
   loadCategories();
 });
 
-// Debug watcher
-watch(categories, (newVal) => {
-  console.log("[CatalogCategoryManager] Categories changed:", newVal.length, "items");
-});
-
-watch(loading, (newVal) => {
-  console.log("[CatalogCategoryManager] Loading state:", newVal);
-});
 </script>

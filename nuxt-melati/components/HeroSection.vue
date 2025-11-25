@@ -5,7 +5,7 @@ const heroSlides = [
     id: 1,
     image: "/img/bg.png",
     title: "Welcome to Melati Gold Shop",
-    subtitle: "Discover our premium gold jewelry collection with exclusive designs from Melati Gold.",
+    subtitle: "Discover our premium gold jewelry collection with the latest trending design at Melati Gold Shop.",
     buttonText: "View Collection",
   },
   {
@@ -13,7 +13,7 @@ const heroSlides = [
     image: "/img/bg2.png",
     title: "Kilau Elegan, Pesona Abadi",
     subtitle:
-      "Perhiasan emas premium dengan desain eksklusif. Percayakan kilauanmu pada koleksi terbaik dari Melati Gold.",
+      "Perhiasan emas stylish dengan desain kekinian. Percayakan kilauanmu pada koleksi terbaik dari Melati Gold Shop.",
     buttonText: "Lihat Koleksi",
   },
 ];
@@ -73,12 +73,10 @@ const imageError = ref(false);
 
 const onImageLoad = () => {
   imageLoaded.value = true;
-  console.log("Hero image loaded successfully:", currentSlide.value.image);
 };
 
 const onImageError = () => {
   imageError.value = true;
-  console.error("Failed to load hero image:", currentSlide.value.image);
 };
 </script>
 
@@ -107,7 +105,7 @@ const onImageError = () => {
       </div>
 
       <!-- Overlay -->
-      <div class="absolute inset-0 z-10" />
+      <div class="absolute inset-0 bg-black/60 z-10" />
     </div>
 
     <!-- Hero Content -->

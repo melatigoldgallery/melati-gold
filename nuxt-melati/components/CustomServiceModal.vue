@@ -40,20 +40,13 @@ const loadServiceData = async () => {
     return;
   }
 
-  console.log("[CustomServiceModal] Loading service data for ID:", props.service.id);
   loading.value = true;
 
   const result = await getServiceWithProducts(props.service.id);
 
-  console.log("[CustomServiceModal] Result:", result);
-  console.log("[CustomServiceModal] Service data:", result.data);
-  console.log("[CustomServiceModal] Products:", result.data?.products);
-  console.log("[CustomServiceModal] Example products array:", result.data?.example_products);
-
   if (result.success && result.data) {
     serviceData.value = result.data;
     products.value = result.data.products || [];
-    console.log("[CustomServiceModal] Products set to:", products.value);
   } else {
     console.error("[CustomServiceModal] Failed to load service:", "error" in result ? result.error : "Unknown error");
   }

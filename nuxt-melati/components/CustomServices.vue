@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, nextTick } from "vue";
+import { computed, onMounted, onUnmounted, ref, nextTick } from 'vue'
 
 // Emit event untuk membuka modal service
 const emit = defineEmits<{
-  (e: "open-service", service: any): void;
-}>();
+  (e: 'open-service', service: any): void
+}>()
 
 // Fetch custom services from database
-const { getCustomServices } = useCatalogManager();
+const { getCustomServices } = useCatalogManager()
 
 // State data
-const services = ref<any[]>([]);
-const loading = ref(true);
+const services = ref<any[]>([])
+const loading = ref(true)
 
 // Carousel refs and state (translateX-based with looping)
-const viewport = ref<HTMLElement | null>(null);
-const track = ref<HTMLElement | null>(null);
-const activeIndex = ref(0);
-const offsetPx = ref(0);
-const slideWidthPx = ref(0);
+const viewport = ref<HTMLElement | null>(null)
+const track = ref<HTMLElement | null>(null)
+const activeIndex = ref(0)
+const offsetPx = ref(0)
+const slideWidthPx = ref(0)
 
-const slideCount = computed(() => services.value.length);
+const slideCount = computed(() => services.value.length)
 
 function getSlides(): HTMLElement[] {
-  const el = track.value;
-  if (!el) return [];
-  return Array.from(el.children) as HTMLElement[];
+  const el = track.value
+  if (!el) return []
+  return Array.from(el.children) as HTMLElement[]
 }
 
 function getMetrics() {
-  const vp = viewport.value;
-  const tr = track.value;
-  const slides = getSlides();
+  const vp = viewport.value
+  const tr = track.value
+  const slides = getSlides()
   if (!vp || !tr || slides.length === 0) {
     return {
       vp: null as HTMLElement | null,
@@ -42,128 +42,132 @@ function getMetrics() {
       visibleCount: 1,
       maxIndex: 0,
       maxOffset: 0,
-    };
+    }
   }
-  const styles = getComputedStyle(tr);
-  const gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
-  const paddingLeft = parseFloat(styles.paddingLeft || "0") || 0;
-  const paddingRight = parseFloat(styles.paddingRight || "0") || 0;
-  const paddingX = paddingLeft + paddingRight;
-  const slideWidth = slides[0].clientWidth;
-  const visibleSpace = Math.max(0, vp.clientWidth - paddingX);
-  const visibleCount = Math.max(1, Math.floor((visibleSpace + gap) / (slideWidth + gap)));
-  const maxIndex = Math.max(0, slides.length - visibleCount);
-  const maxOffset = Math.max(0, tr.scrollWidth - vp.clientWidth);
-  return { vp, tr, slides, slideWidth, gap, visibleCount, maxIndex, maxOffset };
+  const styles = getComputedStyle(tr)
+  const gap = parseFloat(styles.columnGap || styles.gap || '0') || 0
+  const paddingLeft = parseFloat(styles.paddingLeft || '0') || 0
+  const paddingRight = parseFloat(styles.paddingRight || '0') || 0
+  const paddingX = paddingLeft + paddingRight
+  const slideWidth = slides[0].clientWidth
+  const visibleSpace = Math.max(0, vp.clientWidth - paddingX)
+  const visibleCount = Math.max(1, Math.floor((visibleSpace + gap) / (slideWidth + gap)))
+  const maxIndex = Math.max(0, slides.length - visibleCount)
+  const maxOffset = Math.max(0, tr.scrollWidth - vp.clientWidth)
+  return { vp, tr, slides, slideWidth, gap, visibleCount, maxIndex, maxOffset }
 }
 
 function goTo(index: number) {
-  const { vp, slides, maxIndex, maxOffset, slideWidth, gap } = getMetrics();
-  if (!vp || slides.length === 0) return;
-  if (index < 0) index = 0;
-  if (index > maxIndex) index = maxIndex;
+  const { vp, slides, maxIndex, maxOffset, slideWidth, gap } = getMetrics()
+  if (!vp || slides.length === 0) return
+  if (index < 0) index = 0
+  if (index > maxIndex) index = maxIndex
 
   // Calculate offset based on card width and gap for precise positioning
-  const calculatedOffset = index * (slideWidth + gap);
-  const clamped = Math.min(calculatedOffset, maxOffset);
-  offsetPx.value = clamped;
-  activeIndex.value = index;
+  const calculatedOffset = index * (slideWidth + gap)
+  const clamped = Math.min(calculatedOffset, maxOffset)
+  offsetPx.value = clamped
+  activeIndex.value = index
 }
 
 function getTargetCols() {
-  if (typeof window === "undefined") return 1;
-  const w = window.innerWidth;
-  if (w >= 1024) return 4; // lg and up: 4-up
-  if (w >= 768) return 2; // md: 2-up
-  return 1; // sm and below: 1-up
+  if (typeof window === 'undefined') return 1
+  const w = window.innerWidth
+  if (w >= 1024) return 4 // lg and up: 4-up
+  if (w >= 768) return 2 // md: 2-up
+  return 1 // sm and below: 1-up
 }
 
 function updateLayout() {
-  const vp = viewport.value;
-  const tr = track.value;
-  if (!vp || !tr) return;
-  const styles = getComputedStyle(tr);
-  const gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
-  const paddingLeft = parseFloat(styles.paddingLeft || "0") || 0;
-  const paddingRight = parseFloat(styles.paddingRight || "0") || 0;
-  const paddingX = paddingLeft + paddingRight;
-  const cols = getTargetCols();
-  const width = Math.max(0, (vp.clientWidth - paddingX - gap * (cols - 1)) / cols);
-  slideWidthPx.value = width;
-  requestAnimationFrame(() => goTo(activeIndex.value));
+  const vp = viewport.value
+  const tr = track.value
+  if (!vp || !tr) return
+  const styles = getComputedStyle(tr)
+  const gap = parseFloat(styles.columnGap || styles.gap || '0') || 0
+  const paddingLeft = parseFloat(styles.paddingLeft || '0') || 0
+  const paddingRight = parseFloat(styles.paddingRight || '0') || 0
+  const paddingX = paddingLeft + paddingRight
+  const cols = getTargetCols()
+  const width = Math.max(0, (vp.clientWidth - paddingX - gap * (cols - 1)) / cols)
+  slideWidthPx.value = width
+  requestAnimationFrame(() => goTo(activeIndex.value))
 }
 
 function prev() {
-  const { maxIndex } = getMetrics();
+  const { maxIndex } = getMetrics()
   if (activeIndex.value <= 0) {
-    goTo(maxIndex);
+    goTo(maxIndex)
   } else {
-    goTo(activeIndex.value - 1);
+    goTo(activeIndex.value - 1)
   }
 }
 function next() {
-  const { maxIndex } = getMetrics();
+  const { maxIndex } = getMetrics()
   if (activeIndex.value >= maxIndex) {
-    goTo(0);
+    goTo(0)
   } else {
-    goTo(activeIndex.value + 1);
+    goTo(activeIndex.value + 1)
   }
 }
 
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === "ArrowLeft") {
-    e.preventDefault();
-    prev();
-  } else if (e.key === "ArrowRight") {
-    e.preventDefault();
-    next();
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault()
+    prev()
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault()
+    next()
   }
 }
 
 // Load services
 const loadServices = async () => {
-  loading.value = true;
-  const result = await getCustomServices();
+  loading.value = true
+  const result = await getCustomServices()
   if (result.success) {
     services.value = result.data
       .filter((service: any) => service.is_active)
-      .sort((a: any, b: any) => a.display_order - b.display_order);
+      .sort((a: any, b: any) => a.display_order - b.display_order)
   }
-  loading.value = false;
+  loading.value = false
   // Ensure DOM renders before measuring and positioning
-  await nextTick();
+  await nextTick()
   requestAnimationFrame(() => {
-    updateLayout();
-    goTo(0);
-  });
-};
+    updateLayout()
+    goTo(0)
+  })
+}
 
 // Handle service card click
 const openService = (service: any) => {
-  emit("open-service", service);
-};
+  emit('open-service', service)
+}
 
 // Lifecycle
 onMounted(() => {
-  const onResize = () => requestAnimationFrame(() => updateLayout());
-  window.addEventListener("resize", onResize);
-  loadServices();
-  requestAnimationFrame(() => updateLayout());
-  onUnmounted(() => window.removeEventListener("resize", onResize));
-});
+  const onResize = () => requestAnimationFrame(() => updateLayout())
+  window.addEventListener('resize', onResize)
+  loadServices()
+  requestAnimationFrame(() => updateLayout())
+  onUnmounted(() => window.removeEventListener('resize', onResize))
+})
 </script>
 
 <template>
-  <section id="custom" class="bg-cream py-16">
+  <section id="custom" class="bg-cream py-10 md:py-14">
     <div class="container mx-auto max-w-7xl px-4">
       <div class="mb-8 text-center reveal-up">
         <h2 class="section-title text-maroon">Layanan Custom</h2>
-        <p class="mt-3 text-neutral-600">Kami melayani pembuatan perhiasan sesuai keinginan Anda.</p>
+        <p class="mt-3 text-neutral-600">
+          Kami melayani pembuatan perhiasan sesuai keinginan Anda.
+        </p>
       </div>
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <div class="inline-block w-12 h-12 border-4 border-maroon border-t-transparent rounded-full animate-spin"></div>
+        <div
+          class="inline-block w-12 h-12 border-4 border-maroon border-t-transparent rounded-full animate-spin"
+        ></div>
         <p class="mt-4 text-neutral-600">Memuat layanan...</p>
       </div>
 
@@ -174,7 +178,11 @@ onMounted(() => {
 
       <!-- Cards -->
       <div v-else>
-        <div class="flex items-center gap-1 sm:gap-3" role="region" aria-label="Carousel layanan custom">
+        <div
+          class="flex items-center gap-1 sm:gap-3"
+          role="region"
+          aria-label="Carousel layanan custom"
+        >
           <button
             v-if="slideCount > 1"
             type="button"

@@ -26,7 +26,6 @@ export const useCatalogManager = () => {
         return await cache.fetchWithCache(
           cacheKey,
           async () => {
-            console.log("[useCatalogManager] Fetching categories from Supabase...");
 
             const { data, error } = await $supabase
               .from("catalog_categories")
@@ -34,8 +33,6 @@ export const useCatalogManager = () => {
               .order("display_order", { ascending: true });
 
             if (error) throw error;
-
-            console.log("[useCatalogManager] Success! Categories count:", data?.length || 0);
             return { success: true, data: data || [] };
           },
           { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
@@ -65,7 +62,6 @@ export const useCatalogManager = () => {
 
       // Invalidate categories cache after create
       cache.clearPrefix("catalog_categories");
-      console.log("[useCatalogManager] Cache invalidated after creating category");
 
       return { success: true, data };
     } catch (error) {
@@ -90,7 +86,6 @@ export const useCatalogManager = () => {
 
       // Invalidate categories cache after update
       cache.clearPrefix("catalog_categories");
-      console.log("[useCatalogManager] Cache invalidated after updating category");
 
       return { success: true, data };
     } catch (error) {
@@ -107,7 +102,6 @@ export const useCatalogManager = () => {
 
       // Invalidate categories cache after delete
       cache.clearPrefix("catalog_categories");
-      console.log("[useCatalogManager] Cache invalidated after deleting category");
 
       return { success: true };
     } catch (error) {
@@ -129,7 +123,6 @@ export const useCatalogManager = () => {
         return await cache.fetchWithCache(
           cacheKey,
           async () => {
-            console.log("[useCatalogManager] Fetching subcategories from Supabase...");
             return await fetchSubcategoriesFromDB();
           },
           { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
@@ -172,7 +165,6 @@ export const useCatalogManager = () => {
 
       // Invalidate subcategories cache after create
       cache.clearPrefix("catalog_subcategories");
-      console.log("[useCatalogManager] Cache invalidated after creating subcategory");
 
       return { success: true, data };
     } catch (error) {
@@ -214,7 +206,6 @@ export const useCatalogManager = () => {
 
       // Invalidate subcategories cache after delete
       cache.clearPrefix("catalog_subcategories");
-      console.log("[useCatalogManager] Cache invalidated after deleting subcategory");
 
       return { success: true };
     } catch (error) {
@@ -372,7 +363,6 @@ export const useCatalogManager = () => {
       cache.clearPrefix("catalog_products");
       cache.clearPrefix("v_featured_products");
       cache.clearPrefix("v_best_sellers");
-      console.log("[useCatalogManager] Cache invalidated after creating product");
 
       return { success: true, data };
     } catch (error) {
@@ -394,7 +384,6 @@ export const useCatalogManager = () => {
       cache.clearPrefix("catalog_products");
       cache.clearPrefix("v_featured_products");
       cache.clearPrefix("v_best_sellers");
-      console.log("[useCatalogManager] Cache invalidated after updating product");
 
       return { success: true, data };
     } catch (error) {
@@ -413,7 +402,6 @@ export const useCatalogManager = () => {
       cache.clearPrefix("catalog_products");
       cache.clearPrefix("v_featured_products");
       cache.clearPrefix("v_best_sellers");
-      console.log("[useCatalogManager] Cache invalidated after deleting product");
 
       return { success: true };
     } catch (error) {
@@ -433,7 +421,6 @@ export const useCatalogManager = () => {
       // Invalidate products and featured cache after toggle
       cache.clearPrefix("catalog_products");
       cache.clearPrefix("v_featured_products");
-      console.log("[useCatalogManager] Cache invalidated after toggling featured");
 
       return { success: true };
     } catch (error) {
@@ -453,7 +440,6 @@ export const useCatalogManager = () => {
       // Invalidate products and best sellers cache after toggle
       cache.clearPrefix("catalog_products");
       cache.clearPrefix("v_best_sellers");
-      console.log("[useCatalogManager] Cache invalidated after toggling best seller");
 
       return { success: true };
     } catch (error) {
@@ -474,7 +460,6 @@ export const useCatalogManager = () => {
         return await cache.fetchWithCache(
           cacheKey,
           async () => {
-            console.log("[useCatalogManager] Fetching custom services from Supabase...");
             return await fetchServicesFromDB();
           },
           { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
@@ -501,8 +486,6 @@ export const useCatalogManager = () => {
 
   const getServiceWithProducts = async (serviceId: string) => {
     try {
-      console.log("[getServiceWithProducts] Fetching service ID:", serviceId);
-
       // Get service details
       const { data: service, error: serviceError } = await $supabase
         .from("custom_services")
@@ -510,20 +493,15 @@ export const useCatalogManager = () => {
         .eq("id", serviceId)
         .single();
 
-      console.log("[getServiceWithProducts] Service result:", { service, serviceError });
 
       if (serviceError) throw serviceError;
       if (!service) {
         return { success: false, error: "Service not found", data: null };
       }
 
-      console.log("[getServiceWithProducts] Service example_products:", service.example_products);
-      console.log("[getServiceWithProducts] Array length:", service.example_products?.length);
-
       // Get example products if available
       let products: any[] = [];
       if (service.example_products && service.example_products.length > 0) {
-        console.log("[getServiceWithProducts] Fetching products with IDs:", service.example_products);
 
         const { data: productsData, error: productsError } = await $supabase
           .from("catalog_products")
@@ -533,13 +511,10 @@ export const useCatalogManager = () => {
           .in("id", service.example_products)
           .eq("is_active", true);
 
-        console.log("[getServiceWithProducts] Products query result:", { productsData, productsError });
-
         if (productsError) {
           console.error("[getServiceWithProducts] Error fetching service products:", productsError);
         } else {
           products = productsData || [];
-          console.log("[getServiceWithProducts] Products found:", products.length);
         }
       } else {
         console.log("[getServiceWithProducts] No example_products to fetch");
@@ -553,7 +528,6 @@ export const useCatalogManager = () => {
         },
       };
 
-      console.log("[getServiceWithProducts] Final result:", result);
       return result;
     } catch (error) {
       console.error("[getServiceWithProducts] Error:", error);
@@ -569,7 +543,6 @@ export const useCatalogManager = () => {
 
       // Invalidate custom services cache after create
       cache.clearPrefix("custom_services");
-      console.log("[useCatalogManager] Cache invalidated after creating custom service");
 
       return { success: true, data };
     } catch (error) {
@@ -589,7 +562,6 @@ export const useCatalogManager = () => {
 
       // Invalidate custom services cache after update
       cache.clearPrefix("custom_services");
-      console.log("[useCatalogManager] Cache invalidated after updating custom service");
 
       return { success: true, data };
     } catch (error) {
@@ -627,7 +599,6 @@ export const useCatalogManager = () => {
         return await cache.fetchWithCache(
           cacheKey,
           async () => {
-            console.log("[useCatalogManager] Fetching best sellers from Supabase...");
             return await fetchBestSellersFromDB();
           },
           { ttl: 5 * 60 * 1000 } // Cache for 5 minutes
@@ -662,7 +633,6 @@ export const useCatalogManager = () => {
         return await cache.fetchWithCache(
           cacheKey,
           async () => {
-            console.log("[useCatalogManager] Fetching featured products from Supabase...");
             return await fetchFeaturedFromDB();
           },
           { ttl: 5 * 60 * 1000 } // Cache for 5 minutes
@@ -713,7 +683,6 @@ export const useCatalogManager = () => {
       } else if (table === "custom_services") {
         cache.clearPrefix("custom_services");
       }
-      console.log(`[useCatalogManager] Cache invalidated after bulk updating display order in ${table}`);
 
       return { success: true };
     } catch (error) {

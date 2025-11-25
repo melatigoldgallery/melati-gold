@@ -198,7 +198,6 @@ const save = async () => {
       alert("Failed to save category: " + result.error);
     }
   } catch (error) {
-    console.error("Save error:", error);
     alert("An error occurred while saving");
   } finally {
     saving.value = false;

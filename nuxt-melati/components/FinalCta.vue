@@ -1,62 +1,62 @@
 <script setup lang="ts">
-const isOpen = ref(false);
+const isOpen = ref(false)
 
 // Get karat configurations from database
-const { $supabase } = useNuxtApp();
-const supabase = $supabase as any;
+const { $supabase } = useNuxtApp()
+const supabase = $supabase as any
 
-const karatMuda = ref<any>(null);
-const karatTua = ref<any>(null);
-const loading = ref(true);
+const karatMuda = ref<any>(null)
+const karatTua = ref<any>(null)
+const loading = ref(true)
 
 // Fetch karat configurations
 const loadKaratConfigs = async () => {
-  loading.value = true;
+  loading.value = true
   try {
-    const { data, error } = await supabase.from("karat_configurations").select("*").order("id");
+    const { data, error } = await supabase.from('karat_configurations').select('*').order('id')
 
-    if (error) throw error;
+    if (error) throw error
 
     if (data) {
-      karatMuda.value = data.find((c: any) => c.category === "kadar_muda");
-      karatTua.value = data.find((c: any) => c.category === "kadar_tua");
+      karatMuda.value = data.find((c: any) => c.category === 'kadar_muda')
+      karatTua.value = data.find((c: any) => c.category === 'kadar_tua')
     }
   } catch (error) {
-    console.error("Error loading karat configs:", error);
+    console.error('Error loading karat configs:', error)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 function openModal() {
-  isOpen.value = true;
+  isOpen.value = true
 }
 function closeModal() {
-  isOpen.value = false;
+  isOpen.value = false
 }
 function onKeyDown(e: KeyboardEvent) {
-  if (e.key === "Escape" && isOpen.value) closeModal();
+  if (e.key === 'Escape' && isOpen.value) closeModal()
 }
 
 function waLink(config: any, category: string) {
-  if (!config || !config.whatsapp_number) return "#";
-  const categoryName = category === "kadar_muda" ? "Kadar Muda" : "Kadar Tua";
-  const text = `Halo Admin ${categoryName}, saya ingin bertanya tentang produk perhiasan emas.`;
-  return `https://wa.me/${config.whatsapp_number}?text=${encodeURIComponent(text)}`;
+  if (!config || !config.whatsapp_number) return '#'
+  const categoryName = category === 'kadar_muda' ? 'Kadar Muda' : 'Kadar Tua'
+  const text = `Halo Admin ${categoryName}, saya ingin bertanya tentang produk perhiasan emas.`
+  return `https://wa.me/${config.whatsapp_number}?text=${encodeURIComponent(text)}`
 }
 
 onMounted(() => {
-  window.addEventListener("keydown", onKeyDown);
-  loadKaratConfigs();
-});
+  window.addEventListener('keydown', onKeyDown)
+  loadKaratConfigs()
+})
 
 onUnmounted(() => {
-  window.removeEventListener("keydown", onKeyDown);
-});
+  window.removeEventListener('keydown', onKeyDown)
+})
 </script>
 
 <template>
-  <section class="relative overflow-hidden py-20 bg-cream">
+  <section class="relative overflow-hidden py-12 md:py-16 bg-cream">
     <!-- Decorative Elements -->
     <div class="absolute inset-0 -z-10">
       <div class="absolute top-1/4 left-0 w-96 h-96 bg-gold/10 rounded-full blur-3xl"></div>
@@ -72,7 +72,9 @@ onUnmounted(() => {
       </div>
 
       <!-- Title -->
-      <h2 class="text-4xl md:text-5xl font-serif font-bold text-maroon mb-4">Siap Bersinar Hari Ini?</h2>
+      <h2 class="text-4xl md:text-5xl font-serif font-bold text-maroon mb-4">
+        Siap Bersinar Hari Ini?
+      </h2>
       <p class="mt-3 text-lg text-black/80 max-w-2xl mx-auto">
         Temukan perhiasan emas berkualitas yang melengkapi pesona dan gaya Anda.
       </p>
@@ -116,9 +118,13 @@ onUnmounted(() => {
           class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transform transition-all my-8 max-h-[90vh] flex flex-col"
         >
           <!-- Header -->
-          <div class="bg-gradient-to-r from-maroon to-black px-4 sm:px-6 py-4 border-b border-gold/20 flex-shrink-0">
+          <div
+            class="bg-gradient-to-r from-maroon to-black px-4 sm:px-6 py-4 border-b border-gold/20 flex-shrink-0"
+          >
             <div class="flex items-center justify-between">
-              <h3 class="text-lg sm:text-xl font-serif font-semibold text-white">Belanja di Toko Resmi</h3>
+              <h3 class="text-lg sm:text-xl font-serif font-semibold text-white">
+                Belanja di Toko Resmi
+              </h3>
               <button
                 class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
                 @click="closeModal"
@@ -135,10 +141,18 @@ onUnmounted(() => {
               <div
                 class="mx-auto mb-3 h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-maroon to-black flex items-center justify-center shadow-elegant ring-1 ring-gold/30"
               >
-                <img src="/img/logo.png" alt="Melati Gold" class="h-16 w-16 sm:h-20 sm:w-20 object-contain" />
+                <img
+                  src="/img/logo.png"
+                  alt="Melati Gold"
+                  class="h-16 w-16 sm:h-20 sm:w-20 object-contain"
+                />
               </div>
-              <p class="text-maroon font-serif font-semibold text-base sm:text-lg">Melati Gold Shop</p>
-              <p class="text-xs sm:text-sm text-gray-600 mt-1">Pilih platform belanja favorit Anda</p>
+              <p class="text-maroon font-serif font-semibold text-base sm:text-lg">
+                Melati Gold Shop
+              </p>
+              <p class="text-xs sm:text-sm text-gray-600 mt-1">
+                Pilih platform belanja favorit Anda
+              </p>
             </div>
 
             <!-- Loading State -->
@@ -211,7 +225,9 @@ onUnmounted(() => {
                 <div class="flex items-center gap-2 sm:gap-3">
                   <i class="bi bi-whatsapp text-lg sm:text-xl"></i>
                   <div class="text-left">
-                    <span class="block text-xs sm:text-sm font-semibold">Chat Admin Kadar Muda</span>
+                    <span class="block text-xs sm:text-sm font-semibold"
+                      >Chat Admin Kadar Muda</span
+                    >
                     <span class="block text-xs opacity-90">8K dan 9K</span>
                   </div>
                 </div>

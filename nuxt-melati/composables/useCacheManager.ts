@@ -202,7 +202,7 @@ export const useCacheManager = () => {
   const getStats = () => {
     const memorySize = memoryCache.size;
     const localStorageSize = process.client ? Object.keys(localStorage).length : 0;
-    
+
     return {
       memory: {
         entries: memorySize,
@@ -226,12 +226,8 @@ export const useCacheManager = () => {
     // Try cache first
     const cached = get<T>(key, options);
     if (cached !== null) {
-      console.log(`[Cache HIT] ${key}`);
       return cached;
     }
-
-    // Cache miss, fetch fresh data
-    console.log(`[Cache MISS] ${key} - Fetching fresh data...`);
     const data = await fetchFn();
 
     // Store in cache

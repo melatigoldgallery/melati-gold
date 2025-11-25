@@ -1,174 +1,176 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps<{
-  show: boolean;
-  product: null | any;
-  serviceContext?: any | null;
-}>();
+  show: boolean
+  product: null | any
+  serviceContext?: any | null
+}>()
 
 const emit = defineEmits<{
-  (e: "close"): void;
-}>();
+  (e: 'close'): void
+}>()
 
-const { getProductById } = useCatalogManager();
+const { getProductById } = useCatalogManager()
 
 // Local state for product detail
-const productDetail = ref<any>(null);
-const loading = ref(false);
+const productDetail = ref<any>(null)
+const loading = ref(false)
 
 // Fetch product detail jika data tidak lengkap
 const loadProductDetail = async () => {
   if (!props.product) {
-    productDetail.value = null;
-    return;
+    productDetail.value = null
+    return
   }
 
   // Cek apakah data sudah lengkap (punya images array dan description)
   const hasCompleteData =
-    props.product.images && Array.isArray(props.product.images) && props.product.description !== undefined;
+    props.product.images &&
+    Array.isArray(props.product.images) &&
+    props.product.description !== undefined
 
   if (hasCompleteData) {
-    console.log("[ProductDetailModal] Product data already complete, using provided data");
-    productDetail.value = props.product;
-    return;
+    productDetail.value = props.product
+    return
   }
-
-  // Data tidak lengkap, fetch dari database
-  console.log("[ProductDetailModal] Fetching complete product data for ID:", props.product.id);
-  loading.value = true;
+  loading.value = true
 
   try {
-    const result = await getProductById(props.product.id);
+    const result = await getProductById(props.product.id)
 
     if (result.success && result.data) {
-      console.log("[ProductDetailModal] Product detail loaded:", result.data);
-      productDetail.value = result.data;
+      productDetail.value = result.data
     } else {
-      console.error("[ProductDetailModal] Failed to load product:", result.error);
       // Fallback ke data yang ada
-      productDetail.value = props.product;
+      productDetail.value = props.product
     }
   } catch (error) {
-    console.error("[ProductDetailModal] Error loading product:", error);
+    console.error('[ProductDetailModal] Error loading product:', error)
     // Fallback ke data yang ada
-    productDetail.value = props.product;
+    productDetail.value = props.product
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 // Watch untuk product changes
 watch(
   () => props.product,
   async (newProduct) => {
     if (newProduct && props.show) {
-      await loadProductDetail();
+      await loadProductDetail()
     }
   },
   { immediate: true }
-);
+)
 
 // Watch untuk show changes
 watch(
   () => props.show,
   async (isShown) => {
     if (isShown && props.product) {
-      await loadProductDetail();
+      await loadProductDetail()
     } else if (!isShown) {
       // Reset currentSlide when modal closes
-      currentSlide.value = 0;
+      currentSlide.value = 0
     }
   }
-);
+)
 
 // 🚀 Image optimization - inline functions
-const optimizeCloudinaryImage = (url: string, width: number, height: number, quality: number | "auto" = "auto") => {
-  if (!url || !url.includes("cloudinary.com")) {
-    return url;
+const optimizeCloudinaryImage = (
+  url: string,
+  width: number,
+  height: number,
+  quality: number | 'auto' = 'auto'
+) => {
+  if (!url || !url.includes('cloudinary.com')) {
+    return url
   }
-  const transformations = `w_${width},h_${height},c_fill,f_auto,q_${quality}`;
-  return url.replace("/upload/", `/upload/${transformations}/`);
-};
+  const transformations = `w_${width},h_${height},c_fill,f_auto,q_${quality}`
+  return url.replace('/upload/', `/upload/${transformations}/`)
+}
 
 const presets = {
   detail: (url: string) => optimizeCloudinaryImage(url, 1000, 1000, 90),
-  thumbnail: (url: string) => optimizeCloudinaryImage(url, 400, 400, "auto"),
-};
+  thumbnail: (url: string) => optimizeCloudinaryImage(url, 400, 400, 'auto'),
+}
 
 // Carousel state
-const currentSlide = ref(0);
+const currentSlide = ref(0)
 
 // Format price to Rupiah
 const formatPrice = (price: number) => {
-  if (!price) return "Rp 0";
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
+  if (!price) return 'Rp 0'
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
     maximumFractionDigits: 0,
-  }).format(price);
-};
+  }).format(price)
+}
 
 // Derived values to handle both demo and db product shapes
 const displayName = computed(
-  () => productDetail.value && (productDetail.value.name || productDetail.value.title || "")
-);
+  () => productDetail.value && (productDetail.value.name || productDetail.value.title || '')
+)
 const displayImages = computed(() => {
-  if (!productDetail.value) return [];
-  if (productDetail.value.images && productDetail.value.images.length) return productDetail.value.images;
+  if (!productDetail.value) return []
+  if (productDetail.value.images && productDetail.value.images.length)
+    return productDetail.value.images
   if (productDetail.value.gallery_images && productDetail.value.gallery_images.length)
-    return productDetail.value.gallery_images;
-  if (productDetail.value.thumbnail_image) return [productDetail.value.thumbnail_image];
-  return [];
-});
+    return productDetail.value.gallery_images
+  if (productDetail.value.thumbnail_image) return [productDetail.value.thumbnail_image]
+  return []
+})
 
 const displaySpecs = computed(() => {
-  if (!productDetail.value) return [];
-  return productDetail.value.specs || [];
-});
+  if (!productDetail.value) return []
+  return productDetail.value.specs || []
+})
 
 const displayPrice = computed(() => {
-  if (!productDetail.value) return "Rp 0";
-  const price = productDetail.value.price || 0;
-  return formatPrice(price);
-});
+  if (!productDetail.value) return 'Rp 0'
+  const price = productDetail.value.price || 0
+  return formatPrice(price)
+})
 
 // Optimize images for carousel (main view - high quality)
 const getOptimizedMainImage = (imageUrl: string) => {
-  if (!imageUrl || !imageUrl.includes("cloudinary.com")) {
-    return imageUrl;
+  if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
+    return imageUrl
   }
-  return presets.detail(imageUrl); // 1000x1000, high quality
-};
+  return presets.detail(imageUrl) // 1000x1000, high quality
+}
 
 // Optimize thumbnail images (smaller size)
 const getOptimizedThumbImage = (imageUrl: string) => {
-  if (!imageUrl || !imageUrl.includes("cloudinary.com")) {
-    return imageUrl;
+  if (!imageUrl || !imageUrl.includes('cloudinary.com')) {
+    return imageUrl
   }
-  return presets.thumbnail(imageUrl); // 400x400, compressed
-};
+  return presets.thumbnail(imageUrl) // 400x400, compressed
+}
 
 // Carousel navigation
 const goToSlide = (index: number) => {
-  currentSlide.value = index;
-};
+  currentSlide.value = index
+}
 
 const nextSlide = () => {
   if (currentSlide.value < displayImages.value.length - 1) {
-    currentSlide.value++;
+    currentSlide.value++
   } else {
-    currentSlide.value = 0;
+    currentSlide.value = 0
   }
-};
+}
 
 const prevSlide = () => {
   if (currentSlide.value > 0) {
-    currentSlide.value--;
+    currentSlide.value--
   } else {
-    currentSlide.value = displayImages.value.length - 1;
+    currentSlide.value = displayImages.value.length - 1
   }
-};
+}
 </script>
 
 <template>
@@ -178,7 +180,9 @@ const prevSlide = () => {
       class="fixed inset-0 z-[65] flex items-center justify-center bg-black/55 p-4"
       @click.self="emit('close')"
     >
-      <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+      <div
+        class="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto"
+      >
         <!-- Close Button -->
         <button
           @click="emit('close')"
@@ -191,7 +195,9 @@ const prevSlide = () => {
         <!-- Loading State -->
         <div v-if="loading" class="flex items-center justify-center min-h-[400px]">
           <div class="text-center">
-            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gold"></div>
+            <div
+              class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gold"
+            ></div>
             <p class="mt-4 text-gray-600">Memuat detail produk...</p>
           </div>
         </div>
@@ -199,11 +205,11 @@ const prevSlide = () => {
         <!-- Content -->
         <div v-else-if="productDetail" class="grid grid-cols-1 lg:grid-cols-2 gap-0">
           <!-- Left: Image Carousel -->
-          <div class="p-4 lg:p-6">
+          <div class="p-4 lg:p-4">
             <div class="relative">
               <!-- Main Carousel Image -->
-              <div class="relative rounded-xl overflow-hidden bg-gray-100 mb-4">
-                <div class="aspect-[4/5] w-full max-w-md mx-auto">
+              <div class="relative rounded-xl overflow-hidden bg-gray-100 mb-3">
+                <div class="aspect-[4/5] lg:aspect-[3/4] w-full max-w-md lg:max-w-sm mx-auto">
                   <img
                     :src="getOptimizedMainImage(displayImages[currentSlide])"
                     :alt="displayName"
@@ -232,7 +238,10 @@ const prevSlide = () => {
                 </template>
 
                 <!-- Indicators -->
-                <div v-if="displayImages.length > 1" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                <div
+                  v-if="displayImages.length > 1"
+                  class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2"
+                >
                   <button
                     v-for="(img, i) in displayImages"
                     :key="'ind' + i"
@@ -251,7 +260,11 @@ const prevSlide = () => {
                   :key="'t' + i"
                   @click="goToSlide(i)"
                   class="w-12 h-12 rounded-lg overflow-hidden border-2 transition-all"
-                  :class="i === currentSlide ? 'border-gold scale-105' : 'border-gray-200 hover:border-gold'"
+                  :class="
+                    i === currentSlide
+                      ? 'border-gold scale-105'
+                      : 'border-gray-200 hover:border-gold'
+                  "
                   :aria-label="`Go to image ${i + 1}`"
                 >
                   <img
@@ -266,12 +279,12 @@ const prevSlide = () => {
           </div>
 
           <!-- Right: Product Info -->
-          <div class="p-6 lg:p-8 bg-gray-50">
+          <div class="p-6 lg:p-6 bg-gray-50">
             <h3 class="text-2xl lg:text-3xl font-semibold text-neutral-800 mb-3">
-              {{productDetail.title || "" }}
+              {{ productDetail.title || '' }}
             </h3>
             <p v-if="productDetail.description" class="text-neutral-600 mb-4">
-              {{ productDetail.description || "" }}
+              {{ productDetail.description || '' }}
             </p>
 
             <!-- Specs -->
