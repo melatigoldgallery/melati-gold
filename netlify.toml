@@ -2,10 +2,10 @@
 [build]
   # Base directory tempat aplikasi berada
   base = "nuxt-melati"
-  
+
   # Build command
   command = "npm run build"
-  
+
   # Publish directory untuk Netlify preset (client assets)
   publish = ".nuxt/dist/client"
 
