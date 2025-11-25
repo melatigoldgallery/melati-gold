@@ -6,13 +6,15 @@
   # Build command
   command = "npm run build"
 
-  # Publish directory untuk Netlify preset (client assets)
-  publish = ".nuxt/dist/client"
+  # Publish directory - Nuxt generates to dist for static SPA
+  publish = "dist"
 
 # Node version
 [build.environment]
   NODE_VERSION = "20"
 
-# Netlify functions (otomatis detect dari .netlify/functions-internal)
-[functions]
-  directory = ".netlify/functions-internal"
+# SPA fallback untuk client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
