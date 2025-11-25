@@ -1,6 +1,6 @@
 {
-  "date": "2025-10-14T06:53:46.657Z",
-  "preset": "netlify-legacy",
+  "date": "2025-11-25T04:51:59.907Z",
+  "preset": "netlify",
   "framework": {
     "name": "nuxt",
     "version": "3.19.1"
@@ -9,9 +9,5 @@
     "nitro": "2.12.5"
   },
   "commands": {},
-  "config": {
-    "awsLambda": {
-      "streaming": false
-    }
-  }
+  "config": {}
 }

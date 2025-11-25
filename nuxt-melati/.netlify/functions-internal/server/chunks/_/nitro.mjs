@@ -6,6 +6,74 @@ import { promises, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { createHash } from 'node:crypto';
 
+const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
+const suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
+const JsonSigRx = /^\s*["[{]|^\s*-?\d{1,16}(\.\d{1,17})?([Ee][+-]?\d+)?\s*$/;
+function jsonParseTransform(key, value) {
+  if (key === "__proto__" || key === "constructor" && value && typeof value === "object" && "prototype" in value) {
+    warnKeyDropped(key);
+    return;
+  }
+  return value;
+}
+function warnKeyDropped(key) {
+  console.warn(`[destr] Dropping "${key}" key to prevent prototype pollution.`);
+}
+function destr(value, options = {}) {
+  if (typeof value !== "string") {
+    return value;
+  }
+  if (value[0] === '"' && value[value.length - 1] === '"' && value.indexOf("\\") === -1) {
+    return value.slice(1, -1);
+  }
+  const _value = value.trim();
+  if (_value.length <= 9) {
+    switch (_value.toLowerCase()) {
+      case "true": {
+        return true;
+      }
+      case "false": {
+        return false;
+      }
+      case "undefined": {
+        return void 0;
+      }
+      case "null": {
+        return null;
+      }
+      case "nan": {
+        return Number.NaN;
+      }
+      case "infinity": {
+        return Number.POSITIVE_INFINITY;
+      }
+      case "-infinity": {
+        return Number.NEGATIVE_INFINITY;
+      }
+    }
+  }
+  if (!JsonSigRx.test(value)) {
+    if (options.strict) {
+      throw new SyntaxError("[destr] Invalid JSON");
+    }
+    return value;
+  }
+  try {
+    if (suspectProtoRx.test(value) || suspectConstructorRx.test(value)) {
+      if (options.strict) {
+        throw new Error("[destr] Possible prototype pollution");
+      }
+      return JSON.parse(value, jsonParseTransform);
+    }
+    return JSON.parse(value);
+  } catch (error) {
+    if (options.strict) {
+      throw error;
+    }
+    return value;
+  }
+}
+
 const HASH_RE = /#/g;
 const AMPERSAND_RE = /&/g;
 const SLASH_RE = /\//g;
@@ -491,74 +559,6 @@ function _routerNodeToTable(initialPath, initialNode) {
   return table;
 }
 
-const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
-const suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
-const JsonSigRx = /^\s*["[{]|^\s*-?\d{1,16}(\.\d{1,17})?([Ee][+-]?\d+)?\s*$/;
-function jsonParseTransform(key, value) {
-  if (key === "__proto__" || key === "constructor" && value && typeof value === "object" && "prototype" in value) {
-    warnKeyDropped(key);
-    return;
-  }
-  return value;
-}
-function warnKeyDropped(key) {
-  console.warn(`[destr] Dropping "${key}" key to prevent prototype pollution.`);
-}
-function destr(value, options = {}) {
-  if (typeof value !== "string") {
-    return value;
-  }
-  if (value[0] === '"' && value[value.length - 1] === '"' && value.indexOf("\\") === -1) {
-    return value.slice(1, -1);
-  }
-  const _value = value.trim();
-  if (_value.length <= 9) {
-    switch (_value.toLowerCase()) {
-      case "true": {
-        return true;
-      }
-      case "false": {
-        return false;
-      }
-      case "undefined": {
-        return void 0;
-      }
-      case "null": {
-        return null;
-      }
-      case "nan": {
-        return Number.NaN;
-      }
-      case "infinity": {
-        return Number.POSITIVE_INFINITY;
-      }
-      case "-infinity": {
-        return Number.NEGATIVE_INFINITY;
-      }
-    }
-  }
-  if (!JsonSigRx.test(value)) {
-    if (options.strict) {
-      throw new SyntaxError("[destr] Invalid JSON");
-    }
-    return value;
-  }
-  try {
-    if (suspectProtoRx.test(value) || suspectConstructorRx.test(value)) {
-      if (options.strict) {
-        throw new Error("[destr] Possible prototype pollution");
-      }
-      return JSON.parse(value, jsonParseTransform);
-    }
-    return JSON.parse(value);
-  } catch (error) {
-    if (options.strict) {
-      throw error;
-    }
-    return value;
-  }
-}
-
 function isPlainObject(value) {
   if (value === null || typeof value !== "object") {
     return false;
@@ -800,6 +800,7 @@ function getRequestURL(event, opts = {}) {
 }
 
 const RawBodySymbol = Symbol.for("h3RawBody");
+const ParsedBodySymbol = Symbol.for("h3ParsedBody");
 const PayloadMethods$1 = ["PATCH", "POST", "PUT", "DELETE"];
 function readRawBody(event, encoding = "utf8") {
   assertMethod(event, PayloadMethods$1);
@@ -867,6 +868,26 @@ function readRawBody(event, encoding = "utf8") {
   const result = encoding ? promise.then((buff) => buff.toString(encoding)) : promise;
   return result;
 }
+async function readBody(event, options = {}) {
+  const request = event.node.req;
+  if (hasProp(request, ParsedBodySymbol)) {
+    return request[ParsedBodySymbol];
+  }
+  const contentType = request.headers["content-type"] || "";
+  const body = await readRawBody(event);
+  let parsed;
+  if (contentType === "application/json") {
+    parsed = _parseJSON(body, options.strict ?? true);
+  } else if (contentType.startsWith("application/x-www-form-urlencoded")) {
+    parsed = _parseURLEncodedBody(body);
+  } else if (contentType.startsWith("text/")) {
+    parsed = body;
+  } else {
+    parsed = _parseJSON(body, options.strict ?? false);
+  }
+  request[ParsedBodySymbol] = parsed;
+  return parsed;
+}
 function getRequestWebStream(event) {
   if (!PayloadMethods$1.includes(event.method)) {
     return;
@@ -900,6 +921,35 @@ function getRequestWebStream(event) {
       });
     }
   });
+}
+function _parseJSON(body = "", strict) {
+  if (!body) {
+    return void 0;
+  }
+  try {
+    return destr(body, { strict });
+  } catch {
+    throw createError$1({
+      statusCode: 400,
+      statusMessage: "Bad Request",
+      message: "Invalid JSON body"
+    });
+  }
+}
+function _parseURLEncodedBody(body) {
+  const form = new URLSearchParams(body);
+  const parsedForm = /* @__PURE__ */ Object.create(null);
+  for (const [key, value] of form.entries()) {
+    if (hasProp(parsedForm, key)) {
+      if (!Array.isArray(parsedForm[key])) {
+        parsedForm[key] = [parsedForm[key]];
+      }
+      parsedForm[key].push(value);
+    } else {
+      parsedForm[key] = value;
+    }
+  }
+  return parsedForm;
 }
 
 function handleCacheHeaders(event, opts) {
@@ -3948,7 +3998,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "3ccc0934-b014-4c8e-8ea7-80f55d57c0e8",
+    "buildId": "10b4646c-c00d-4034-be98-01a8472e6ea3",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -3956,8 +4006,7 @@ const _inlineRuntimeConfig = {
     "envPrefix": "NUXT_",
     "routeRules": {
       "/__nuxt_error": {
-        "cache": false,
-        "isr": false
+        "cache": false
       },
       "/_nuxt/builds/meta/**": {
         "headers": {
@@ -3977,9 +4026,13 @@ const _inlineRuntimeConfig = {
     }
   },
   "public": {
-    "supabaseUrl": "",
-    "supabaseAnonKey": ""
-  }
+    "supabaseUrl": "https://pblbprozxlnetckixpqw.supabase.co",
+    "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBibGJwcm96eGxuZXRja2l4cHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMzg2MjMsImV4cCI6MjA3MjgxNDYyM30.bP0IXn8N7_tZZixKiFEwCHc1R49g6b1sftPDAhIPLYQ",
+    "cloudinaryCloudName": "ds3krgrze",
+    "cloudinaryApiKey": "619643251615438",
+    "cloudinaryUploadPreset": "melati_gold_unsigned"
+  },
+  "cloudinaryApiSecret": "tnL1uW8AWRofgL4bKrjPu-r7wfk"
 };
 const envOptions = {
   prefix: "NITRO_",
@@ -4083,6 +4136,36 @@ function getRouteRulesForPath(path) {
   return defu({}, ..._routeRulesMatcher.matchAll(path).reverse());
 }
 
+function joinHeaders(value) {
+  return Array.isArray(value) ? value.join(", ") : String(value);
+}
+function normalizeFetchResponse(response) {
+  if (!response.headers.has("set-cookie")) {
+    return response;
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: normalizeCookieHeaders(response.headers)
+  });
+}
+function normalizeCookieHeader(header = "") {
+  return splitCookiesString(joinHeaders(header));
+}
+function normalizeCookieHeaders(headers) {
+  const outgoingHeaders = new Headers();
+  for (const [name, header] of headers) {
+    if (name === "set-cookie") {
+      for (const cookie of normalizeCookieHeader(header)) {
+        outgoingHeaders.append("set-cookie", cookie);
+      }
+    } else {
+      outgoingHeaders.set(name, joinHeaders(header));
+    }
+  }
+  return outgoingHeaders;
+}
+
 function isJsonRequest(event) {
   if (hasReqHeader(event, "accept", "text/html")) {
     return false;
@@ -4092,49 +4175,6 @@ function isJsonRequest(event) {
 function hasReqHeader(event, name, includes) {
   const value = getRequestHeader(event, name);
   return value && typeof value === "string" && value.toLowerCase().includes(includes);
-}
-
-function defineNitroErrorHandler(handler) {
-  return handler;
-}
-
-function defineRenderHandler(render) {
-  const runtimeConfig = useRuntimeConfig();
-  return eventHandler(async (event) => {
-    const nitroApp = useNitroApp();
-    const ctx = { event, render, response: void 0 };
-    await nitroApp.hooks.callHook("render:before", ctx);
-    if (!ctx.response) {
-      if (event.path === `${runtimeConfig.app.baseURL}favicon.ico`) {
-        setResponseHeader(event, "Content-Type", "image/x-icon");
-        return send(
-          event,
-          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-        );
-      }
-      ctx.response = await ctx.render(event);
-      if (!ctx.response) {
-        const _currentStatus = getResponseStatus(event);
-        setResponseStatus(event, _currentStatus === 200 ? 500 : _currentStatus);
-        return send(
-          event,
-          "No response returned from render handler: " + event.path
-        );
-      }
-    }
-    await nitroApp.hooks.callHook("render:response", ctx.response, ctx);
-    if (ctx.response.headers) {
-      setResponseHeaders(event, ctx.response.headers);
-    }
-    if (ctx.response.statusCode || ctx.response.statusMessage) {
-      setResponseStatus(
-        event,
-        ctx.response.statusCode,
-        ctx.response.statusMessage
-      );
-    }
-    return ctx.response.body;
-  });
 }
 
 const errorHandler$0 = (async function errorhandler(error, event, { defaultHandler }) {
@@ -4185,6 +4225,10 @@ const errorHandler$0 = (async function errorhandler(error, event, { defaultHandl
   setResponseStatus(event, res.status && res.status !== 200 ? res.status : defaultRes.status, res.statusText || defaultRes.statusText);
   return send(event, html);
 });
+
+function defineNitroErrorHandler(handler) {
+  return handler;
+}
 
 const errorHandler$1 = defineNitroErrorHandler(
   function defaultNitroErrorHandler(error, event) {
@@ -4270,12 +4314,16 @@ const plugins = [
 
 const _SxA8c9 = defineEventHandler(() => {});
 
-const _lazy_qhb1B4 = () => import('../routes/renderer.mjs');
+const _lazy_AIt8Gy = () => import('../routes/api/cloudinary/delete.post.mjs');
+const _lazy_QkeBgy = () => import('../routes/api/cloudinary/usage.get.mjs');
+const _lazy_o0jllu = () => import('../routes/renderer.mjs');
 
 const handlers = [
-  { route: '/__nuxt_error', handler: _lazy_qhb1B4, lazy: true, middleware: false, method: undefined },
+  { route: '/api/cloudinary/delete', handler: _lazy_AIt8Gy, lazy: true, middleware: false, method: "post" },
+  { route: '/api/cloudinary/usage', handler: _lazy_QkeBgy, lazy: true, middleware: false, method: "get" },
+  { route: '/__nuxt_error', handler: _lazy_o0jllu, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_qhb1B4, lazy: true, middleware: false, method: undefined }
+  { route: '/**', handler: _lazy_o0jllu, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {
@@ -4419,96 +4467,44 @@ function useNitroApp() {
 }
 runNitroPlugins(nitroApp);
 
-function joinHeaders(value) {
-  return Array.isArray(value) ? value.join(", ") : String(value);
-}
-function normalizeFetchResponse(response) {
-  if (!response.headers.has("set-cookie")) {
-    return response;
-  }
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: normalizeCookieHeaders(response.headers)
+function defineRenderHandler(render) {
+  const runtimeConfig = useRuntimeConfig();
+  return eventHandler(async (event) => {
+    const nitroApp = useNitroApp();
+    const ctx = { event, render, response: void 0 };
+    await nitroApp.hooks.callHook("render:before", ctx);
+    if (!ctx.response) {
+      if (event.path === `${runtimeConfig.app.baseURL}favicon.ico`) {
+        setResponseHeader(event, "Content-Type", "image/x-icon");
+        return send(
+          event,
+          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        );
+      }
+      ctx.response = await ctx.render(event);
+      if (!ctx.response) {
+        const _currentStatus = getResponseStatus(event);
+        setResponseStatus(event, _currentStatus === 200 ? 500 : _currentStatus);
+        return send(
+          event,
+          "No response returned from render handler: " + event.path
+        );
+      }
+    }
+    await nitroApp.hooks.callHook("render:response", ctx.response, ctx);
+    if (ctx.response.headers) {
+      setResponseHeaders(event, ctx.response.headers);
+    }
+    if (ctx.response.statusCode || ctx.response.statusMessage) {
+      setResponseStatus(
+        event,
+        ctx.response.statusCode,
+        ctx.response.statusMessage
+      );
+    }
+    return ctx.response.body;
   });
 }
-function normalizeCookieHeader(header = "") {
-  return splitCookiesString(joinHeaders(header));
-}
-function normalizeCookieHeaders(headers) {
-  const outgoingHeaders = new Headers();
-  for (const [name, header] of headers) {
-    if (name === "set-cookie") {
-      for (const cookie of normalizeCookieHeader(header)) {
-        outgoingHeaders.append("set-cookie", cookie);
-      }
-    } else {
-      outgoingHeaders.set(name, joinHeaders(header));
-    }
-  }
-  return outgoingHeaders;
-}
-function toBuffer(data) {
-  if ("pipeTo" in data && typeof data.pipeTo === "function") {
-    return new Promise((resolve, reject) => {
-      const chunks = [];
-      data.pipeTo(
-        new WritableStream({
-          write(chunk) {
-            chunks.push(chunk);
-          },
-          close() {
-            resolve(Buffer.concat(chunks));
-          },
-          abort(reason) {
-            reject(reason);
-          }
-        })
-      ).catch(reject);
-    });
-  }
-  if ("pipe" in data && typeof data.pipe === "function") {
-    return new Promise((resolve, reject) => {
-      const chunks = [];
-      data.on("data", (chunk) => {
-        chunks.push(chunk);
-      }).on("end", () => {
-        resolve(Buffer.concat(chunks));
-      }).on("error", reject);
-    });
-  }
-  return Buffer.from(data);
-}
 
-function normalizeLambdaIncomingHeaders(headers) {
-  return Object.fromEntries(
-    Object.entries(headers || {}).map(([key, value]) => [
-      key.toLowerCase(),
-      value
-    ])
-  );
-}
-function normalizeLambdaOutgoingHeaders(headers, stripCookies = false) {
-  const entries = stripCookies ? Object.entries(headers).filter(([key]) => !["set-cookie"].includes(key)) : Object.entries(headers);
-  return Object.fromEntries(
-    entries.map(([k, v]) => [k, Array.isArray(v) ? v.join(",") : String(v)])
-  );
-}
-async function normalizeLambdaOutgoingBody(body, headers) {
-  if (typeof body === "string") {
-    return { type: "text", body };
-  }
-  if (!body) {
-    return { type: "text", body: "" };
-  }
-  const buffer = await toBuffer(body);
-  const contentType = headers["content-type"] || "";
-  return isTextType(contentType) ? { type: "text", body: buffer.toString("utf8") } : { type: "binary", body: buffer.toString("base64") };
-}
-const TEXT_TYPE_RE = /^text\/|\/(javascript|json|xml)|utf-?8/;
-function isTextType(contentType = "") {
-  return TEXT_TYPE_RE.test(contentType);
-}
-
-export { normalizeCookieHeader as a, normalizeLambdaOutgoingBody as b, normalizeLambdaOutgoingHeaders as c, useRuntimeConfig as d, getResponseStatusText as e, getResponseStatus as f, getRouteRulesForPath as g, defineRenderHandler as h, getQuery as i, joinRelativeURL as j, createError$1 as k, getRouteRules as l, hasProtocol as m, normalizeLambdaIncomingHeaders as n, joinURL as o, useNitroApp as u, withQuery as w };
+export { joinRelativeURL as a, useRuntimeConfig as b, createError$1 as c, defineEventHandler as d, getResponseStatusText as e, getResponseStatus as f, getRouteRulesForPath as g, defineRenderHandler as h, getQuery as i, joinHeaders as j, getRouteRules as k, hasProtocol as l, joinURL as m, normalizeCookieHeader as n, readBody as r, useNitroApp as u };
 //# sourceMappingURL=nitro.mjs.map
