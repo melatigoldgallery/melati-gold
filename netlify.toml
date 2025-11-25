@@ -1,0 +1,18 @@
+# Netlify Configuration for Nuxt in Subfolder
+[build]
+  # Base directory tempat aplikasi berada
+  base = "nuxt-melati"
+  
+  # Build command
+  command = "npm run build"
+  
+  # Publish directory untuk Netlify preset (client assets)
+  publish = ".nuxt/dist/client"
+
+# Node version
+[build.environment]
+  NODE_VERSION = "18"
+
+# Netlify functions (otomatis detect dari .netlify/functions-internal)
+[functions]
+  directory = ".netlify/functions-internal"
