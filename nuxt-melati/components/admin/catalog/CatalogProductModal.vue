@@ -3,7 +3,7 @@
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50"
     @click.self="$emit('close')"
   >
-    <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
       <div class="p-4 sm:p-6">
         <!-- Header -->
         <div class="flex justify-between items-center mb-4 sm:mb-6">
@@ -277,8 +277,10 @@ const form = ref<{
   category_id: string;
   subcategory_id: string;
   title: string;
+  name: string;
   description: string;
   price: number;
+  price_display: string;
   karat: string;
   weight: string;
   weight_grams: number;
@@ -297,8 +299,10 @@ const form = ref<{
   category_id: "",
   subcategory_id: "",
   title: "",
+  name: "",
   description: "",
   price: 0,
+  price_display: "",
   karat: "",
   weight: "",
   weight_grams: 0,
@@ -440,6 +444,33 @@ const save = async () => {
   saving.value = true;
 
   try {
+    // Ensure weight string is synced with weight_grams before save
+    if (form.value.weight_grams) {
+      form.value.weight = `${form.value.weight_grams} gram`;
+    }
+
+    // Ensure JSONB arrays are valid
+    if (!Array.isArray(form.value.images)) {
+      form.value.images = [];
+    }
+    if (!Array.isArray(form.value.specs)) {
+      form.value.specs = [];
+    }
+
+    // Set name if not exists (fallback to title)
+    if (!form.value.name) {
+      form.value.name = form.value.title;
+    }
+
+    // Set price_display from price
+    if (form.value.price) {
+      form.value.price_display = new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+      }).format(form.value.price);
+    }
+
     const result = props.product ? await updateProduct(props.product.id, form.value) : await createProduct(form.value);
 
     if (result.success) {

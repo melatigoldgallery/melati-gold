@@ -354,7 +354,18 @@ export const useCatalogManager = () => {
 
   const createProduct = async (productData: any) => {
     try {
-      const { data, error } = await $supabase.from("catalog_products").insert([productData]).select().single();
+      // Remove joined relations and read-only fields
+      const {
+        category,
+        subcategory,
+        id, // Auto-generated
+        created_at, // Auto-set
+        updated_at, // Auto-managed by trigger
+        view_count, // Should not be set on create
+        ...cleanData
+      } = productData;
+
+      const { data, error } = await $supabase.from("catalog_products").insert([cleanData]).select().single();
 
       if (error) throw error;
 
@@ -372,8 +383,16 @@ export const useCatalogManager = () => {
 
   const updateProduct = async (id: string, productData: any) => {
     try {
-      // Remove joined relations before update (they are not actual columns)
-      const { category, subcategory, ...cleanData } = productData;
+      // Remove joined relations and read-only fields
+      const {
+        category,
+        subcategory,
+        id: _id, // Primary key - don't update
+        created_at, // Read-only
+        updated_at, // Auto-managed by trigger
+        view_count, // Should not be updated manually
+        ...cleanData
+      } = productData;
 
       const { data, error } = await $supabase.from("catalog_products").update(cleanData).eq("id", id).select().single();
 
