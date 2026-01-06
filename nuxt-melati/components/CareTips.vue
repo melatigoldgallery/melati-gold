@@ -48,7 +48,7 @@
               <article
                 v-for="(tip, index) in tips"
                 :key="tip.title"
-                class="relative flex-none group overflow-hidden rounded-3xl border border-white/60 bg-white/90 p-6 shadow-xl shadow-maroon/10 backdrop-blur transition-transform duration-500 hover:-translate-y-2"
+                class="relative flex-none group overflow-hidden rounded-3xl border border-white/60 bg-white/90 p-6 shadow-md shadow-maroon/10 backdrop-blur transition-transform duration-500 hover:-translate-y-2"
                 :style="{ flex: `0 0 ${slideWidthPx}px` }"
               >
                 <div
