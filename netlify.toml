@@ -13,6 +13,19 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# Functions configuration
+[functions]
+  # Directory untuk serverless functions (relative to base directory)
+  directory = ".netlify/functions"
+  # Node bundler untuk TypeScript support
+  node_bundler = "esbuild"
+
+# Scheduled Functions - Keep Supabase Database Active
+# Function ini akan berjalan otomatis setiap hari untuk mencegah auto-pause
+[[functions]]
+  path = "/scheduled-db-ping"
+  schedule = "0 3 * * *"  # Runs setiap hari jam 3:00 AM UTC
+
 # SPA fallback untuk client-side routing
 [[redirects]]
   from = "/*"
