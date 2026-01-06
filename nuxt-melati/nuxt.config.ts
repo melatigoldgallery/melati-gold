@@ -55,6 +55,9 @@ export default defineNuxtConfig({
         { name: 'description', content: 'Perhiasan emas elegan dan premium' },
       ],
       link: [
+        // 🎨 Favicon - menggunakan logo.png
+        { rel: 'icon', type: 'image/png', href: '/img/logo.png' },
+        { rel: 'apple-touch-icon', href: '/img/logo.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
