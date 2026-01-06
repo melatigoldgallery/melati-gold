@@ -6,8 +6,10 @@ import { createClient } from "@supabase/supabase-js";
 export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
   try {
     // Get Supabase credentials dari environment variables
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseUrl =
+      process.env.NUXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseKey =
+      process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
       console.error("❌ Supabase credentials tidak ditemukan di environment variables");
@@ -15,7 +17,8 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
         statusCode: 500,
         body: JSON.stringify({
           error: "Missing Supabase credentials",
-          message: "SUPABASE_URL atau SUPABASE_ANON_KEY tidak ditemukan",
+          message:
+            "Environment variables tidak ditemukan. Checked: NUXT_PUBLIC_SUPABASE_URL, VITE_SUPABASE_URL, SUPABASE_URL",
         }),
       };
     }
