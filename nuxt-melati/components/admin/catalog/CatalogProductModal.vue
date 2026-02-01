@@ -67,17 +67,6 @@
             ></textarea>
           </div>
 
-          <!-- Specs (Simple textarea for now) -->
-          <div>
-            <label class="block text-xs sm:text-sm font-medium mb-2">Spesifikasi (satu per baris)</label>
-            <textarea
-              v-model="specsText"
-              rows="3"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              placeholder="Emas 18K&#10;Berat: 4.5 gram&#10;Panjang: 45cm"
-            ></textarea>
-          </div>
-
           <!-- Karat & Weight -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
@@ -175,8 +164,8 @@
             />
           </div>
 
-          <!-- Custom Links (Optional Override) -->
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <!-- Custom Links (Optional Override) - Only for Superadmin -->
+          <div v-if="isSuperAdmin" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h4 class="text-sm font-semibold mb-3 text-gray-900">🔗 Link Custom (Opsional)</h4>
             <p class="text-xs text-gray-500 mb-3">
               Kosongkan untuk menggunakan link default berdasarkan kadar. Isi hanya jika produk ini perlu link khusus.
@@ -264,14 +253,17 @@ const emit = defineEmits(["close", "saved"]);
 
 const { createProduct, updateProduct } = useCatalogManager();
 const { getGoldPrices, calculatePrice } = useGoldPricing();
+const { user } = useAuth();
 const toast = useToast();
 
 // State
 const saving = ref(false);
-const specsText = ref("");
 const imageUrls = ref<string[]>([]);
 const goldPrices = ref<any[]>([]);
 const isInitializing = ref(false);
+
+// Check if user is superadmin
+const isSuperAdmin = computed(() => user.value?.role === "superadmin");
 
 const form = ref<{
   category_id: string;
@@ -356,7 +348,7 @@ watch(
   () => form.value.weight_grams,
   (grams) => {
     if (grams) form.value.weight = `${grams} gram`;
-  }
+  },
 );
 
 // Auto-update price when not overridden
@@ -381,9 +373,10 @@ onMounted(async () => {
     // Copy all product data
     form.value = { ...props.product };
 
-    // Explicitly set description and specs after form assignment
+    // Explicitly set description after form assignment
     form.value.description = props.product.description || "";
-    form.value.specs = Array.isArray(props.product.specs) ? [...props.product.specs] : [];
+    // Keep specs as empty array - specs are auto-generated from product fields
+    form.value.specs = [];
 
     // Initialize imageUrls with existing images
     if (props.product.images && props.product.images.length > 0) {
@@ -409,21 +402,7 @@ onMounted(async () => {
     }
   }
 
-  // Set specsText AFTER initialization flag is released
-  await nextTick();
-  if (props.product && props.product.specs) {
-    specsText.value = (props.product.specs || []).join("\n");
-  }
-
   isInitializing.value = false; // Release flag
-});
-
-// Watch specs text
-watch(specsText, (newValue: string) => {
-  // Jangan auto-update saat inisialisasi
-  if (!isInitializing.value && newValue !== undefined) {
-    form.value.specs = newValue.split("\n").filter((s: string) => s.trim());
-  }
 });
 
 // Handle images upload
@@ -453,13 +432,16 @@ const save = async () => {
     if (!Array.isArray(form.value.images)) {
       form.value.images = [];
     }
-    if (!Array.isArray(form.value.specs)) {
-      form.value.specs = [];
-    }
+    // Specs kept as empty array - auto-generated from product fields on display
+    form.value.specs = [];
 
-    // Set name if not exists (fallback to title)
-    if (!form.value.name) {
-      form.value.name = form.value.title;
+    // Always sync name with title to ensure consistency
+    form.value.name = form.value.title;
+
+    // Security: Clear custom links if not superadmin
+    if (user.value?.role !== "superadmin") {
+      form.value.custom_shopee_link = "";
+      form.value.custom_whatsapp_number = "";
     }
 
     // Set price_display from price
@@ -479,7 +461,7 @@ const save = async () => {
         props.product
           ? `Produk "${form.value.title}" berhasil diupdate!`
           : `Produk "${form.value.title}" berhasil ditambahkan!`,
-        4000
+        4000,
       );
       emit("saved");
     } else {

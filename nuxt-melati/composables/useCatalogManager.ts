@@ -34,7 +34,7 @@ export const useCatalogManager = () => {
             if (error) throw error;
             return { success: true, data: data || [] };
           },
-          { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
+          { ttl: 10 * 60 * 1000 }, // Cache for 10 minutes
         );
       }
 
@@ -124,7 +124,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchSubcategoriesFromDB();
           },
-          { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
+          { ttl: 10 * 60 * 1000 }, // Cache for 10 minutes
         );
       }
 
@@ -137,7 +137,7 @@ export const useCatalogManager = () => {
             `
             *,
             category:catalog_categories(id, name, slug)
-          `
+          `,
           )
           .order("display_order", { ascending: true });
 
@@ -255,7 +255,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchProductsFromDB();
           },
-          { ttl: 5 * 60 * 1000 } // Cache for 5 minutes
+          { ttl: 5 * 60 * 1000 }, // Cache for 5 minutes
         );
       }
 
@@ -339,7 +339,7 @@ export const useCatalogManager = () => {
           *,
           category:catalog_categories(id, name, slug),
           subcategory:catalog_subcategories(id, name, slug)
-        `
+        `,
         )
         .eq("id", id)
         .single();
@@ -480,7 +480,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchServicesFromDB();
           },
-          { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
+          { ttl: 10 * 60 * 1000 }, // Cache for 10 minutes
         );
       }
 
@@ -522,7 +522,7 @@ export const useCatalogManager = () => {
         const { data: productsData, error: productsError } = await $supabase
           .from("catalog_products")
           .select(
-            "id, title, name, description, thumbnail_image, price, price_display, stock_status, category_id, subcategory_id, weight, karat"
+            "id, title, name, description, thumbnail_image, price, price_display, stock_status, category_id, subcategory_id, weight, karat",
           )
           .in("id", service.example_products)
           .eq("is_active", true);
@@ -617,7 +617,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchBestSellersFromDB();
           },
-          { ttl: 5 * 60 * 1000 } // Cache for 5 minutes
+          { ttl: 5 * 60 * 1000 }, // Cache for 5 minutes
         );
       }
 
@@ -651,7 +651,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchFeaturedFromDB();
           },
-          { ttl: 5 * 60 * 1000 } // Cache for 5 minutes
+          { ttl: 5 * 60 * 1000 }, // Cache for 5 minutes
         );
       }
 
@@ -682,7 +682,7 @@ export const useCatalogManager = () => {
   const bulkUpdateDisplayOrder = async (table: string, items: Array<{ id: string; display_order: number }>) => {
     try {
       const promises = items.map((item) =>
-        $supabase.from(table).update({ display_order: item.display_order }).eq("id", item.id)
+        $supabase.from(table).update({ display_order: item.display_order }).eq("id", item.id),
       );
 
       await Promise.all(promises);
@@ -707,15 +707,190 @@ export const useCatalogManager = () => {
     }
   };
 
+  // ============================================
+  // NEW FUNCTIONS FOR STRATEGY A (Page-based routing)
+  // ============================================
+
+  /**
+   * Get category by slug (for routing)
+   */
+  const getCategoryBySlug = async (slug: string) => {
+    try {
+      const cacheKey = cache.generateKey("catalog_category_slug", { slug });
+
+      return await cache.fetchWithCache(
+        cacheKey,
+        async () => {
+          const { data, error } = await $supabase
+            .from("catalog_categories")
+            .select("*")
+            .eq("slug", slug)
+            .eq("is_active", true)
+            .single();
+
+          if (error) {
+            // If not found by slug, try by name (fallback for backward compatibility)
+            const { data: fallbackData, error: fallbackError } = await $supabase
+              .from("catalog_categories")
+              .select("*")
+              .ilike("name", slug)
+              .eq("is_active", true)
+              .limit(1)
+              .single();
+
+            if (fallbackError) throw error; // throw original error
+            return { success: true, data: fallbackData };
+          }
+
+          return { success: true, data };
+        },
+        { ttl: 10 * 60 * 1000 }, // Cache for 10 minutes
+      );
+    } catch (error) {
+      console.error("[useCatalogManager] Error fetching category by slug:", error);
+      return { success: false, error: getErrorMessage(error), data: null };
+    }
+  };
+
+  /**
+   * Get subcategory by slug (for filtering)
+   */
+  const getSubcategoryBySlug = async (slug: string, categoryId?: string) => {
+    try {
+      let query = $supabase.from("catalog_subcategories").select("*").eq("slug", slug).eq("is_active", true);
+
+      if (categoryId) {
+        query = query.eq("category_id", categoryId);
+      }
+
+      const { data, error } = await query.limit(1).single();
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error) {
+      console.error("[useCatalogManager] Error fetching subcategory by slug:", error);
+      return { success: false, error: getErrorMessage(error), data: null };
+    }
+  };
+
+  /**
+   * Get related products (same category/subcategory, excluding current product)
+   */
+  const getRelatedProducts = async (productId: string, limit: number = 6) => {
+    try {
+      console.log("[getRelatedProducts] Fetching related products for:", productId);
+
+      // First, get the current product to know its category/subcategory
+      const { data: currentProduct, error: productError } = await $supabase
+        .from("catalog_products")
+        .select("id, category_id, subcategory_id")
+        .eq("id", productId)
+        .single();
+
+      if (productError) {
+        console.error("[getRelatedProducts] Error fetching current product:", productError);
+        throw new Error("Product not found");
+      }
+
+      if (!currentProduct) {
+        console.error("[getRelatedProducts] Current product not found");
+        throw new Error("Product not found");
+      }
+
+      console.log("[getRelatedProducts] Current product:", currentProduct);
+
+      // Fetch related products from same subcategory first, then same category
+      let query = $supabase
+        .from("catalog_products")
+        .select(
+          `
+          id,
+          title,
+          name,
+          thumbnail_image,
+          images,
+          price,
+          price_display,
+          category_id,
+          subcategory_id,
+          category:catalog_categories(id, name, slug),
+          subcategory:catalog_subcategories(id, name, slug)
+        `,
+        )
+        .eq("is_active", true)
+        .neq("id", productId); // Exclude current product
+
+      // Prioritize same subcategory
+      if (currentProduct.subcategory_id) {
+        query = query.eq("subcategory_id", currentProduct.subcategory_id);
+        console.log("[getRelatedProducts] Filtering by subcategory:", currentProduct.subcategory_id);
+      } else if (currentProduct.category_id) {
+        query = query.eq("category_id", currentProduct.category_id);
+        console.log("[getRelatedProducts] Filtering by category:", currentProduct.category_id);
+      }
+
+      const { data, error } = await query.limit(limit);
+
+      if (error) {
+        console.error("[getRelatedProducts] Error fetching related products:", error);
+        throw error;
+      }
+
+      console.log("[getRelatedProducts] Found related products:", data?.length || 0);
+
+      // If not enough products from subcategory, fetch more from category
+      if (data && data.length < limit && currentProduct.subcategory_id && currentProduct.category_id) {
+        console.log("[getRelatedProducts] Fetching more products from category...");
+        const remaining = limit - data.length;
+        const { data: moreData, error: moreError } = await $supabase
+          .from("catalog_products")
+          .select(
+            `
+            id,
+            title,
+            name,
+            thumbnail_image,
+            images,
+            price,
+            price_display,
+            category_id,
+            subcategory_id,
+            category:catalog_categories(id, name, slug),
+            subcategory:catalog_subcategories(id, name, slug)
+          `,
+          )
+          .eq("is_active", true)
+          .eq("category_id", currentProduct.category_id)
+          .neq("id", productId)
+          .neq("subcategory_id", currentProduct.subcategory_id)
+          .limit(remaining);
+
+        if (!moreError && moreData) {
+          console.log("[getRelatedProducts] Found additional products:", moreData.length);
+          data.push(...moreData);
+        }
+      }
+
+      console.log("[getRelatedProducts] Total related products:", data?.length || 0);
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error("[useCatalogManager] Error fetching related products:", error);
+      return { success: false, error: getErrorMessage(error), data: [] };
+    }
+  };
+
   return {
     // Categories
     getCategories,
+    getCategoryBySlug, // NEW
     createCategory,
     updateCategory,
     deleteCategory,
 
     // Subcategories
     getSubcategories,
+    getSubcategoryBySlug, // NEW
     createSubcategory,
     updateSubcategory,
     deleteSubcategory,
@@ -723,6 +898,7 @@ export const useCatalogManager = () => {
     // Products
     getProducts,
     getProductById,
+    getRelatedProducts, // NEW
     createProduct,
     updateProduct,
     deleteProduct,

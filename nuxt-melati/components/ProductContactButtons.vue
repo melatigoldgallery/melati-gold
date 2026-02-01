@@ -59,11 +59,15 @@ const getProductContact = async (product: any) => {
     if (error) throw error;
 
     if (data) {
+      // Generate product URL
+      const productUrl = `${window.location.origin}/product/${product.id}`;
+
       // Replace placeholders in message template
       let message = data.whatsapp_message_template || "Halo, saya tertarik dengan {product_name}";
       message = message.replace("{product_name}", product.title || product.name);
       message = message.replace("{karat}", product.karat || "");
       message = message.replace("{price}", product.price ? `Rp ${product.price.toLocaleString()}` : "");
+      message = message.replace("{product_link}", productUrl);
 
       // Priority: custom link > karat config default
       return {
@@ -121,6 +125,6 @@ watch(
   () => props.product,
   () => {
     loadContact();
-  }
+  },
 );
 </script>

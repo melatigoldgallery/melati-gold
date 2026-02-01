@@ -147,7 +147,7 @@ const onImageError = () => {
     </div>
 
     <!-- Slide Navigation Dots -->
-    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex space-x-4">
+    <!-- <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex space-x-4">
       <button
         v-for="(slide, index) in heroSlides"
         :key="slide.id"
@@ -159,7 +159,7 @@ const onImageError = () => {
         }"
         :aria-label="`Go to slide ${index + 1}`"
       />
-    </div>
+    </div> -->
   </section>
 </template>
 

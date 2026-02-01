@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, nextTick } from "vue";
 
-const emit = defineEmits<{
-  (e: "open-subcategories", category: any): void;
-}>();
+// No longer need to emit - we'll navigate to page instead
 
 // Fetch categories from database
 const { getCategories } = useCatalogManager();
@@ -204,8 +202,8 @@ onMounted(() => {
                   :style="{ flex: `0 0 ${slideWidthPx}px` }"
                 >
                   <div
-                    class="group relative block w-full overflow-hidden rounded-1xl card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 aspect-[3/4]"
-                    @click="emit('open-subcategories', category)"
+                    class="group relative block w-full overflow-hidden rounded-1xl card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 aspect-[3/4] cursor-pointer"
+                    @click="navigateTo(`/catalog/${category.slug || category.name.toLowerCase()}`)"
                     role="button"
                     tabindex="0"
                   >
@@ -263,7 +261,10 @@ onMounted(() => {
   background-color: rgba(17, 24, 39, 0.65);
   color: #f9fafb;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  transition: background-color 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .carousel-button:hover {

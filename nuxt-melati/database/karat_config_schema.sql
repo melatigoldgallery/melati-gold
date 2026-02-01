@@ -32,7 +32,7 @@ VALUES
   (
     'kadar_tua',
     'Kadar Tua (16K-24K)',
-    ARRAY['16K', '18K', '20K', '21K', '22K', '23K', '24K'],
+    ARRAY['16K', '17K', '18K', '22K', '24K'],
     'https://shopee.co.id/melatigold',
     '6289876543210',
     'Halo Admin Kadar Tua, saya tertarik dengan produk {product_name} kadar {karat}. Apakah masih tersedia?'

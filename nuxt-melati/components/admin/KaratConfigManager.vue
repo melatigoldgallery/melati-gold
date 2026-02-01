@@ -137,7 +137,7 @@
               <textarea
                 v-model="editForm.whatsapp_message_template"
                 rows="4"
-                placeholder="Halo, saya tertarik dengan {product_name} kadar {karat}"
+                placeholder="Halo, saya tertarik dengan {product_name} kadar {karat}&#10;Link produk: {product_link}&#10;Apakah masih tersedia?"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
               ></textarea>
               <p class="text-xs text-gray-500 mt-1">
@@ -147,6 +147,8 @@
                 <code class="bg-gray-100 px-1 py-0.5 rounded">{karat}</code>
                 ,
                 <code class="bg-gray-100 px-1 py-0.5 rounded">{price}</code>
+                ,
+                <code class="bg-gray-100 px-1 py-0.5 rounded">{product_link}</code>
               </p>
             </div>
 
@@ -182,22 +184,38 @@ const supabase = $supabase as any;
 
 const getConfigs = async () => {
   try {
-    const { data, error } = await supabase.from("karat_configurations").select("*").order("id");
+    const { data, error } = await supabase
+      .from("karat_configurations")
+      .select(
+        "id, category, name, karat_list, shopee_store_url, tokopedia_store_url, whatsapp_number, whatsapp_message_template, is_active",
+      )
+      .order("category", { ascending: true });
 
     if (error) throw error;
     return { success: true, data: data || [] };
   } catch (error: any) {
+    console.error("[KaratConfig] Load error:", error);
     return { success: false, error: error.message, data: [] };
   }
 };
 
 const updateConfig = async (id: string, updates: any) => {
   try {
-    const { data, error } = await supabase.from("karat_configurations").update(updates).eq("id", id).select().single();
+    console.log("[KaratConfig] Updating config:", { id, updates });
+
+    const { data, error, count } = await supabase.from("karat_configurations").update(updates).eq("id", id).select();
+
+    console.log("[KaratConfig] Update result:", { data, error, count });
 
     if (error) throw error;
+
+    if (!data || data.length === 0) {
+      throw new Error("No rows updated. ID might not exist or RLS policy blocked the update.");
+    }
+
     return { success: true, data };
   } catch (error: any) {
+    console.error("[KaratConfig] Update error:", error);
     return { success: false, error: error.message };
   }
 };
@@ -239,12 +257,17 @@ const saveConfig = async () => {
   if (!editingConfig.value) return;
 
   saving.value = true;
+  console.log("[KaratConfig] Saving config:", editingConfig.value.id, editForm.value);
+
   const result = await updateConfig(editingConfig.value.id, editForm.value);
 
   if (result.success) {
+    console.log("[KaratConfig] Save successful, reloading configs...");
     await loadConfigs();
     cancelEdit();
+    alert("Konfigurasi berhasil disimpan!");
   } else {
+    console.error("[KaratConfig] Save failed:", result.error);
     alert("Gagal menyimpan: " + result.error);
   }
   saving.value = false;
