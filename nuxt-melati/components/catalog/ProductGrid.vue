@@ -51,27 +51,27 @@ const handleClick = (product: any) => {
 </script>
 
 <template>
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5 lg:gap-6">
     <article v-for="product in products" :key="product.id" class="group cursor-pointer" @click="handleClick(product)">
       <div
-        class="relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+        class="relative bg-white/95 backdrop-blur rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100"
       >
         <!-- Product Image -->
-        <div class="relative aspect-[4/5] overflow-hidden bg-gray-100">
+        <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
           <img
             :src="getOptimizedImage(product)"
             :alt="product.name || product.title"
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             loading="lazy"
             decoding="async"
           />
 
           <!-- Hover Overlay -->
           <div
-            class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center"
+            class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center"
           >
             <span
-              class="text-white font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0"
+              class="text-white font-semibold text-sm md:text-base opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 px-6 py-3 rounded-xl"
             >
               Lihat Detail
             </span>
@@ -80,32 +80,37 @@ const handleClick = (product: any) => {
           <!-- Badge if featured or new -->
           <div
             v-if="product.is_featured"
-            class="absolute top-2 right-2 bg-gold text-white text-xs px-2 py-1 rounded-full font-semibold"
+            class="absolute top-3 right-3 bg-gradient-to-r from-gold to-yellow-500 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg"
           >
             Featured
           </div>
         </div>
 
         <!-- Product Info -->
-        <div class="p-3 md:p-4">
-          <h3 class="font-semibold text-gray-900 text-sm md:text-base line-clamp-2 mb-2">
+        <div class="p-3 md:p-4 lg:p-5 space-y-2">
+          <h3
+            class="font-medium text-gray-900 text-sm md:text-base line-clamp-2 leading-snug group-hover:text-maroon transition-colors duration-300"
+          >
             {{ product.name || product.title }}
           </h3>
 
-          <p v-if="product.price" class="text-maroon font-bold text-sm md:text-base">
+          <p v-if="product.price" class="text-maroon font-bold text-base md:text-lg">
             {{ formatPrice(product.price) }}
           </p>
-          <p v-else class="text-gray-600 text-sm italic">Hubungi untuk harga</p>
+          <p v-else class="text-gray-500 text-sm italic font-medium">Hubungi untuk harga</p>
 
           <!-- Specifications (if available) -->
-          <div v-if="product.karat || product.weight" class="mt-2 flex flex-wrap gap-2 text-xs text-gray-600">
-            <span v-if="product.karat" class="inline-flex items-center gap-1">
-              <i class="bi bi-gem text-gold"></i>
-              {{ product.karat }}
+          <div
+            v-if="product.karat || product.weight"
+            class="flex flex-wrap gap-2 text-xs text-gray-600 pt-2 border-t border-gray-100"
+          >
+            <span v-if="product.karat" class="inline-flex items-center gap-1.5 bg-cream/50 px-2.5 py-1 rounded-lg">
+              <i class="bi bi-gem text-gold text-sm"></i>
+              <span class="font-medium">{{ product.karat }}</span>
             </span>
-            <span v-if="product.weight" class="inline-flex items-center gap-1">
-              <i class="bi bi-clock text-gold"></i>
-              {{ product.weight }}
+            <span v-if="product.weight" class="inline-flex items-center gap-1.5 bg-cream/50 px-2.5 py-1 rounded-lg">
+              <i class="bi bi-clock text-gold text-sm"></i>
+              <span class="font-medium">{{ product.weight }}</span>
             </span>
           </div>
         </div>

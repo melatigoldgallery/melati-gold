@@ -2,6 +2,7 @@
 import { ref, computed, watch } from "vue";
 import CatalogFilterSidebar from "~/components/catalog/FilterSidebar.vue";
 import CatalogProductGrid from "~/components/catalog/ProductGrid.vue";
+import CatalogPaginationControls from "~/components/catalog/PaginationControls.vue";
 
 // Disable default layout (which includes SiteHeader)
 definePageMeta({
@@ -29,6 +30,13 @@ const filters = ref({
   karat: (route.query.karat as string) || "",
   sortBy: (route.query.sort as string) || "newest",
 });
+
+// Pagination state
+const currentPage = ref(route.query.page ? Number(route.query.page) : 1);
+const itemsPerPage = ref(route.query.limit ? Number(route.query.limit) : 24);
+const totalItems = ref(0);
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
+const paginationData = ref<any>(null);
 
 // Fetch category data
 const fetchCategoryData = async () => {
@@ -62,9 +70,13 @@ const fetchCategoryData = async () => {
 const fetchProducts = async () => {
   if (!category.value) return;
 
+  loading.value = true;
   try {
     const productFilters: any = {
       categoryId: category.value.id,
+      page: currentPage.value,
+      limit: itemsPerPage.value,
+      useCache: true,
     };
 
     if (filters.value.subcategoryId) {
@@ -75,23 +87,23 @@ const fetchProducts = async () => {
 
     if (result.success) {
       let productList = result.data;
+      paginationData.value = result.pagination;
+
       console.log("[Catalog] Raw products:", productList.length);
 
-      // Apply client-side filters
+      // Apply client-side filters (for filters not supported by API)
       // Price filter
       if (filters.value.priceMin !== null) {
         productList = productList.filter((p: any) => {
           const price = p.price || 0;
           return price >= filters.value.priceMin!;
         });
-        console.log("[Catalog] After priceMin filter:", productList.length);
       }
       if (filters.value.priceMax !== null) {
         productList = productList.filter((p: any) => {
           const price = p.price || 0;
           return price <= filters.value.priceMax!;
         });
-        console.log("[Catalog] After priceMax filter:", productList.length);
       }
 
       // Karat filter
@@ -103,7 +115,6 @@ const fetchProducts = async () => {
           const filterKarat = filters.value.karat.toLowerCase().replace(/[^0-9]/g, "");
           return productKarat === filterKarat;
         });
-        console.log("[Catalog] After karat filter:", productList.length, "Filter:", filters.value.karat);
       }
 
       // Apply sorting
@@ -114,7 +125,6 @@ const fetchProducts = async () => {
             const priceB = b.price || 0;
             return priceA - priceB;
           });
-          console.log("[Catalog] Sorted by price ascending");
           break;
         case "price-desc":
           productList.sort((a: any, b: any) => {
@@ -122,7 +132,6 @@ const fetchProducts = async () => {
             const priceB = b.price || 0;
             return priceB - priceA;
           });
-          console.log("[Catalog] Sorted by price descending");
           break;
         case "newest":
         default:
@@ -131,17 +140,21 @@ const fetchProducts = async () => {
             const dateB = new Date(b.created_at || 0).getTime();
             return dateB - dateA;
           });
-          console.log("[Catalog] Sorted by newest");
       }
 
       products.value = productList;
-      console.log("[Catalog] Final products:", products.value.length);
+      totalItems.value = productList.length;
+      console.log("[Catalog] Final products:", products.value.length, "Total:", totalItems.value);
     } else {
       products.value = [];
+      totalItems.value = 0;
     }
   } catch (err) {
     console.error("[Catalog] Error fetching products:", err);
     products.value = [];
+    totalItems.value = 0;
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -149,6 +162,7 @@ const fetchProducts = async () => {
 const handleFilterChange = async (newFilters: any) => {
   console.log("[Catalog] Filter changed:", newFilters);
   filters.value = { ...filters.value, ...newFilters };
+  currentPage.value = 1; // Reset to first page on filter change
   console.log("[Catalog] Current filters:", filters.value);
 
   // Update URL query params
@@ -161,12 +175,50 @@ const handleFilterChange = async (newFilters: any) => {
         price_max: filters.value.priceMax || undefined,
         karat: filters.value.karat || undefined,
         sort: filters.value.sortBy,
+        page: 1,
+        limit: itemsPerPage.value,
       },
     },
     { replace: true },
   );
 
   // Refetch products
+  await fetchProducts();
+};
+
+// Handle pagination changes
+const handlePageChange = async (page: number) => {
+  currentPage.value = page;
+  await navigateTo(
+    {
+      path: route.path,
+      query: {
+        ...route.query,
+        page,
+      },
+    },
+    { replace: true },
+  );
+  await fetchProducts();
+  // Smooth scroll to top
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+// Handle items per page change
+const handleItemsPerPageChange = async (limit: number) => {
+  itemsPerPage.value = limit;
+  currentPage.value = 1; // Reset to first page
+  await navigateTo(
+    {
+      path: route.path,
+      query: {
+        ...route.query,
+        limit,
+        page: 1,
+      },
+    },
+    { replace: true },
+  );
   await fetchProducts();
 };
 
@@ -186,6 +238,8 @@ watch(
       karat: (route.query.karat as string) || "",
       sortBy: (route.query.sort as string) || "newest",
     };
+    currentPage.value = route.query.page ? Number(route.query.page) : 1;
+    itemsPerPage.value = route.query.limit ? Number(route.query.limit) : 24;
     fetchProducts();
   },
 );
@@ -213,71 +267,97 @@ useHead({
 </script>
 
 <template>
-  <div class="min-h-screen bg-cream">
-    <main class="container mx-auto max-w-7xl px-4 py-8">
-      <!-- Breadcrumb -->
-      <nav class="mb-6 text-sm">
-        <ol class="flex items-center gap-2 text-neutral-600">
-          <li>
-            <NuxtLink to="/" class="hover:text-maroon transition-colors">
-              <i class="bi bi-house-door"></i>
-              Home
-            </NuxtLink>
-          </li>
-          <li><i class="bi bi-chevron-right text-xs"></i></li>
-          <li>
-            <span class="text-neutral-400">Katalog</span>
-          </li>
-          <li><i class="bi bi-chevron-right text-xs"></i></li>
-          <li>
-            <span class="font-semibold text-maroon">{{ category?.name || "Loading..." }}</span>
-          </li>
-        </ol>
+  <div class="min-h-screen bg-gradient-to-b from-cream via-white to-cream">
+    <main class="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-3 md:py-3">
+      <!-- Breadcrumb - Enhanced -->
+      <nav class="mb-5">
+        <div class="px-5 py-3 inline-flex">
+          <ol class="flex items-center gap-2 text-xs text-neutral-600">
+            <li>
+              <NuxtLink to="/" class="hover:text-maroon transition-colors duration-300 flex items-center gap-2">
+                <i class="bi bi-house-door text-sm"></i>
+                <span>Home</span>
+              </NuxtLink>
+            </li>
+            <li><i class="bi bi-chevron-right text-[10px]"></i></li>
+            <li>
+              <span class="text-neutral-400">Katalog</span>
+            </li>
+            <li><i class="bi bi-chevron-right text-[10px]"></i></li>
+            <li>
+              <span class="font-semibold text-maroon">{{ category?.name || "Loading..." }}</span>
+            </li>
+          </ol>
+        </div>
       </nav>
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-20">
-        <div class="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-yellow-600"></div>
-        <p class="mt-4 text-gray-600">Memuat katalog...</p>
+        <div
+          class="inline-block h-12 w-12 animate-spin rounded-full border-4 border-maroon border-t-transparent shadow-lg"
+        ></div>
+        <p class="mt-4 text-gray-600 font-medium">Memuat katalog...</p>
       </div>
 
       <!-- Error State -->
       <div v-else-if="error" class="text-center py-20">
         <i class="bi bi-exclamation-triangle text-6xl text-red-500"></i>
         <p class="mt-4 text-gray-600">{{ error }}</p>
-        <NuxtLink to="/" class="mt-4 inline-block px-6 py-2 bg-maroon text-white rounded-lg hover:bg-maroon-dark">
+        <NuxtLink
+          to="/"
+          class="mt-6 inline-block px-6 py-3 bg-maroon text-white rounded-2xl hover:bg-maroon-dark shadow-lg hover:shadow-xl transition-all duration-300 font-medium"
+        >
           Kembali ke Beranda
         </NuxtLink>
       </div>
 
       <!-- Main Content -->
-      <div v-else class="flex flex-col lg:flex-row gap-6">
+      <div v-else class="flex flex-col lg:flex-row gap-6 lg:gap-8">
         <!-- Filter Sidebar -->
         <aside class="lg:w-64 flex-shrink-0">
           <CatalogFilterSidebar :category="category" :filters="filters" @update:filters="handleFilterChange" />
         </aside>
 
         <!-- Product Grid -->
-        <div class="flex-1">
-          <!-- Category Header -->
+        <div class="flex-1 min-w-0">
+          <!-- Category Header - Enhanced -->
           <div class="mb-8">
-            <h1 class="text-3xl md:text-3xl font-serif text-maroon mb-3">
-              {{ category?.name }}
-            </h1>
-            <p v-if="category?.description" class="text-neutral-600 text-lg">
+            <div class="flex items-center gap-2.5 mb-3">
+              <i class="bi bi-gem text-2xl text-gold"></i>
+              <h1 class="text-3xl md:text-3xl font-serif font-bold text-maroon">
+                {{ category?.name }}
+              </h1>
+            </div>
+            <div class="h-1 w-20 bg-gradient-to-r from-gold to-maroon rounded-full mb-4"></div>
+            <p v-if="category?.description" class="text-neutral-600 text-base leading-relaxed max-w-3xl">
               {{ category.description }}
             </p>
-            <p class="mt-2 text-sm text-neutral-500">{{ products.length }} produk ditemukan</p>
+            <p class="mt-4 text-sm text-neutral-500 font-medium">{{ products.length }} produk ditemukan</p>
           </div>
 
           <!-- Empty State -->
-          <div v-if="products.length === 0" class="text-center py-16">
+          <div v-if="products.length === 0 && !loading" class="text-center py-16 bg-white/50 rounded-2xl">
             <i class="bi bi-inbox text-6xl text-gray-400"></i>
             <p class="mt-4 text-gray-600">Belum ada produk tersedia untuk kategori ini</p>
           </div>
 
           <!-- Products Grid -->
-          <CatalogProductGrid v-else :products="products" @product-click="handleProductClick" />
+          <div v-else>
+            <CatalogProductGrid :products="products" @product-click="handleProductClick" />
+
+            <!-- Pagination Controls -->
+            <div v-if="totalPages > 1" class="mt-10">
+              <CatalogPaginationControls
+                :current-page="currentPage"
+                :total-pages="totalPages"
+                :total-items="totalItems"
+                :items-per-page="itemsPerPage"
+                :loading="loading"
+                @page-change="handlePageChange"
+                @items-per-page-change="handleItemsPerPageChange"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </main>
