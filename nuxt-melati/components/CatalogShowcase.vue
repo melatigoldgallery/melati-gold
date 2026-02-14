@@ -8,14 +8,39 @@ const { getCategories } = useCatalogManager();
 const categories = ref<any[]>([]);
 const loading = ref(true);
 
-// Carousel refs and state (translateX-based with looping)
+// Carousel refs and state (Clone Technique for infinite loop)
 const viewport = ref<HTMLElement | null>(null);
 const track = ref<HTMLElement | null>(null);
-const activeIndex = ref(0);
+const activeIndex = ref(4); // Start at index 4 (first real slide after 4 clones)
 const offsetPx = ref(0);
 const slideWidthPx = ref(0);
+const transitionEnabled = ref(true);
 
 const slideCount = computed(() => categories.value.length);
+
+// Create display array with clones for infinite loop
+// Clone 4 cards (max visible on desktop) at each end to prevent empty spaces
+// Structure: [Last 4 cloned, ...RealSlides, First 4 cloned]
+const CLONE_COUNT = 4;
+const displayCategories = computed(() => {
+  if (categories.value.length === 0) return [];
+
+  const len = categories.value.length;
+  // Clone last N cards for start
+  const clonesStart = [];
+  for (let i = 0; i < CLONE_COUNT; i++) {
+    const idx = (len - CLONE_COUNT + i) % len;
+    clonesStart.push({ ...categories.value[idx], _cloneId: `clone-start-${i}` });
+  }
+
+  // Clone first N cards for end
+  const clonesEnd = [];
+  for (let i = 0; i < CLONE_COUNT; i++) {
+    clonesEnd.push({ ...categories.value[i], _cloneId: `clone-end-${i}` });
+  }
+
+  return [...clonesStart, ...categories.value, ...clonesEnd];
+});
 
 function getSlides(): HTMLElement[] {
   const el = track.value;
@@ -54,18 +79,48 @@ function getMetrics() {
   return { vp, tr, slides, slideWidth, gap, visibleCount, maxIndex, maxOffset };
 }
 
-function goTo(index: number) {
-  const { vp, slides, maxIndex, maxOffset, slideWidth, gap } = getMetrics();
+function goTo(index: number, instant = false) {
+  const { vp, slides, slideWidth, gap } = getMetrics();
   if (!vp || slides.length === 0) return;
-  // Clamp to page-bound index to avoid partial trailing space
-  if (index < 0) index = 0;
-  if (index > maxIndex) index = maxIndex;
 
-  // Calculate offset based on card width and gap for precise positioning
+  const totalSlides = displayCategories.value.length;
+
+  // Calculate offset
   const calculatedOffset = index * (slideWidth + gap);
-  const clamped = Math.min(calculatedOffset, maxOffset);
-  offsetPx.value = clamped;
-  activeIndex.value = index;
+
+  if (instant) {
+    // Instant jump without transition
+    transitionEnabled.value = false;
+    offsetPx.value = calculatedOffset;
+    activeIndex.value = index;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        transitionEnabled.value = true;
+      });
+    });
+  } else {
+    // Smooth transition
+    offsetPx.value = calculatedOffset;
+    activeIndex.value = index;
+
+    // Check clone boundaries after transition completes
+    setTimeout(() => {
+      const realCount = categories.value.length;
+      const realStartIndex = CLONE_COUNT;
+      const realEndIndex = CLONE_COUNT + realCount - 1;
+
+      // If in start clone zone (index < CLONE_COUNT), jump to equivalent real position at end
+      if (activeIndex.value < CLONE_COUNT) {
+        const offset = CLONE_COUNT - activeIndex.value;
+        goTo(realEndIndex - offset + 1, true);
+      }
+      // If in end clone zone (index >= realEndIndex + 1), jump to equivalent real position at start
+      else if (activeIndex.value > realEndIndex) {
+        const offset = activeIndex.value - realEndIndex;
+        goTo(realStartIndex + offset - 1, true);
+      }
+    }, 500); // Match transition duration
+  }
 }
 
 function getTargetCols() {
@@ -93,20 +148,11 @@ function updateLayout() {
 }
 
 function prev() {
-  const { maxIndex } = getMetrics();
-  if (activeIndex.value <= 0) {
-    goTo(maxIndex);
-  } else {
-    goTo(activeIndex.value - 1);
-  }
+  goTo(activeIndex.value - 1);
 }
+
 function next() {
-  const { maxIndex } = getMetrics();
-  if (activeIndex.value >= maxIndex) {
-    goTo(0);
-  } else {
-    goTo(activeIndex.value + 1);
-  }
+  goTo(activeIndex.value + 1);
 }
 
 // No scroll handler: manual scroll disabled; navigation via buttons/keyboard
@@ -137,7 +183,8 @@ const loadCategories = async () => {
   await nextTick();
   requestAnimationFrame(() => {
     updateLayout();
-    goTo(0);
+    // Start at index 4 (first real slide after 4 clones)
+    goTo(CLONE_COUNT, true);
   });
 };
 
@@ -192,12 +239,13 @@ onMounted(() => {
             <div ref="viewport" class="overflow-hidden" tabindex="0" @keydown="onKeydown">
               <div
                 ref="track"
-                class="flex gap-3 md:gap-4 px-0 md:px-3 py-4 md:py-6 transition-transform duration-500 ease-out"
+                class="flex gap-3 md:gap-4 px-0 md:px-3 py-4 md:py-6 ease-out"
+                :class="{ 'transition-transform duration-500': transitionEnabled }"
                 :style="{ transform: `translateX(-${offsetPx}px)` }"
               >
                 <article
-                  v-for="category in categories"
-                  :key="category.id"
+                  v-for="(category, idx) in displayCategories"
+                  :key="category._cloneId || category.id"
                   class="relative flex-none"
                   :style="{ flex: `0 0 ${slideWidthPx}px` }"
                 >
@@ -258,8 +306,7 @@ onMounted(() => {
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 9999px;
-  background-color: rgba(17, 24, 39, 0.65);
-  color: #f9fafb;
+  background-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.25);
   transition:
     background-color 0.3s ease,
@@ -268,9 +315,7 @@ onMounted(() => {
 }
 
 .carousel-button:hover {
-  background-color: rgba(17, 24, 39, 0.85);
   transform: translateY(-2px);
-  border-color: rgba(255, 215, 0, 0.6);
 }
 
 .carousel-button:disabled {

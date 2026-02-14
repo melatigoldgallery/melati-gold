@@ -58,14 +58,14 @@ const specs = computed(() => {
         {{ product.category_name }}
         <span v-if="product?.subcategory_name" class="text-gold">/ {{ product.subcategory_name }}</span>
       </div>
-      <h1 class="text-2xl sm:text-3xl lg:text-4xl font-serif text-gray-900 leading-tight">
+      <h1 class="font-bold text-xl sm:text-2xl lg:text-2xl font-serif text-gray-900 leading-tight">
         {{ product?.title || product?.name || "Loading..." }}
       </h1>
     </div>
 
     <!-- Price -->
     <div class="border-t border-b border-gray-200 py-3 md:py-4 bg-gradient-to-r from-amber-50/50 to-transparent">
-      <div class="text-2xl sm:text-2xl lg:text-3xl font-bold text-maroon">± {{ formatPrice(product?.price) }}</div>
+      <div class="text-xl sm:text-2xl lg:text-xl font-bold text-maroon">± {{ formatPrice(product?.price) }}</div>
       <p v-if="product?.price" class="text-xs sm:text-sm text-gray-600 mt-1.5 flex items-center gap-1">
         <i class="bi bi-info-circle"></i>
         <span>Harga dapat berubah mengikuti harga emas terbaru</span>

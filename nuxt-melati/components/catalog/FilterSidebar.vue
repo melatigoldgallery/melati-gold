@@ -111,7 +111,6 @@ const karatOptions = [
   { value: "18K", label: "18 Karat" },
   { value: "17K", label: "17 Karat" },
   { value: "16K", label: "16 Karat" },
-  { value: "22K", label: "22 Karat" },
   { value: "9K", label: "9 Karat" },
   { value: "8K", label: "8 Karat" },
 ];
@@ -140,14 +139,14 @@ const hasActiveFilters = computed(() => {
 <template>
   <div>
     <!-- Mobile Filter Button -->
-    <div class="lg:hidden mb-4">
+    <div class="lg:hidden mb-3">
       <button
         @click="showMobileFilters = true"
-        class="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-2xl flex items-center justify-between hover:bg-cream hover:border-maroon transition-all duration-300 shadow-sm hover:shadow-md"
+        class="w-full px-3 py-2.5 bg-white border-2 border-gray-200 rounded-2xl flex items-center justify-between hover:bg-cream hover:border-maroon transition-all duration-300 shadow-sm hover:shadow-md"
       >
-        <span class="flex items-center gap-3">
+        <span class="flex items-center gap-2.5">
           <i class="bi bi-funnel text-maroon"></i>
-          <span class="font-semibold text-gray-900">Filter & Urutkan</span>
+          <span class="font-semibold text-gray-900 text-sm lg:text-base">Filter & Urutkan</span>
         </span>
         <span v-if="hasActiveFilters" class="text-xs bg-maroon text-white px-3 py-1.5 rounded-full font-semibold">
           Aktif
@@ -261,9 +260,9 @@ const hasActiveFilters = computed(() => {
           <div class="absolute inset-0 bg-black/50" @click="showMobileFilters = false"></div>
           <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] overflow-y-auto shadow-2xl">
             <div
-              class="sticky top-0 bg-white border-b border-gray-200 px-5 py-5 flex items-center justify-between z-10"
+              class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3.5 flex items-center justify-between z-10"
             >
-              <h3 class="text-lg font-bold text-gray-900">Filter & Urutkan</h3>
+              <h3 class="text-base font-bold text-gray-900">Filter & Urutkan</h3>
               <button
                 @click="showMobileFilters = false"
                 class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors"
@@ -272,11 +271,11 @@ const hasActiveFilters = computed(() => {
               </button>
             </div>
 
-            <div class="p-5">
+            <div class="p-3">
               <!-- Same filter content as desktop -->
               <!-- Subcategories -->
-              <div class="mb-6">
-                <h4 class="text-xs font-bold text-gray-700 mb-4 uppercase tracking-wider">Sub-Kategori</h4>
+              <div class="mb-4">
+                <h4 class="text-xs font-bold text-gray-700 mb-2.5 uppercase tracking-wider">Sub-Kategori</h4>
                 <div v-if="loading" class="text-center py-4">
                   <div
                     class="inline-block w-6 h-6 border-2 border-maroon border-t-transparent rounded-full animate-spin"
@@ -303,8 +302,8 @@ const hasActiveFilters = computed(() => {
               </div>
 
               <!-- Price Range -->
-              <div class="mb-6">
-                <h4 class="text-xs font-bold text-gray-700 mb-4 uppercase tracking-wider">Harga</h4>
+              <div class="mb-4">
+                <h4 class="text-xs font-bold text-gray-700 mb-2.5 uppercase tracking-wider">Harga</h4>
                 <div class="space-y-2">
                   <button
                     v-for="range in priceRanges"
@@ -323,8 +322,8 @@ const hasActiveFilters = computed(() => {
               </div>
 
               <!-- Karat -->
-              <div class="mb-6">
-                <h4 class="text-xs font-bold text-gray-700 mb-4 uppercase tracking-wider">Karat</h4>
+              <div class="mb-4">
+                <h4 class="text-xs font-bold text-gray-700 mb-2.5 uppercase tracking-wider">Karat</h4>
                 <div class="space-y-2">
                   <label
                     v-for="option in karatOptions"
@@ -345,8 +344,8 @@ const hasActiveFilters = computed(() => {
               </div>
 
               <!-- Sort -->
-              <div class="mb-6">
-                <h4 class="text-xs font-bold text-gray-700 mb-4 uppercase tracking-wider">Urutkan</h4>
+              <div class="mb-4">
+                <h4 class="text-xs font-bold text-gray-700 mb-2.5 uppercase tracking-wider">Urutkan</h4>
                 <select
                   v-model="localFilters.sortBy"
                   @change="updateFilters"
@@ -359,17 +358,17 @@ const hasActiveFilters = computed(() => {
               </div>
 
               <!-- Actions -->
-              <div class="flex gap-3 pt-6 border-t border-gray-200">
+              <div class="flex gap-2.5 pt-4 border-t border-gray-200">
                 <button
                   v-if="hasActiveFilters"
                   @click="clearFilters"
-                  class="flex-1 px-4 py-4 border-2 border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300"
+                  class="flex-1 px-3 py-3 border-2 border-gray-300 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300"
                 >
                   Reset
                 </button>
                 <button
                   @click="showMobileFilters = false"
-                  class="flex-1 px-4 py-4 bg-maroon text-white rounded-xl font-semibold hover:bg-maroon-dark transition-all duration-300 shadow-lg"
+                  class="flex-1 px-3 py-3 bg-maroon text-white rounded-xl font-semibold hover:bg-maroon-dark transition-all duration-300 shadow-lg"
                 >
                   Tampilkan Hasil
                 </button>

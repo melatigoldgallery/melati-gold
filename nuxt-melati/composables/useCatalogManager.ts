@@ -345,6 +345,21 @@ export const useCatalogManager = () => {
         .single();
 
       if (error) throw error;
+
+      // Flatten nested category and subcategory data for easier access
+      if (data) {
+        const flattenedData = {
+          ...data,
+          category_id: data.category?.id || data.category_id,
+          category_name: data.category?.name || null,
+          category_slug: data.category?.slug || null,
+          subcategory_id: data.subcategory?.id || data.subcategory_id,
+          subcategory_name: data.subcategory?.name || null,
+          subcategory_slug: data.subcategory?.slug || null,
+        };
+        return { success: true, data: flattenedData };
+      }
+
       return { success: true, data };
     } catch (error) {
       console.error("Error fetching product:", error);

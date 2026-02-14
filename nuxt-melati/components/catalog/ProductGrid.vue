@@ -54,64 +54,52 @@ const handleClick = (product: any) => {
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5 lg:gap-6">
     <article v-for="product in products" :key="product.id" class="group cursor-pointer" @click="handleClick(product)">
       <div
-        class="relative bg-white/95 backdrop-blur rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-gray-100"
+        class="relative bg-white/95 backdrop-blur rounded-1xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 border border-gray-100"
       >
         <!-- Product Image -->
-        <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
+        <div class="relative aspect-[4/5] overflow-hidden bg-gray-100">
           <img
             :src="getOptimizedImage(product)"
             :alt="product.name || product.title"
-            class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            class="w-full h-full object-cover transition-transform duration-700"
             loading="lazy"
             decoding="async"
           />
 
-          <!-- Hover Overlay -->
+          <!-- Hover Overlay with Text -->
           <div
-            class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center"
+            class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-4"
           >
             <span
-              class="text-white font-semibold text-sm md:text-base opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 px-6 py-3 rounded-xl"
+              class="text-white text-sm md:text-base lg:text-base transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500"
             >
-              Lihat Detail
+              Lihat Produk
             </span>
           </div>
 
           <!-- Badge if featured or new -->
           <div
             v-if="product.is_featured"
-            class="absolute top-3 right-3 bg-gradient-to-r from-gold to-yellow-500 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg"
+            class="absolute top-2 right-2 md:top-3 md:right-3 bg-gradient-to-r from-gold to-yellow-500 text-white text-[9px] md:text-xs px-2 py-0.5 md:px-3 md:py-1.5 rounded-full font-semibold shadow-lg"
           >
-            Featured
+            Best Seller
           </div>
         </div>
 
         <!-- Product Info -->
-        <div class="p-3 md:p-4 lg:p-5 space-y-2">
+        <div class="p-1 md:p-2 lg:p-3 space-y-1">
+          <!-- Product Name -->
           <h3
-            class="font-medium text-gray-900 text-sm md:text-base line-clamp-2 leading-snug group-hover:text-maroon transition-colors duration-300"
+            class="font-semibold text-maroon text-sm md:text-base lg:text-lg leading-tight group-hover:text-maroon transition-colors duration-300 text-center mt-2"
           >
             {{ product.name || product.title }}
           </h3>
 
-          <p v-if="product.price" class="text-maroon font-bold text-base md:text-lg">
-            {{ formatPrice(product.price) }}
-          </p>
-          <p v-else class="text-gray-500 text-sm italic font-medium">Hubungi untuk harga</p>
-
-          <!-- Specifications (if available) -->
-          <div
-            v-if="product.karat || product.weight"
-            class="flex flex-wrap gap-2 text-xs text-gray-600 pt-2 border-t border-gray-100"
-          >
-            <span v-if="product.karat" class="inline-flex items-center gap-1.5 bg-cream/50 px-2.5 py-1 rounded-lg">
-              <i class="bi bi-gem text-gold text-sm"></i>
-              <span class="font-medium">{{ product.karat }}</span>
-            </span>
-            <span v-if="product.weight" class="inline-flex items-center gap-1.5 bg-cream/50 px-2.5 py-1 rounded-lg">
-              <i class="bi bi-clock text-gold text-sm"></i>
-              <span class="font-medium">{{ product.weight }}</span>
-            </span>
+          <!-- Price -->
+          <div class="mb-2">
+            <p v-if="product.price" class="text-gray-900 text-xs md:text-sm lg:text-sm leading-tight text-center">
+              Mulai dari {{ formatPrice(product.price) }}
+            </p>
           </div>
         </div>
       </div>

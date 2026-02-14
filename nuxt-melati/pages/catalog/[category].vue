@@ -270,7 +270,7 @@ useHead({
   <div class="min-h-screen bg-gradient-to-b from-cream via-white to-cream">
     <main class="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-3 md:py-3">
       <!-- Breadcrumb - Enhanced -->
-      <nav class="mb-5">
+      <nav class="mb-1">
         <div class="px-5 py-3 inline-flex">
           <ol class="flex items-center gap-2 text-xs text-neutral-600">
             <li>
@@ -312,7 +312,7 @@ useHead({
       </div>
 
       <!-- Main Content -->
-      <div v-else class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+      <div v-else class="flex flex-col lg:flex-row gap-2 lg:gap-8">
         <!-- Filter Sidebar -->
         <aside class="lg:w-64 flex-shrink-0">
           <CatalogFilterSidebar :category="category" :filters="filters" @update:filters="handleFilterChange" />
@@ -321,18 +321,16 @@ useHead({
         <!-- Product Grid -->
         <div class="flex-1 min-w-0">
           <!-- Category Header - Enhanced -->
-          <div class="mb-8">
-            <div class="flex items-center gap-2.5 mb-3">
-              <i class="bi bi-gem text-2xl text-gold"></i>
-              <h1 class="text-3xl md:text-3xl font-serif font-bold text-maroon">
+          <div class="mb-6">
+            <div class="flex items-center gap-2.5 mb-1">
+              <h1 class="text-xl md:text-3xl lg:text-2xl font-serif font-bold text-maroon">
                 {{ category?.name }}
               </h1>
             </div>
-            <div class="h-1 w-20 bg-gradient-to-r from-gold to-maroon rounded-full mb-4"></div>
+            <div class="h-1 w-20 bg-gradient-to-r from-gold to-maroon rounded-full mb-3"></div>
             <p v-if="category?.description" class="text-neutral-600 text-base leading-relaxed max-w-3xl">
               {{ category.description }}
             </p>
-            <p class="mt-4 text-sm text-neutral-500 font-medium">{{ products.length }} produk ditemukan</p>
           </div>
 
           <!-- Empty State -->

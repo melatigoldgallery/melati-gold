@@ -62,33 +62,33 @@ const handleClick = (product: any) => {
 <template>
   <section class="py-8 border-t">
     <div class="mb-6">
-      <h2 class="text-2xl md:text-3xl font-serif text-gray-900">Produk Terkait</h2>
-      <p class="text-gray-600 mt-2">Anda mungkin juga menyukai produk ini</p>
+      <h2 class="text-xl md:text-2xl font-serif text-gray-900">Produk Terkait</h2>
+      <p class="text-gray-600 mt-2 text-sm md:text-base">Anda mungkin juga menyukai produk ini</p>
     </div>
 
     <!-- Desktop Grid -->
-    <div class="hidden md:grid md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div class="hidden md:grid md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
       <article v-for="product in products" :key="product.id" class="group cursor-pointer" @click="handleClick(product)">
         <div
-          class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+          class="bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300"
         >
           <!-- Image -->
-          <div class="relative aspect-[4/5] overflow-hidden bg-gray-100">
+          <div class="relative w-50 aspect-[3/4] overflow-hidden bg-gray-100">
             <img
               :src="getProductImage(product)"
               :alt="product.title || product.name"
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              class="w-full h-full object-cover transition-transform duration-500"
               loading="lazy"
             />
             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
           </div>
 
           <!-- Info -->
-          <div class="p-3">
-            <h3 class="font-semibold text-gray-900 text-sm line-clamp-2 mb-1">
+          <div class="p-1.5">
+            <h3 class="font-semibold text-gray-900 text-xs line-clamp-2 mb-0.5">
               {{ product.title || product.name }}
             </h3>
-            <p class="text-maroon font-bold text-sm">
+            <p class="text-maroon font-bold text-xs">
               {{ formatPrice(product.price) }}
             </p>
           </div>

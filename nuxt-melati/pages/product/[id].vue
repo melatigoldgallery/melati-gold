@@ -127,19 +127,17 @@ useHead({
                 Home
               </NuxtLink>
             </li>
-            <li><i class="bi bi-chevron-right text-xs"></i></li>
-            <li>
-              <NuxtLink to="/" class="hover:text-maroon transition-colors">Katalog</NuxtLink>
-            </li>
-            <li v-if="product?.category_name"><i class="bi bi-chevron-right text-xs"></i></li>
-            <li v-if="product?.category_name">
-              <NuxtLink
-                :to="`/catalog/${product.category_slug || product.category_name.toLowerCase()}`"
-                class="hover:text-maroon transition-colors"
-              >
-                {{ product.category_name }}
-              </NuxtLink>
-            </li>
+            <template v-if="product?.category_name">
+              <li><i class="bi bi-chevron-right text-xs"></i></li>
+              <li>
+                <NuxtLink
+                  :to="`/catalog/${product.category_slug || product.category_name.toLowerCase().replace(/\s+/g, '-')}`"
+                  class="hover:text-maroon transition-colors"
+                >
+                  {{ product.category_name }}
+                </NuxtLink>
+              </li>
+            </template>
             <li><i class="bi bi-chevron-right text-xs"></i></li>
             <li>
               <span class="font-semibold text-maroon">{{ product?.name }}</span>

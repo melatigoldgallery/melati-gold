@@ -1,37 +1,57 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, nextTick } from 'vue'
-
-// Emit event untuk membuka modal service
-const emit = defineEmits<{
-  (e: 'open-service', service: any): void
-}>()
+import { computed, onMounted, onUnmounted, ref, nextTick } from "vue";
 
 // Fetch custom services from database
-const { getCustomServices } = useCatalogManager()
+const { getCustomServices } = useCatalogManager();
 
 // State data
-const services = ref<any[]>([])
-const loading = ref(true)
+const services = ref<any[]>([]);
+const loading = ref(true);
 
-// Carousel refs and state (translateX-based with looping)
-const viewport = ref<HTMLElement | null>(null)
-const track = ref<HTMLElement | null>(null)
-const activeIndex = ref(0)
-const offsetPx = ref(0)
-const slideWidthPx = ref(0)
+// Carousel refs and state (Clone Technique for infinite loop)
+const viewport = ref<HTMLElement | null>(null);
+const track = ref<HTMLElement | null>(null);
+const activeIndex = ref(4); // Start at index 4 (first real slide after 4 clones)
+const offsetPx = ref(0);
+const slideWidthPx = ref(0);
+const transitionEnabled = ref(true);
 
-const slideCount = computed(() => services.value.length)
+const slideCount = computed(() => services.value.length);
+
+// Create display array with clones for infinite loop
+// Clone 4 cards (max visible on desktop) at each end to prevent empty spaces
+// Structure: [Last 4 cloned, ...RealSlides, First 4 cloned]
+const CLONE_COUNT = 4;
+const displayServices = computed(() => {
+  if (services.value.length === 0) return [];
+
+  const len = services.value.length;
+  // Clone last N cards for start
+  const clonesStart = [];
+  for (let i = 0; i < CLONE_COUNT; i++) {
+    const idx = (len - CLONE_COUNT + i) % len;
+    clonesStart.push({ ...services.value[idx], _cloneId: `clone-start-${i}` });
+  }
+
+  // Clone first N cards for end
+  const clonesEnd = [];
+  for (let i = 0; i < CLONE_COUNT; i++) {
+    clonesEnd.push({ ...services.value[i], _cloneId: `clone-end-${i}` });
+  }
+
+  return [...clonesStart, ...services.value, ...clonesEnd];
+});
 
 function getSlides(): HTMLElement[] {
-  const el = track.value
-  if (!el) return []
-  return Array.from(el.children) as HTMLElement[]
+  const el = track.value;
+  if (!el) return [];
+  return Array.from(el.children) as HTMLElement[];
 }
 
 function getMetrics() {
-  const vp = viewport.value
-  const tr = track.value
-  const slides = getSlides()
+  const vp = viewport.value;
+  const tr = track.value;
+  const slides = getSlides();
   if (!vp || !tr || slides.length === 0) {
     return {
       vp: null as HTMLElement | null,
@@ -42,115 +62,138 @@ function getMetrics() {
       visibleCount: 1,
       maxIndex: 0,
       maxOffset: 0,
-    }
+    };
   }
-  const styles = getComputedStyle(tr)
-  const gap = parseFloat(styles.columnGap || styles.gap || '0') || 0
-  const paddingLeft = parseFloat(styles.paddingLeft || '0') || 0
-  const paddingRight = parseFloat(styles.paddingRight || '0') || 0
-  const paddingX = paddingLeft + paddingRight
-  const slideWidth = slides[0].clientWidth
-  const visibleSpace = Math.max(0, vp.clientWidth - paddingX)
-  const visibleCount = Math.max(1, Math.floor((visibleSpace + gap) / (slideWidth + gap)))
-  const maxIndex = Math.max(0, slides.length - visibleCount)
-  const maxOffset = Math.max(0, tr.scrollWidth - vp.clientWidth)
-  return { vp, tr, slides, slideWidth, gap, visibleCount, maxIndex, maxOffset }
+  const styles = getComputedStyle(tr);
+  const gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
+  const paddingLeft = parseFloat(styles.paddingLeft || "0") || 0;
+  const paddingRight = parseFloat(styles.paddingRight || "0") || 0;
+  const paddingX = paddingLeft + paddingRight;
+  const slideWidth = slides[0].clientWidth;
+  const visibleSpace = Math.max(0, vp.clientWidth - paddingX);
+  const visibleCount = Math.max(1, Math.floor((visibleSpace + gap) / (slideWidth + gap)));
+  const maxIndex = Math.max(0, slides.length - visibleCount);
+  const maxOffset = Math.max(0, tr.scrollWidth - vp.clientWidth);
+  return { vp, tr, slides, slideWidth, gap, visibleCount, maxIndex, maxOffset };
 }
 
-function goTo(index: number) {
-  const { vp, slides, maxIndex, maxOffset, slideWidth, gap } = getMetrics()
-  if (!vp || slides.length === 0) return
-  if (index < 0) index = 0
-  if (index > maxIndex) index = maxIndex
+function goTo(index: number, instant = false) {
+  const { vp, slides, slideWidth, gap } = getMetrics();
+  if (!vp || slides.length === 0) return;
 
-  // Calculate offset based on card width and gap for precise positioning
-  const calculatedOffset = index * (slideWidth + gap)
-  const clamped = Math.min(calculatedOffset, maxOffset)
-  offsetPx.value = clamped
-  activeIndex.value = index
+  const totalSlides = displayServices.value.length;
+
+  // Calculate offset
+  const calculatedOffset = index * (slideWidth + gap);
+
+  if (instant) {
+    // Instant jump without transition
+    transitionEnabled.value = false;
+    offsetPx.value = calculatedOffset;
+    activeIndex.value = index;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        transitionEnabled.value = true;
+      });
+    });
+  } else {
+    // Smooth transition
+    offsetPx.value = calculatedOffset;
+    activeIndex.value = index;
+
+    // Check clone boundaries after transition completes
+    setTimeout(() => {
+      const realCount = services.value.length;
+      const realStartIndex = CLONE_COUNT;
+      const realEndIndex = CLONE_COUNT + realCount - 1;
+
+      // If in start clone zone (index < CLONE_COUNT), jump to equivalent real position at end
+      if (activeIndex.value < CLONE_COUNT) {
+        const offset = CLONE_COUNT - activeIndex.value;
+        goTo(realEndIndex - offset + 1, true);
+      }
+      // If in end clone zone (index >= realEndIndex + 1), jump to equivalent real position at start
+      else if (activeIndex.value > realEndIndex) {
+        const offset = activeIndex.value - realEndIndex;
+        goTo(realStartIndex + offset - 1, true);
+      }
+    }, 500); // Match transition duration
+  }
 }
 
 function getTargetCols() {
-  if (typeof window === 'undefined') return 1
-  const w = window.innerWidth
-  if (w >= 1024) return 4 // lg and up: 4-up
-  if (w >= 768) return 2 // md: 2-up
-  return 1 // sm and below: 1-up
+  if (typeof window === "undefined") return 1;
+  const w = window.innerWidth;
+  if (w >= 1024) return 4; // lg and up: 4-up
+  if (w >= 768) return 2; // md: 2-up
+  return 1; // sm and below: 1-up
 }
 
 function updateLayout() {
-  const vp = viewport.value
-  const tr = track.value
-  if (!vp || !tr) return
-  const styles = getComputedStyle(tr)
-  const gap = parseFloat(styles.columnGap || styles.gap || '0') || 0
-  const paddingLeft = parseFloat(styles.paddingLeft || '0') || 0
-  const paddingRight = parseFloat(styles.paddingRight || '0') || 0
-  const paddingX = paddingLeft + paddingRight
-  const cols = getTargetCols()
-  const width = Math.max(0, (vp.clientWidth - paddingX - gap * (cols - 1)) / cols)
-  slideWidthPx.value = width
-  requestAnimationFrame(() => goTo(activeIndex.value))
+  const vp = viewport.value;
+  const tr = track.value;
+  if (!vp || !tr) return;
+  const styles = getComputedStyle(tr);
+  const gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
+  const paddingLeft = parseFloat(styles.paddingLeft || "0") || 0;
+  const paddingRight = parseFloat(styles.paddingRight || "0") || 0;
+  const paddingX = paddingLeft + paddingRight;
+  const cols = getTargetCols();
+  const width = Math.max(0, (vp.clientWidth - paddingX - gap * (cols - 1)) / cols);
+  slideWidthPx.value = width;
+  requestAnimationFrame(() => goTo(activeIndex.value));
 }
 
 function prev() {
-  const { maxIndex } = getMetrics()
-  if (activeIndex.value <= 0) {
-    goTo(maxIndex)
-  } else {
-    goTo(activeIndex.value - 1)
-  }
+  goTo(activeIndex.value - 1);
 }
+
 function next() {
-  const { maxIndex } = getMetrics()
-  if (activeIndex.value >= maxIndex) {
-    goTo(0)
-  } else {
-    goTo(activeIndex.value + 1)
-  }
+  goTo(activeIndex.value + 1);
 }
 
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'ArrowLeft') {
-    e.preventDefault()
-    prev()
-  } else if (e.key === 'ArrowRight') {
-    e.preventDefault()
-    next()
+  if (e.key === "ArrowLeft") {
+    e.preventDefault();
+    prev();
+  } else if (e.key === "ArrowRight") {
+    e.preventDefault();
+    next();
   }
 }
 
 // Load services
 const loadServices = async () => {
-  loading.value = true
-  const result = await getCustomServices()
+  loading.value = true;
+  const result = await getCustomServices();
   if (result.success) {
     services.value = result.data
       .filter((service: any) => service.is_active)
-      .sort((a: any, b: any) => a.display_order - b.display_order)
+      .sort((a: any, b: any) => a.display_order - b.display_order);
   }
-  loading.value = false
+  loading.value = false;
   // Ensure DOM renders before measuring and positioning
-  await nextTick()
+  await nextTick();
   requestAnimationFrame(() => {
-    updateLayout()
-    goTo(0)
-  })
-}
+    updateLayout();
+    // Start at index 4 (first real slide after 4 clones)
+    goTo(CLONE_COUNT, true);
+  });
+};
 
-// Handle service card click
+// Handle service card click - navigate to service detail page
 const openService = (service: any) => {
-  emit('open-service', service)
-}
+  navigateTo(`/service/${service.id}`);
+};
 
 // Lifecycle
 onMounted(() => {
-  const onResize = () => requestAnimationFrame(() => updateLayout())
-  window.addEventListener('resize', onResize)
-  loadServices()
-  requestAnimationFrame(() => updateLayout())
-  onUnmounted(() => window.removeEventListener('resize', onResize))
-})
+  const onResize = () => requestAnimationFrame(() => updateLayout());
+  window.addEventListener("resize", onResize);
+  loadServices();
+  requestAnimationFrame(() => updateLayout());
+  onUnmounted(() => window.removeEventListener("resize", onResize));
+});
 </script>
 
 <template>
@@ -158,16 +201,12 @@ onMounted(() => {
     <div class="container mx-auto max-w-7xl px-4">
       <div class="mb-8 text-center reveal-up">
         <h2 class="section-title text-maroon">Layanan Custom</h2>
-        <p class="mt-3 text-neutral-600">
-          Kami melayani pembuatan perhiasan sesuai keinginan Anda.
-        </p>
+        <p class="mt-3 text-neutral-600">Kami melayani pembuatan perhiasan sesuai keinginan Anda.</p>
       </div>
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <div
-          class="inline-block w-12 h-12 border-4 border-maroon border-t-transparent rounded-full animate-spin"
-        ></div>
+        <div class="inline-block w-12 h-12 border-4 border-maroon border-t-transparent rounded-full animate-spin"></div>
         <p class="mt-4 text-neutral-600">Memuat layanan...</p>
       </div>
 
@@ -178,11 +217,7 @@ onMounted(() => {
 
       <!-- Cards -->
       <div v-else>
-        <div
-          class="flex items-center gap-1 sm:gap-3"
-          role="region"
-          aria-label="Carousel layanan custom"
-        >
+        <div class="flex items-center gap-1 sm:gap-3" role="region" aria-label="Carousel layanan custom">
           <button
             v-if="slideCount > 1"
             type="button"
@@ -198,12 +233,13 @@ onMounted(() => {
             <div ref="viewport" class="overflow-hidden" tabindex="0" @keydown="onKeydown">
               <div
                 ref="track"
-                class="flex gap-3 md:gap-4 px-0 md:px-3 py-4 md:py-6 transition-transform duration-500 ease-out"
+                class="flex gap-3 md:gap-4 px-0 md:px-3 py-4 md:py-6 ease-out"
+                :class="{ 'transition-transform duration-500': transitionEnabled }"
                 :style="{ transform: `translateX(-${offsetPx}px)` }"
               >
                 <article
-                  v-for="service in services"
-                  :key="service.id"
+                  v-for="(service, idx) in displayServices"
+                  :key="service._cloneId || service.id"
                   class="relative flex-none"
                   :style="{ flex: `0 0 ${slideWidthPx}px` }"
                 >
@@ -280,16 +316,16 @@ onMounted(() => {
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 9999px;
-  background-color: rgba(17, 24, 39, 0.65);
-  color: #f9fafb;
+  background-color: transparent;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  transition: background-color 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .carousel-button:hover {
-  background-color: rgba(17, 24, 39, 0.85);
   transform: translateY(-2px);
-  border-color: rgba(255, 215, 0, 0.6);
 }
 
 .carousel-button:disabled {
