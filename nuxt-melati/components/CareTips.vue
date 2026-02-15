@@ -1,96 +1,259 @@
 <template>
-  <section
-    id="perawatan"
-    class="relative overflow-hidden bg-gradient-to-br from-white via-cream/70 to-white py-10 md:py-14"
-  >
-    <div
-      class="pointer-events-none absolute -top-32 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-gold/10 blur-3xl"
-    ></div>
-    <div class="pointer-events-none absolute -bottom-24 right-10 h-64 w-64 rounded-full bg-maroon/10 blur-3xl"></div>
-
+  <section id="perawatan" class="bg-cream py-10 md:py-14">
     <div class="mx-auto max-w-6xl px-4">
       <Transition name="care-fade" appear>
-        <div class="text-center mb-16">
-          <p class="text-lg uppercase tracking-[0.4em] text-gold/100">Panduan Perawatan</p>
-          <h2 class="mt-3 text-3xl md:text-4xl font-serif text-maroon">
-            Bagaimana Melakukan Perawatan Emas yang Baik?
+        <div class="text-center mb-4 md:mb-12">
+          <h2 class="mt-3 text-2xl md:text-4xl font-serif text-maroon leading-tight">
+            Tips Perawatan Emas & Panduan Ukuran Perhiasan
           </h2>
-          <p class="mt-6 text-neutral-600 md:text-lg max-w-3xl mx-auto">
-            Agar emas tetap berkilau dan awet, berikut adalah beberapa cara merawatnya.
+          <p class="mt-4 md:mt-6 text-sm md:text-lg text-neutral-600 max-w-3xl mx-auto">
+            Informasi lengkap perawatan dan panduan ukuran untuk perhiasan emas Anda.
           </p>
         </div>
       </Transition>
 
-      <div class="flex items-center gap-1 sm:gap-3" role="region" aria-label="Carousel tips perawatan">
-        <button
-          v-if="slideCount > 1"
-          type="button"
-          class="carousel-button shrink-0"
-          @click="prev"
-          aria-label="Sebelumnya"
-        >
-          <i class="bi bi-chevron-left"></i>
-        </button>
-
-        <div class="relative flex-1 min-w-0">
-          <div ref="viewport" class="overflow-hidden" tabindex="0" @keydown="onKeydown">
-            <div
-              ref="track"
-              class="flex gap-6 px-0 md:px-3 py-4 ease-out"
-              :class="{ 'transition-transform duration-500': transitionEnabled }"
-              :style="{ transform: `translateX(-${offsetPx}px)` }"
+      <!-- Tab Navigation -->
+      <div class="flex justify-center my-4 md:mb-10">
+        <div class="w-full md:w-auto overflow-x-auto scrollbar-hide relative">
+          <div
+            class="flex gap-2 md:gap-3 bg-white/60 backdrop-blur-sm p-1.5 md:p-2 rounded-2xl shadow-lg border border-white/40 justify-between md:justify-center"
+          >
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              @click="activeTab = tab.id"
+              :class="[
+                'tab-button flex flex-col md:flex-row items-center gap-1 md:gap-2 px-2 md:px-6 py-1.5 md:py-3 rounded-xl font-medium transition-all duration-300 flex-shrink-0',
+                activeTab === tab.id
+                  ? 'bg-gradient-to-br from-gold/20 to-maroon/10 text-maroon shadow-md border-2 border-gold'
+                  : 'text-neutral-600 hover:text-maroon hover:bg-white/50',
+              ]"
+              :aria-selected="activeTab === tab.id"
+              role="tab"
             >
-              <article
-                v-for="(tip, index) in displayTips"
-                :key="tip._cloneId || tip.title"
-                class="relative flex-none group overflow-hidden rounded-3xl border border-white/60 bg-white/90 p-6 shadow-md shadow-maroon/10 backdrop-blur transition-transform duration-500 hover:-translate-y-2"
-                :style="{ flex: `0 0 ${slideWidthPx}px` }"
-              >
-                <div class="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                  <div class="absolute -top-16 right-0 h-40 w-40 rounded-full bg-gold/20 blur-3xl"></div>
-                  <div class="absolute -bottom-20 left-10 h-48 w-48 rounded-full bg-maroon/10 blur-3xl"></div>
-                </div>
+              <component :is="tab.icon" class="w-5 h-5 md:w-5 md:h-5" />
+              <span class="text-xs md:text-sm whitespace-nowrap leading-tight text-center">{{ tab.label }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
-                <div class="relative flex items-start gap-4">
-                  <span class="flex h-12 w-12 items-center justify-center text-2xl text-gold">
-                    <i class="bi bi-gem text-xl"></i>
-                  </span>
-                  <div>
-                    <h3 class="text-xl font-semibold text-maroon">{{ tip.title }}</h3>
-                    <p class="mt-2 text-md leading-relaxed text-neutral-600">
-                      {{ tip.description }}
-                    </p>
-                  </div>
+      <!-- Tab Content with Transition -->
+      <Transition name="tab-fade" mode="out-in">
+        <!-- Tab 1: Tips Perawatan (Carousel) -->
+        <div v-if="activeTab === 'care'" key="care">
+          <div class="flex items-center gap-2 md:gap-3" role="region" aria-label="Carousel tips perawatan">
+            <button
+              v-if="slideCount > 1"
+              type="button"
+              class="carousel-button shrink-0"
+              @click="prev"
+              aria-label="Sebelumnya"
+            >
+              <ChevronLeftIcon class="w-5 h-5" />
+            </button>
+
+            <div class="relative flex-1 min-w-0">
+              <div ref="viewport" class="overflow-hidden" tabindex="0" @keydown="onKeydown">
+                <div
+                  ref="track"
+                  class="flex gap-4 md:gap-6 px-0 md:px-3 py-4 ease-out"
+                  :class="{ 'transition-transform duration-500': transitionEnabled }"
+                  :style="{ transform: `translateX(-${offsetPx}px)` }"
+                >
+                  <article
+                    v-for="(tip, index) in displayTips"
+                    :key="tip._cloneId || tip.title"
+                    class="relative flex-none group overflow-hidden rounded-3xl border border-white/60 bg-white/90 p-4 md:p-6 shadow-md shadow-maroon/10 backdrop-blur transition-transform duration-500 hover:-translate-y-2"
+                    :style="{ flex: `0 0 ${slideWidthPx}px` }"
+                  >
+                    <div class="relative flex flex-col items-center text-center gap-3 md:gap-4">
+                      <span
+                        class="flex h-10 w-10 md:h-12 md:w-12 flex-shrink-0 items-center justify-center text-2xl text-gold"
+                      >
+                        <SparklesIcon class="w-6 h-6 md:w-7 md:h-7" />
+                      </span>
+                      <div class="flex-1 min-w-0">
+                        <h3 class="text-base md:text-xl font-semibold text-maroon">{{ tip.title }}</h3>
+                        <p class="mt-1.5 md:mt-2 text-sm md:text-md leading-relaxed text-neutral-600">
+                          {{ tip.description }}
+                        </p>
+                      </div>
+                    </div>
+                  </article>
                 </div>
-              </article>
+              </div>
+            </div>
+
+            <button
+              v-if="slideCount > 1"
+              type="button"
+              class="carousel-button shrink-0"
+              @click="next"
+              aria-label="Berikutnya"
+            >
+              <ChevronRightIcon class="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 2: Ukuran Cincin -->
+        <div v-else-if="activeTab === 'ring'" key="ring" class="space-y-6 md:space-y-8">
+          <!-- Guide Steps -->
+          <div>
+            <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">
+              Cara Mengukur Cincin
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
+              <div
+                v-for="(step, index) in ringGuideSteps"
+                :key="index"
+                class="step-card bg-white/90 backdrop-blur rounded-2xl p-4 md:p-6 shadow-lg border border-white/60 hover:-translate-y-2 transition-all duration-300"
+                :style="{ animationDelay: `${index * 0.1}s` }"
+              >
+                <div class="flex flex-col items-center text-center space-y-3 md:space-y-4">
+                  <div class="relative">
+                    <div class="absolute inset-0 bg-gold/20 rounded-full blur-xl"></div>
+                    <div
+                      class="relative w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-gold/30 to-maroon/20 rounded-full flex items-center justify-center"
+                    >
+                      <span class="text-xl md:text-2xl font-bold text-maroon">{{ index + 1 }}</span>
+                    </div>
+                  </div>
+                  <h4 class="text-base md:text-lg font-semibold text-maroon">{{ step.title }}</h4>
+                  <p class="text-sm md:text-sm text-neutral-600 leading-relaxed">{{ step.description }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ring Size Table Image -->
+          <div>
+            <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Tabel Ukuran Cincin</h3>
+            <div class="flex justify-center">
+              <div
+                class="bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60 overflow-hidden hover:-translate-y-1 transition-all duration-300 w-full max-w-2xl"
+              >
+                <img src="/img/Tabel-cincin.png" alt="Tabel Ukuran Cincin" class="w-full h-auto" loading="lazy" />
+              </div>
             </div>
           </div>
         </div>
 
-        <button
-          v-if="slideCount > 1"
-          type="button"
-          class="carousel-button shrink-0"
-          @click="next"
-          aria-label="Berikutnya"
-        >
-          <i class="bi bi-chevron-right"></i>
-        </button>
-      </div>
+        <!-- Tab 3: Ukuran Gelang -->
+        <div v-else-if="activeTab === 'bracelet'" key="bracelet" class="space-y-6 md:space-y-8">
+          <!-- Guide Steps -->
+          <div>
+            <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">
+            Cara Mengukur Gelang
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
+              <div
+                v-for="(step, index) in braceletGuideSteps"
+                :key="index"
+                class="step-card bg-white/90 backdrop-blur rounded-2xl p-4 md:p-6 shadow-lg border border-white/60 hover:-translate-y-2 transition-all duration-300"
+                :style="{ animationDelay: `${index * 0.1}s` }"
+              >
+                <div class="flex flex-col items-center text-center space-y-3 md:space-y-4">
+                  <div class="relative">
+                    <div class="absolute inset-0 bg-gold/20 rounded-full blur-xl"></div>
+                    <div
+                      class="relative w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-gold/30 to-maroon/20 rounded-full flex items-center justify-center"
+                    >
+                      <span class="text-xl md:text-2xl font-bold text-maroon">{{ index + 1 }}</span>
+                    </div>
+                  </div>
+                  <h4 class="text-base md:text-lg font-semibold text-maroon">{{ step.title }}</h4>
+                  <p class="text-sm md:text-sm text-neutral-600 leading-relaxed">{{ step.description }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bracelet Size Table Image -->
+          <div>
+            <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Tabel Ukuran Gelang</h3>
+            <div class="flex justify-center">
+              <div
+                class="bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60 overflow-hidden hover:-translate-y-1 transition-all duration-300 w-full max-w-2xl"
+              >
+                <img src="/img/Tabel-gelang.png" alt="Tabel Ukuran Gelang" class="w-full h-auto" loading="lazy" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, nextTick } from "vue";
+import { computed, onMounted, onUnmounted, ref, nextTick, watch } from "vue";
+import {
+  SparklesIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  LinkIcon,
+  LifebuoyIcon,
+} from "@heroicons/vue/24/outline";
 
-// Type definition for tips with optional clone identifier
+// Type definitions
 interface Tip {
   title: string;
   description: string;
   _cloneId?: string;
 }
 
+interface GuideStep {
+  title: string;
+  description: string;
+}
+
+// Tab Management
+const activeTab = ref("care");
+
+const tabs = [
+  { id: "care", label: "Tips Perawatan", icon: SparklesIcon },
+  { id: "ring", label: "Ukuran Cincin", icon: LifebuoyIcon },
+  { id: "bracelet", label: "Ukuran Gelang", icon: LinkIcon },
+];
+
+// Ring Size Guide Steps
+const ringGuideSteps: GuideStep[] = [
+  {
+    title: "Ukur Keliling Jari",
+    description:
+      "Jika tidak ada contoh cincin, gunakan tali atau kertas untuk mengukur lingkar jari. Kemudian kertas atau tali diukur menggunakan penggaris dimulai dari angka 0.",
+  },
+  {
+    title: "Ukur Diameter Cincin",
+    description:
+      "Jika ada contoh cincin yang sudah pas, ukur diameter cincin tersebut menggunakan penggaris. Diameter diukur dari sisi dalam cincin.",
+  },
+  {
+    title: "Cocokkan dengan Tabel",
+    description: "Bandingkan hasil pengukuran dengan tabel di bawah untuk menentukan ukuran cincin yang tepat.",
+  },
+];
+
+// Bracelet Size Guide Steps
+const braceletGuideSteps: GuideStep[] = [
+  {
+    title: "Ukur Pergelangan Tangan",
+    description:
+      "Gunakan kertas atau benang untuk mengukur lingkar pergelangan tangan pada posisi yang biasa dipakai gelang.",
+  },
+  {
+    title: "Pilih Jenis Gelang",
+    description: "Tentukan apakah gelang bertipe kaku (bengle) atau rantai, karena perhitungan ukurannya berbeda.",
+  },
+  {
+    title: "Cocokkan dengan Tabel",
+    description: "Gunakan tabel untuk menemukan ukuran gelang yang sesuai dengan ukuran pergelangan tangan.",
+  },
+];
+
+// Carousel state (for care tips tab)
 const viewport = ref<HTMLElement | null>(null);
 const track = ref<HTMLElement | null>(null);
 const activeIndex = ref(3); // Start at index 3 (first real slide after 3 clones)
@@ -253,7 +416,11 @@ function updateLayout() {
   const paddingRight = parseFloat(styles.paddingRight || "0") || 0;
   const paddingX = paddingLeft + paddingRight;
   const cols = getTargetCols();
-  const width = Math.max(0, (vp.clientWidth - paddingX - gap * (cols - 1)) / cols);
+
+  // Mobile optimization: use slightly less width for better text visibility
+  const mobileAdjustment = window.innerWidth < 640 ? 16 : 0;
+  const width = Math.max(0, (vp.clientWidth - paddingX - gap * (cols - 1)) / cols - mobileAdjustment);
+
   slideWidthPx.value = width;
   requestAnimationFrame(() => goTo(activeIndex.value));
 }
@@ -291,6 +458,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Fade transitions for section appearance */
 .care-fade-enter-active,
 .care-fade-leave-active {
   transition:
@@ -304,6 +472,25 @@ onMounted(() => {
   transform: translateY(24px);
 }
 
+/* Tab content transitions */
+.tab-fade-enter-active,
+.tab-fade-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.tab-fade-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.tab-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+/* Carousel buttons */
 .carousel-button {
   display: inline-flex;
   align-items: center;
@@ -329,22 +516,106 @@ onMounted(() => {
   transform: none;
 }
 
+/* Step cards animation */
+.step-card {
+  animation: fadeInUp 0.6s ease backwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth scroll for tab navigation */
+.scrollbar-hide {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tab content container for better spacing */
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .md\\:space-y-8 > * + * {
+    margin-top: 2rem;
+  }
+}
+
+/* Tab button optimizations */
+.tab-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-button:active {
+  transform: scale(0.95);
+}
+
+/* Mobile responsive */
 @media (max-width: 640px) {
   .carousel-button {
-    width: 2rem;
-    height: 2rem;
+    width: 2.25rem;
+    height: 2.25rem;
     background-color: transparent;
-    border: none;
+    backdrop-filter: blur(4px);
     color: #591927;
   }
+
   .carousel-button:hover {
     background-color: transparent;
     transform: none;
-    border-color: transparent;
   }
-  .carousel-button i {
-    font-size: 0.875rem;
-    line-height: 1;
+
+  .carousel-button:active {
+    transform: scale(0.95);
+  }
+
+  /* Mobile tab improvements */
+  .tab-button {
+    min-width: auto;
+    flex: 1;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .tab-button {
+      flex: 0 0 auto;
+    }
+  }
+
+  /* Optimize card layout for mobile */
+  article {
+    min-height: 180px;
+  }
+
+  /* Add subtle gradient hint for scrollable tabs */
+  .scrollbar-hide::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent);
+    pointer-events: none;
   }
 }
 </style>

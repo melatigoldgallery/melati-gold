@@ -139,7 +139,7 @@ onUnmounted(() => {
             <!-- Logo -->
             <div class="text-center mb-4 sm:mb-6">
               <div
-                class="mx-auto mb-3 h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-maroon to-black flex items-center justify-center shadow-elegant ring-1 ring-gold/30"
+                class="mx-auto mb-3 h-20 w-20 sm:h-20 sm:w-20 rounded-full bg-gradient-to-br from-maroon to-black flex items-center justify-center shadow-elegant ring-1 ring-gold/30"
               >
                 <img
                   src="/img/logo.png"

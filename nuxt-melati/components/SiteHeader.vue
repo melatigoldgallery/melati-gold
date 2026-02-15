@@ -49,7 +49,7 @@ onUnmounted(() => {
         :class="isScrolled ? 'bg-black/80 backdrop-blur-md' : 'bg-transparent'"
       />
     </div>
-    <div class="container mx-auto flex max-w-6xl items-center justify-between py-3 px-4">
+    <div class="container mx-auto flex max-w-9xl items-center justify-between py-3 px-0">
       <NuxtLink to="/" class="flex items-center gap-3 group">
         <div>
           <h1
@@ -82,6 +82,18 @@ onUnmounted(() => {
           Best Seller
         </a>
         <a
+          href="#custom"
+          class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+        >
+          Layanan Custom
+        </a>
+        <a
+          href="#perawatan"
+          class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+        >
+          Tips
+        </a>
+        <a
           href="#testimoni"
           class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
         >
@@ -107,9 +119,17 @@ onUnmounted(() => {
       <div v-if="open" class="md:hidden fixed inset-0 top-[60px] z-40 bg-black/50 backdrop-blur-sm" @click="closeMenu">
         <div class="bg-black/95 backdrop-blur-md border-t border-white/20" @click.stop>
           <nav class="container mx-auto max-w-6xl py-3 px-4 grid gap-2">
-            <a href="#produk" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">Produk</a>
+            <a href="#produk" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
+              Katalog Produk
+            </a>
             <a href="#best-produk" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
               Best Seller
+            </a>
+            <a href="#custom" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
+              Layanan Custom
+            </a>
+            <a href="#perawatan" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
+              Tips & Panduan
             </a>
             <a href="#testimoni" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
               Testimoni
@@ -161,7 +181,10 @@ h1.text-gold {
 
 /* Logo hover glow effect */
 .group:hover h1 {
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 20px rgba(247, 227, 161, 0.4), 0 0 40px rgba(247, 227, 161, 0.2);
+  text-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(247, 227, 161, 0.4),
+    0 0 40px rgba(247, 227, 161, 0.2);
   filter: brightness(1.1);
 }
 

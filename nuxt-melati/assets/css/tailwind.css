@@ -5,7 +5,22 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Add scroll padding to account for fixed header */
+    scroll-padding-top: 5rem; /* Mobile: ~80px */
   }
+
+  @media (min-width: 768px) {
+    html {
+      scroll-padding-top: 5.5rem; /* Tablet: ~88px */
+    }
+  }
+
+  @media (min-width: 1024px) {
+    html {
+      scroll-padding-top: 6rem; /* Desktop: ~96px */
+    }
+  }
+
   body {
     @apply bg-cream text-neutral-900 font-sans antialiased;
   }
@@ -36,7 +51,7 @@
     @apply font-serif text-3xl md:text-4xl;
   }
   .font-script {
-    font-family: 'Allura', cursive;
+    font-family: "Allura", cursive;
   }
 }
 
