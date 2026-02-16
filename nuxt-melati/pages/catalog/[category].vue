@@ -267,8 +267,8 @@ useHead({
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-cream via-white to-cream">
-    <main class="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-3 md:py-3">
+  <div class="min-h-screen bg-gradient-to-b from-cream via-white to-cream overflow-x-hidden">
+    <main class="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-3 md:py-3 overflow-x-hidden">
       <!-- Breadcrumb - Enhanced -->
       <nav class="mb-1">
         <div class="px-5 py-3 inline-flex">

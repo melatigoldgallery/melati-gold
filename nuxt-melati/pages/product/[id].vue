@@ -99,8 +99,8 @@ useHead({
 </script>
 
 <template>
-  <div class="min-h-screen bg-cream">
-    <main class="container mx-auto max-w-7xl px-4 py-8">
+  <div class="min-h-screen bg-cream overflow-x-hidden">
+    <main class="container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden">
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-20">
         <div class="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-yellow-600"></div>

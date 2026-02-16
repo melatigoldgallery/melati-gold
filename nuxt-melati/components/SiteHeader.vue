@@ -49,69 +49,71 @@ onUnmounted(() => {
         :class="isScrolled ? 'bg-black/80 backdrop-blur-md' : 'bg-transparent'"
       />
     </div>
-    <div class="container mx-auto flex max-w-9xl items-center justify-between py-3 px-0">
-      <NuxtLink to="/" class="flex items-center gap-3 group">
-        <div>
-          <h1
-            class="font-script text-2xl sm:text-3xl md:text-4xl font-bold tracking-wide text-gold group-hover:scale-105 transition-all duration-300"
+    <div class="w-full overflow-x-hidden">
+      <div class="container mx-auto flex max-w-7xl items-center justify-between py-3 px-4 sm:px-6 lg:px-8">
+        <NuxtLink to="/" class="flex items-center gap-3 group">
+          <div>
+            <h1
+              class="font-script text-xl sm:text-2xl md:text-3xl font-bold tracking-wide text-gold transition-all duration-300"
+            >
+              Melati Gold Shop
+            </h1>
+          </div>
+        </NuxtLink>
+
+        <button
+          class="md:hidden inline-flex items-center justify-center rounded-md p-2 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold transition-all duration-200"
+          @click="open = !open"
+          aria-label="Toggle menu"
+        >
+          <i class="bi text-2xl" :class="open ? 'bi-x-lg' : 'bi-list'" />
+        </button>
+
+        <nav class="hidden md:flex items-center gap-6">
+          <a
+            href="#produk"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
           >
-            Melati Gold Shop
-          </h1>
-        </div>
-      </NuxtLink>
-
-      <button
-        class="md:hidden inline-flex items-center justify-center rounded-md p-2 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold transition-all duration-200"
-        @click="open = !open"
-        aria-label="Toggle menu"
-      >
-        <i class="bi text-2xl" :class="open ? 'bi-x-lg' : 'bi-list'" />
-      </button>
-
-      <nav class="hidden md:flex items-center gap-6">
-        <a
-          href="#produk"
-          class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
-        >
-          Katalog Produk
-        </a>
-        <a
-          href="#best-produk"
-          class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
-        >
-          Best Seller
-        </a>
-        <a
-          href="#custom"
-          class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
-        >
-          Layanan Custom
-        </a>
-        <a
-          href="#perawatan"
-          class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
-        >
-          Tips
-        </a>
-        <a
-          href="#testimoni"
-          class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
-        >
-          Testimoni
-        </a>
-        <a
-          href="#tentang"
-          class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
-        >
-          Tentang
-        </a>
-        <a
-          href="#kontak"
-          class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
-        >
-          Kontak
-        </a>
-      </nav>
+            Katalog Produk
+          </a>
+          <a
+            href="#best-produk"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          >
+            Best Seller
+          </a>
+          <a
+            href="#custom"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          >
+            Layanan Custom
+          </a>
+          <a
+            href="#perawatan"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          >
+            Tips
+          </a>
+          <a
+            href="#testimoni"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          >
+            Testimoni
+          </a>
+          <a
+            href="#tentang"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          >
+            Tentang
+          </a>
+          <a
+            href="#kontak"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          >
+            Kontak
+          </a>
+        </nav>
+      </div>
     </div>
 
     <!-- Mobile Menu Dropdown with Backdrop -->

@@ -1,15 +1,31 @@
 ﻿<template>
-  <div class="min-h-screen bg-cream">
+  <div class="min-h-screen bg-cream overflow-x-hidden">
     <SiteHeader />
-    <main class="relative">
-      <HeroSection />
-      <CatalogShowcase />
-      <FeaturedProducts />
-      <CustomServices />
-      <CareTips />
-      <Testimonials />
-      <AboutUs />
-      <FinalCta />
+    <main class="relative overflow-x-hidden">
+      <div data-aos="fade-in">
+        <HeroSection />
+      </div>
+      <div data-aos="zoom-in" data-aos-duration="800">
+        <CatalogShowcase />
+      </div>
+      <div data-aos="fade-up" data-aos-duration="900" data-aos-delay="100">
+        <FeaturedProducts />
+      </div>
+      <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="50">
+        <CustomServices />
+      </div>
+      <div data-aos="fade-up" data-aos-duration="850" data-aos-delay="75">
+        <CareTips />
+      </div>
+      <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
+        <Testimonials />
+      </div>
+      <div data-aos="fade-left" data-aos-duration="900" data-aos-delay="50">
+        <AboutUs />
+      </div>
+      <div data-aos="zoom-in" data-aos-duration="800" data-aos-delay="100">
+        <FinalCta />
+      </div>
     </main>
     <SiteFooter />
   </div>

@@ -54,7 +54,15 @@
             </button>
 
             <div class="relative flex-1 min-w-0">
-              <div ref="viewport" class="overflow-hidden" tabindex="0" @keydown="onKeydown">
+              <div
+                ref="viewport"
+                class="overflow-hidden"
+                tabindex="0"
+                @keydown="onKeydown"
+                @touchstart="onTouchStart"
+                @touchmove="onTouchMove"
+                @touchend="onTouchEnd"
+              >
                 <div
                   ref="track"
                   class="flex gap-4 md:gap-6 px-0 md:px-3 py-4 ease-out"
@@ -101,9 +109,7 @@
         <div v-else-if="activeTab === 'ring'" key="ring" class="space-y-6 md:space-y-8">
           <!-- Guide Steps -->
           <div>
-            <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">
-              Cara Mengukur Cincin
-            </h3>
+            <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Cara Mengukur Cincin</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
               <div
                 v-for="(step, index) in ringGuideSteps"
@@ -144,9 +150,7 @@
         <div v-else-if="activeTab === 'bracelet'" key="bracelet" class="space-y-6 md:space-y-8">
           <!-- Guide Steps -->
           <div>
-            <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">
-            Cara Mengukur Gelang
-            </h3>
+            <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Cara Mengukur Gelang</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
               <div
                 v-for="(step, index) in braceletGuideSteps"
@@ -189,13 +193,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, nextTick, watch } from "vue";
-import {
-  SparklesIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  LinkIcon,
-  LifebuoyIcon,
-} from "@heroicons/vue/24/outline";
+import { SparklesIcon, ChevronLeftIcon, ChevronRightIcon, LinkIcon, LifebuoyIcon } from "@heroicons/vue/24/outline";
 
 // Type definitions
 interface Tip {
@@ -319,6 +317,14 @@ const displayTips = computed<Tip[]>(() => {
 
 const slideCount = computed(() => tips.length);
 
+// Touch swipe support for mobile
+const touchStartX = ref(0);
+const touchStartY = ref(0);
+const touchCurrentX = ref(0);
+const touchDragging = ref(false);
+const touchStartOffset = ref(0);
+const SWIPE_THRESHOLD = 20; // Minimum pixels to detect as swipe
+
 function getSlides(): HTMLElement[] {
   const el = track.value;
   if (!el) return [];
@@ -431,6 +437,56 @@ function prev() {
 
 function next() {
   goTo(activeIndex.value + 1);
+}
+
+// Touch swipe handlers for mobile
+function onTouchStart(e: TouchEvent) {
+  if (tips.length <= 1) return; // No swipe if only 1 tip
+
+  const touch = e.touches[0];
+  touchStartX.value = touch.clientX;
+  touchStartY.value = touch.clientY;
+  touchCurrentX.value = touch.clientX;
+  touchDragging.value = true;
+  touchStartOffset.value = offsetPx.value;
+  transitionEnabled.value = false;
+}
+
+function onTouchMove(e: TouchEvent) {
+  if (!touchDragging.value) return;
+
+  const touch = e.touches[0];
+  touchCurrentX.value = touch.clientX;
+
+  // Calculate current offset based on touch position
+  const deltaX = touchCurrentX.value - touchStartX.value;
+  const newOffset = Math.max(0, touchStartOffset.value - deltaX);
+  offsetPx.value = newOffset;
+}
+
+function onTouchEnd() {
+  if (!touchDragging.value) return;
+
+  touchDragging.value = false;
+  transitionEnabled.value = true;
+
+  const deltaX = touchCurrentX.value - touchStartX.value;
+  const absDelta = Math.abs(deltaX);
+
+  // Only trigger swipe if threshold is met
+  if (absDelta >= SWIPE_THRESHOLD) {
+    // Determine swipe direction
+    if (deltaX > 0) {
+      // Swiped right = prev
+      prev();
+    } else {
+      // Swiped left = next
+      next();
+    }
+  } else {
+    // Snap back to current position
+    goTo(activeIndex.value);
+  }
 }
 
 function onKeydown(e: KeyboardEvent) {
