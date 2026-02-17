@@ -3,6 +3,7 @@ import { ref, computed, watch } from "vue";
 import CatalogFilterSidebar from "~/components/catalog/FilterSidebar.vue";
 import CatalogProductGrid from "~/components/catalog/ProductGrid.vue";
 import CatalogPaginationControls from "~/components/catalog/PaginationControls.vue";
+import { HomeIcon, ChevronRightIcon, ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
 
 // Disable default layout (which includes SiteHeader)
 definePageMeta({
@@ -275,15 +276,15 @@ useHead({
           <ol class="flex items-center gap-2 text-xs text-neutral-600">
             <li>
               <NuxtLink to="/" class="hover:text-maroon transition-colors duration-300 flex items-center gap-2">
-                <i class="bi bi-house-door text-sm"></i>
+                <HomeIcon class="w-4 h-4" />
                 <span>Home</span>
               </NuxtLink>
             </li>
-            <li><i class="bi bi-chevron-right text-[10px]"></i></li>
+            <li><ChevronRightIcon class="w-3 h-3" /></li>
             <li>
               <span class="text-neutral-400">Katalog</span>
             </li>
-            <li><i class="bi bi-chevron-right text-[10px]"></i></li>
+            <li><ChevronRightIcon class="w-3 h-3" /></li>
             <li>
               <span class="font-semibold text-maroon">{{ category?.name || "Loading..." }}</span>
             </li>
@@ -301,7 +302,7 @@ useHead({
 
       <!-- Error State -->
       <div v-else-if="error" class="text-center py-20">
-        <i class="bi bi-exclamation-triangle text-6xl text-red-500"></i>
+        <ExclamationTriangleIcon class="w-16 h-16 text-red-500 mx-auto" />
         <p class="mt-4 text-gray-600">{{ error }}</p>
         <NuxtLink
           to="/"

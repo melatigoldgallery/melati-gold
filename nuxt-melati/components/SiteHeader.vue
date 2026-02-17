@@ -1,6 +1,29 @@
 <script setup lang="ts">
+const router = useRouter();
+const route = useRoute();
 const open = ref(false);
 const isScrolled = ref(false);
+
+// Smart navigation handler - navigate to home with hash if not on home page
+const handleNavigation = async (hash: string) => {
+  closeMenu();
+
+  // If not on home page, navigate to home with hash
+  if (route.path !== "/") {
+    await router.push(`/${hash}`);
+  } else {
+    // If already on home, use native hash navigation
+    window.location.hash = hash.replace("#", "");
+  }
+
+  // Smooth scroll to element after navigation
+  setTimeout(() => {
+    const element = document.querySelector(hash);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  }, 100);
+};
 
 // Detect scroll position
 const handleScroll = () => {
@@ -54,7 +77,7 @@ onUnmounted(() => {
         <NuxtLink to="/" class="flex items-center gap-3 group">
           <div>
             <h1
-              class="font-script text-xl sm:text-2xl md:text-3xl font-bold tracking-wide text-gold transition-all duration-300"
+              class="font-script text-2xl sm:text-3xl md:text-4xl font-bold tracking-wide text-gold transition-all duration-300"
             >
               Melati Gold Shop
             </h1>
@@ -62,56 +85,74 @@ onUnmounted(() => {
         </NuxtLink>
 
         <button
-          class="md:hidden inline-flex items-center justify-center rounded-md p-2 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold transition-all duration-200"
+          class="md:hidden inline-flex items-center justify-center rounded-md p-2 focus:outline-none transition-all duration-200 relative w-10 h-10 isolate"
+          :class="!isScrolled ? 'backdrop-blur-sm' : ''"
           @click="open = !open"
           aria-label="Toggle menu"
         >
-          <i class="bi text-2xl" :class="open ? 'bi-x-lg' : 'bi-list'" />
+          <span class="relative w-6 h-6 flex items-center justify-center">
+            <i
+              v-show="!open"
+              class="bi bi-list text-2xl absolute transition-all duration-300"
+              :style="{
+                opacity: open ? '0' : '1',
+                transform: open ? 'rotate(90deg) scale(0.5)' : 'rotate(0deg) scale(1)',
+              }"
+            />
+            <i
+              v-show="open"
+              class="bi bi-x-lg text-2xl absolute transition-all duration-300"
+              :style="{
+                opacity: open ? '1' : '0',
+                transform: open ? 'rotate(0deg) scale(1)' : 'rotate(-90deg) scale(0.5)',
+              }"
+            />
+          </span>
         </button>
 
         <nav class="hidden md:flex items-center gap-6">
-          <a
-            href="#produk"
-            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          <button
+            @click="handleNavigation('#produk')"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300 bg-none border-none cursor-pointer"
           >
             Katalog Produk
-          </a>
-          <a
-            href="#best-produk"
-            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          </button>
+          <button
+            @click="handleNavigation('#best-produk')"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300 bg-none border-none cursor-pointer"
           >
             Best Seller
-          </a>
-          <a
-            href="#custom"
-            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          </button>
+          <button
+            @click="handleNavigation('#custom')"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300 bg-none border-none cursor-pointer"
           >
             Layanan Custom
-          </a>
-          <a
-            href="#perawatan"
-            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          </button>
+          <button
+            @click="handleNavigation('#perawatan')"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300 bg-none border-none cursor-pointer"
           >
             Tips
-          </a>
-          <a
-            href="#testimoni"
-            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          </button>
+          <button
+            @click="handleNavigation('#testimoni')"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300 bg-none border-none cursor-pointer"
           >
             Testimoni
-          </a>
-          <a
-            href="#tentang"
-            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          </button>
+          <button
+            @click="handleNavigation('#tentang')"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300 bg-none border-none cursor-pointer"
           >
             Tentang
-          </a>
-          <a
-            href="#kontak"
-            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300"
+          </button>
+          <button
+            @click="handleNavigation('#kontak')"
+            class="relative text-gold hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-white after:transition-all hover:after:w-full transition-colors duration-300 bg-none border-none cursor-pointer"
           >
             Kontak
-          </a>
+          </button>
         </nav>
       </div>
     </div>
@@ -121,23 +162,48 @@ onUnmounted(() => {
       <div v-if="open" class="md:hidden fixed inset-0 top-[60px] z-40 bg-black/50 backdrop-blur-sm" @click="closeMenu">
         <div class="bg-black/95 backdrop-blur-md border-t border-white/20" @click.stop>
           <nav class="container mx-auto max-w-6xl py-3 px-4 grid gap-2">
-            <a href="#produk" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
+            <button
+              @click="handleNavigation('#produk')"
+              class="py-3 text-gold hover:text-white transition-colors text-left bg-none border-none cursor-pointer"
+            >
               Katalog Produk
-            </a>
-            <a href="#best-produk" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
+            </button>
+            <button
+              @click="handleNavigation('#best-produk')"
+              class="py-3 text-gold hover:text-white transition-colors text-left bg-none border-none cursor-pointer"
+            >
               Best Seller
-            </a>
-            <a href="#custom" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
+            </button>
+            <button
+              @click="handleNavigation('#custom')"
+              class="py-3 text-gold hover:text-white transition-colors text-left bg-none border-none cursor-pointer"
+            >
               Layanan Custom
-            </a>
-            <a href="#perawatan" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
+            </button>
+            <button
+              @click="handleNavigation('#perawatan')"
+              class="py-3 text-gold hover:text-white transition-colors text-left bg-none border-none cursor-pointer"
+            >
               Tips & Panduan
-            </a>
-            <a href="#testimoni" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">
+            </button>
+            <button
+              @click="handleNavigation('#testimoni')"
+              class="py-3 text-gold hover:text-white transition-colors text-left bg-none border-none cursor-pointer"
+            >
               Testimoni
-            </a>
-            <a href="#tentang" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">Tentang</a>
-            <a href="#kontak" class="py-3 text-gold hover:text-white transition-colors" @click="closeMenu">Kontak</a>
+            </button>
+            <button
+              @click="handleNavigation('#tentang')"
+              class="py-3 text-gold hover:text-white transition-colors text-left bg-none border-none cursor-pointer"
+            >
+              Tentang
+            </button>
+            <button
+              @click="handleNavigation('#kontak')"
+              class="py-3 text-gold hover:text-white transition-colors text-left bg-none border-none cursor-pointer"
+            >
+              Kontak
+            </button>
           </nav>
         </div>
       </div>

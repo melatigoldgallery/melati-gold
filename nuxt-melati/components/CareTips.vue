@@ -59,21 +59,21 @@
                 class="overflow-hidden"
                 tabindex="0"
                 @keydown="onKeydown"
-                @touchstart="onTouchStart"
-                @touchmove="onTouchMove"
-                @touchend="onTouchEnd"
+                @touchstart="(e) => onTouchStart(e, 'care')"
+                @touchmove="(e) => onTouchMove(e, 'care')"
+                @touchend="() => onTouchEnd('care')"
               >
                 <div
                   ref="track"
                   class="flex gap-4 md:gap-6 px-0 md:px-3 py-4 ease-out"
-                  :class="{ 'transition-transform duration-500': transitionEnabled }"
-                  :style="{ transform: `translateX(-${offsetPx}px)` }"
+                  :class="{ 'transition-transform duration-500': carousels.care.transitionEnabled }"
+                  :style="{ transform: `translateX(-${carousels.care.offset}px)` }"
                 >
                   <article
                     v-for="(tip, index) in displayTips"
                     :key="tip._cloneId || tip.title"
                     class="relative flex-none group overflow-hidden rounded-3xl border border-white/60 bg-white/90 p-4 md:p-6 shadow-md shadow-maroon/10 backdrop-blur transition-transform duration-500 hover:-translate-y-2"
-                    :style="{ flex: `0 0 ${slideWidthPx}px` }"
+                    :style="{ flex: `0 0 ${carousels.care.slideWidth}px` }"
                   >
                     <div class="relative flex flex-col items-center text-center gap-3 md:gap-4">
                       <span
@@ -110,7 +110,9 @@
           <!-- Guide Steps -->
           <div>
             <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Cara Mengukur Cincin</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
+
+            <!-- Desktop: Grid -->
+            <div class="hidden md:grid md:grid-cols-3 gap-3 md:gap-6">
               <div
                 v-for="(step, index) in ringGuideSteps"
                 :key="index"
@@ -131,6 +133,64 @@
                 </div>
               </div>
             </div>
+
+            <!-- Mobile: Carousel -->
+            <div class="md:hidden flex items-center gap-3">
+              <button
+                type="button"
+                class="carousel-button shrink-0"
+                @click="carouselPrev('ring')"
+                aria-label="Sebelumnya"
+              >
+                <ChevronLeftIcon class="w-5 h-5" />
+              </button>
+
+              <div class="relative flex-1 min-w-0">
+                <div
+                  ref="ringViewport"
+                  class="overflow-hidden"
+                  @touchstart="(e) => onTouchStart(e, 'ring')"
+                  @touchmove="(e) => onTouchMove(e, 'ring')"
+                  @touchend="() => onTouchEnd('ring')"
+                >
+                  <div
+                    ref="ringTrack"
+                    class="flex gap-4 py-4 ease-out"
+                    :class="{ 'transition-transform duration-500': carousels.ring.transitionEnabled }"
+                    :style="{ transform: `translateX(-${carousels.ring.offset}px)` }"
+                  >
+                    <div
+                      v-for="(step, index) in displayRingSteps"
+                      :key="step._cloneId || `ring-${index}`"
+                      class="step-card flex-none bg-white/90 rounded-2xl p-4 border border-white/60"
+                      :style="{ width: `${carousels.ring.slideWidth}px` }"
+                    >
+                      <div class="flex flex-col items-center text-center space-y-3">
+                        <div class="relative">
+                          <div class="absolute inset-0 bg-gold/20 rounded-full blur-xl"></div>
+                          <div
+                            class="relative w-12 h-12 bg-gradient-to-br from-gold/30 to-maroon/20 rounded-full flex items-center justify-center"
+                          >
+                            <span class="text-xl font-bold text-maroon">{{ step.stepNumber }}</span>
+                          </div>
+                        </div>
+                        <h4 class="text-base font-semibold text-maroon">{{ step.title }}</h4>
+                        <p class="text-sm text-neutral-600 leading-relaxed">{{ step.description }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="carousel-button shrink-0"
+                @click="carouselNext('ring')"
+                aria-label="Berikutnya"
+              >
+                <ChevronRightIcon class="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           <!-- Ring Size Table Image -->
@@ -138,9 +198,9 @@
             <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Tabel Ukuran Cincin</h3>
             <div class="flex justify-center">
               <div
-                class="bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60 overflow-hidden hover:-translate-y-1 transition-all duration-300 w-full max-w-2xl"
+                class="bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60 overflow-hidden hover:-translate-y-1 transition-all duration-300 w-full max-w-lg"
               >
-                <img src="/img/Tabel-cincin.png" alt="Tabel Ukuran Cincin" class="w-full h-auto" loading="lazy" />
+                <img src="/img/Tabel-cincin.jpg" alt="Tabel Ukuran Cincin" class="w-full h-auto" loading="lazy" />
               </div>
             </div>
           </div>
@@ -151,7 +211,9 @@
           <!-- Guide Steps -->
           <div>
             <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Cara Mengukur Gelang</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
+
+            <!-- Desktop: Grid -->
+            <div class="hidden md:grid md:grid-cols-3 gap-3 md:gap-6">
               <div
                 v-for="(step, index) in braceletGuideSteps"
                 :key="index"
@@ -172,6 +234,64 @@
                 </div>
               </div>
             </div>
+
+            <!-- Mobile: Carousel -->
+            <div class="md:hidden flex items-center gap-3">
+              <button
+                type="button"
+                class="carousel-button shrink-0"
+                @click="carouselPrev('bracelet')"
+                aria-label="Sebelumnya"
+              >
+                <ChevronLeftIcon class="w-5 h-5" />
+              </button>
+
+              <div class="relative flex-1 min-w-0">
+                <div
+                  ref="braceletViewport"
+                  class="overflow-hidden"
+                  @touchstart="(e) => onTouchStart(e, 'bracelet')"
+                  @touchmove="(e) => onTouchMove(e, 'bracelet')"
+                  @touchend="() => onTouchEnd('bracelet')"
+                >
+                  <div
+                    ref="braceletTrack"
+                    class="flex gap-4 py-4 ease-out"
+                    :class="{ 'transition-transform duration-500': carousels.bracelet.transitionEnabled }"
+                    :style="{ transform: `translateX(-${carousels.bracelet.offset}px)` }"
+                  >
+                    <div
+                      v-for="(step, index) in displayBraceletSteps"
+                      :key="step._cloneId || `bracelet-${index}`"
+                      class="step-card flex-none bg-white/90 rounded-2xl p-4 border border-white/60"
+                      :style="{ width: `${carousels.bracelet.slideWidth}px` }"
+                    >
+                      <div class="flex flex-col items-center text-center space-y-3">
+                        <div class="relative">
+                          <div class="absolute inset-0 bg-gold/20 rounded-full blur-xl"></div>
+                          <div
+                            class="relative w-12 h-12 bg-gradient-to-br from-gold/30 to-maroon/20 rounded-full flex items-center justify-center"
+                          >
+                            <span class="text-xl font-bold text-maroon">{{ step.stepNumber }}</span>
+                          </div>
+                        </div>
+                        <h4 class="text-base font-semibold text-maroon">{{ step.title }}</h4>
+                        <p class="text-sm text-neutral-600 leading-relaxed">{{ step.description }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="carousel-button shrink-0"
+                @click="carouselNext('bracelet')"
+                aria-label="Berikutnya"
+              >
+                <ChevronRightIcon class="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           <!-- Bracelet Size Table Image -->
@@ -179,9 +299,9 @@
             <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Tabel Ukuran Gelang</h3>
             <div class="flex justify-center">
               <div
-                class="bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60 overflow-hidden hover:-translate-y-1 transition-all duration-300 w-full max-w-2xl"
+                class="bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60 overflow-hidden hover:-translate-y-1 transition-all duration-300 w-full max-w-lg"
               >
-                <img src="/img/Tabel-gelang.png" alt="Tabel Ukuran Gelang" class="w-full h-auto" loading="lazy" />
+                <img src="/img/Tabel-gelang.jpg" alt="Tabel Ukuran Gelang" class="w-full h-auto" loading="lazy" />
               </div>
             </div>
           </div>
@@ -205,6 +325,8 @@ interface Tip {
 interface GuideStep {
   title: string;
   description: string;
+  _cloneId?: string;
+  stepNumber?: number;
 }
 
 // Tab Management
@@ -251,13 +373,19 @@ const braceletGuideSteps: GuideStep[] = [
   },
 ];
 
-// Carousel state (for care tips tab)
+// Generic carousel state
 const viewport = ref<HTMLElement | null>(null);
 const track = ref<HTMLElement | null>(null);
-const activeIndex = ref(3); // Start at index 3 (first real slide after 3 clones)
-const offsetPx = ref(0);
-const slideWidthPx = ref(0);
-const transitionEnabled = ref(true);
+const ringViewport = ref<HTMLElement | null>(null);
+const ringTrack = ref<HTMLElement | null>(null);
+const braceletViewport = ref<HTMLElement | null>(null);
+const braceletTrack = ref<HTMLElement | null>(null);
+
+const carousels = ref({
+  care: { index: 3, offset: 0, slideWidth: 0, transitionEnabled: true },
+  ring: { index: 1, offset: 0, slideWidth: 0, transitionEnabled: true },
+  bracelet: { index: 1, offset: 0, slideWidth: 0, transitionEnabled: true },
+});
 
 const tips: Tip[] = [
   {
@@ -317,6 +445,27 @@ const displayTips = computed<Tip[]>(() => {
 
 const slideCount = computed(() => tips.length);
 
+// Create display arrays with clones for ring and bracelet (infinite loop)
+const RING_BRACELET_CLONE_COUNT = 1;
+
+const displayRingSteps = computed(() => {
+  if (ringGuideSteps.length === 0) return [];
+  const len = ringGuideSteps.length;
+  const cloneStart = { ...ringGuideSteps[len - 1], _cloneId: "ring-clone-start", stepNumber: len };
+  const cloneEnd = { ...ringGuideSteps[0], _cloneId: "ring-clone-end", stepNumber: 1 };
+  const stepsWithNumbers = ringGuideSteps.map((step, idx) => ({ ...step, stepNumber: idx + 1 }));
+  return [cloneStart, ...stepsWithNumbers, cloneEnd];
+});
+
+const displayBraceletSteps = computed(() => {
+  if (braceletGuideSteps.length === 0) return [];
+  const len = braceletGuideSteps.length;
+  const cloneStart = { ...braceletGuideSteps[len - 1], _cloneId: "bracelet-clone-start", stepNumber: len };
+  const cloneEnd = { ...braceletGuideSteps[0], _cloneId: "bracelet-clone-end", stepNumber: 1 };
+  const stepsWithNumbers = braceletGuideSteps.map((step, idx) => ({ ...step, stepNumber: idx + 1 }));
+  return [cloneStart, ...stepsWithNumbers, cloneEnd];
+});
+
 // Touch swipe support for mobile
 const touchStartX = ref(0);
 const touchStartY = ref(0);
@@ -325,27 +474,12 @@ const touchDragging = ref(false);
 const touchStartOffset = ref(0);
 const SWIPE_THRESHOLD = 20; // Minimum pixels to detect as swipe
 
-function getSlides(): HTMLElement[] {
-  const el = track.value;
-  if (!el) return [];
-  return Array.from(el.children) as HTMLElement[];
-}
-
-function getMetrics() {
-  const vp = viewport.value;
-  const tr = track.value;
-  const slides = getSlides();
+function getMetrics(type: "care" | "ring" | "bracelet" = "care") {
+  const vp = type === "care" ? viewport.value : type === "ring" ? ringViewport.value : braceletViewport.value;
+  const tr = type === "care" ? track.value : type === "ring" ? ringTrack.value : braceletTrack.value;
+  const slides = tr ? (Array.from(tr.children) as HTMLElement[]) : [];
   if (!vp || !tr || slides.length === 0) {
-    return {
-      vp: null,
-      tr: null,
-      slides,
-      slideWidth: 0,
-      gap: 0,
-      visibleCount: 1,
-      maxIndex: 0,
-      maxOffset: 0,
-    };
+    return { vp: null, tr: null, slides, slideWidth: 0, gap: 0, visibleCount: 1, maxIndex: 0, maxOffset: 0 };
   }
   const styles = getComputedStyle(tr);
   const gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
@@ -360,47 +494,58 @@ function getMetrics() {
   return { vp, tr, slides, slideWidth, gap, visibleCount, maxIndex, maxOffset };
 }
 
-function goTo(index: number, instant = false) {
-  const { vp, slides, slideWidth, gap } = getMetrics();
+function goTo(index: number, type: "care" | "ring" | "bracelet" = "care", instant = false) {
+  const { vp, slides, slideWidth, gap } = getMetrics(type);
   if (!vp || slides.length === 0) return;
 
-  const totalSlides = displayTips.value.length;
-
-  // Calculate offset
+  const carousel = carousels.value[type];
   const calculatedOffset = index * (slideWidth + gap);
 
   if (instant) {
-    // Instant jump without transition
-    transitionEnabled.value = false;
-    offsetPx.value = calculatedOffset;
-    activeIndex.value = index;
+    carousel.transitionEnabled = false;
+    carousel.offset = calculatedOffset;
+    carousel.index = index;
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        transitionEnabled.value = true;
+        carousel.transitionEnabled = true;
       });
     });
   } else {
-    // Smooth transition
-    offsetPx.value = calculatedOffset;
-    activeIndex.value = index;
+    carousel.offset = calculatedOffset;
+    carousel.index = index;
 
-    // Check clone boundaries after transition completes
-    setTimeout(() => {
-      const realCount = tips.length;
-      const realStartIndex = CLONE_COUNT;
-      const realEndIndex = CLONE_COUNT + realCount - 1;
+    // Handle infinite loop boundaries
+    if (type === "care") {
+      setTimeout(() => {
+        const realCount = tips.length;
+        const realStartIndex = CLONE_COUNT;
+        const realEndIndex = CLONE_COUNT + realCount - 1;
 
-      // If in start clone zone (index < CLONE_COUNT), jump to equivalent real position at end
-      if (activeIndex.value < CLONE_COUNT) {
-        const offset = CLONE_COUNT - activeIndex.value;
-        goTo(realEndIndex - offset + 1, true);
-      }
-      // If in end clone zone (index >= realEndIndex + 1), jump to equivalent real position at start
-      else if (activeIndex.value > realEndIndex) {
-        const offset = activeIndex.value - realEndIndex;
-        goTo(realStartIndex + offset - 1, true);
-      }
-    }, 500); // Match transition duration
+        if (carousel.index < CLONE_COUNT) {
+          const offset = CLONE_COUNT - carousel.index;
+          goTo(realEndIndex - offset + 1, type, true);
+        } else if (carousel.index > realEndIndex) {
+          const offset = carousel.index - realEndIndex;
+          goTo(realStartIndex + offset - 1, type, true);
+        }
+      }, 500);
+    } else if (type === "ring" || type === "bracelet") {
+      // Ring and bracelet have 1 clone on each side
+      setTimeout(() => {
+        const stepCount = type === "ring" ? ringGuideSteps.length : braceletGuideSteps.length;
+        const realStartIndex = RING_BRACELET_CLONE_COUNT;
+        const realEndIndex = RING_BRACELET_CLONE_COUNT + stepCount - 1;
+
+        // If at start clone (index 0), jump to last real item (index 3)
+        if (carousel.index < RING_BRACELET_CLONE_COUNT) {
+          goTo(realEndIndex, type, true);
+        }
+        // If at end clone (index 4), jump to first real item (index 1)
+        else if (carousel.index > realEndIndex) {
+          goTo(realStartIndex, type, true);
+        }
+      }, 500);
+    }
   }
 }
 
@@ -412,80 +557,81 @@ function getTargetCols() {
   return 1;
 }
 
-function updateLayout() {
-  const vp = viewport.value;
-  const tr = track.value;
+function updateLayout(type: "care" | "ring" | "bracelet" = "care") {
+  const vp = type === "care" ? viewport.value : type === "ring" ? ringViewport.value : braceletViewport.value;
+  const tr = type === "care" ? track.value : type === "ring" ? ringTrack.value : braceletTrack.value;
   if (!vp || !tr) return;
   const styles = getComputedStyle(tr);
   const gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
   const paddingLeft = parseFloat(styles.paddingLeft || "0") || 0;
   const paddingRight = parseFloat(styles.paddingRight || "0") || 0;
   const paddingX = paddingLeft + paddingRight;
-  const cols = getTargetCols();
+  const cols = type === "care" ? getTargetCols() : 1; // Ring and bracelet always 1 col on mobile
 
-  // Mobile optimization: use slightly less width for better text visibility
   const mobileAdjustment = window.innerWidth < 640 ? 16 : 0;
   const width = Math.max(0, (vp.clientWidth - paddingX - gap * (cols - 1)) / cols - mobileAdjustment);
 
-  slideWidthPx.value = width;
-  requestAnimationFrame(() => goTo(activeIndex.value));
+  carousels.value[type].slideWidth = width;
+  requestAnimationFrame(() => goTo(carousels.value[type].index, type));
 }
 
 function prev() {
-  goTo(activeIndex.value - 1);
+  goTo(carousels.value.care.index - 1, "care");
 }
 
 function next() {
-  goTo(activeIndex.value + 1);
+  goTo(carousels.value.care.index + 1, "care");
+}
+
+function carouselPrev(type: "ring" | "bracelet") {
+  const carousel = carousels.value[type];
+  const newIndex = carousel.index - 1;
+  goTo(newIndex, type);
+}
+
+function carouselNext(type: "ring" | "bracelet") {
+  const carousel = carousels.value[type];
+  const newIndex = carousel.index + 1;
+  goTo(newIndex, type);
 }
 
 // Touch swipe handlers for mobile
-function onTouchStart(e: TouchEvent) {
-  if (tips.length <= 1) return; // No swipe if only 1 tip
-
+function onTouchStart(e: TouchEvent, type: "care" | "ring" | "bracelet" = "care") {
+  if (type === "care" && tips.length <= 1) return;
   const touch = e.touches[0];
   touchStartX.value = touch.clientX;
   touchStartY.value = touch.clientY;
   touchCurrentX.value = touch.clientX;
   touchDragging.value = true;
-  touchStartOffset.value = offsetPx.value;
-  transitionEnabled.value = false;
+  touchStartOffset.value = carousels.value[type].offset;
+  carousels.value[type].transitionEnabled = false;
 }
 
-function onTouchMove(e: TouchEvent) {
+function onTouchMove(e: TouchEvent, type: "care" | "ring" | "bracelet" = "care") {
   if (!touchDragging.value) return;
-
   const touch = e.touches[0];
   touchCurrentX.value = touch.clientX;
-
-  // Calculate current offset based on touch position
   const deltaX = touchCurrentX.value - touchStartX.value;
   const newOffset = Math.max(0, touchStartOffset.value - deltaX);
-  offsetPx.value = newOffset;
+  carousels.value[type].offset = newOffset;
 }
 
-function onTouchEnd() {
+function onTouchEnd(type: "care" | "ring" | "bracelet" = "care") {
   if (!touchDragging.value) return;
-
   touchDragging.value = false;
-  transitionEnabled.value = true;
-
+  carousels.value[type].transitionEnabled = true;
   const deltaX = touchCurrentX.value - touchStartX.value;
   const absDelta = Math.abs(deltaX);
-
-  // Only trigger swipe if threshold is met
   if (absDelta >= SWIPE_THRESHOLD) {
-    // Determine swipe direction
     if (deltaX > 0) {
-      // Swiped right = prev
-      prev();
+      if (type === "care") prev();
+      else carouselPrev(type);
     } else {
-      // Swiped left = next
-      next();
+      if (type === "care") next();
+      else carouselNext(type);
     }
   } else {
-    // Snap back to current position
-    goTo(activeIndex.value);
+    goTo(carousels.value[type].index, type);
   }
 }
 
@@ -499,14 +645,72 @@ function onKeydown(e: KeyboardEvent) {
   }
 }
 
+// Watch activeTab to update layout when switching tabs (fix bug 3 kolom menumpuk)
+watch(activeTab, (newTab) => {
+  if (typeof window === "undefined") return;
+  if (window.innerWidth >= 768) return; // Only for mobile
+
+  // Use setTimeout to wait for tab transition animation (0.3s) to complete
+  nextTick(() => {
+    setTimeout(() => {
+      requestAnimationFrame(() => {
+        if (newTab === "ring") {
+          // Retry layout update to ensure viewport is ready
+          const retryRingLayout = () => {
+            const vp = ringViewport.value;
+            if (vp && vp.clientWidth > 0) {
+              updateLayout("ring");
+              if (carousels.value.ring.index === 0 || carousels.value.ring.slideWidth === 0) {
+                goTo(RING_BRACELET_CLONE_COUNT, "ring", true);
+              }
+            } else {
+              // Retry after 50ms if viewport not ready
+              setTimeout(retryRingLayout, 50);
+            }
+          };
+          retryRingLayout();
+        } else if (newTab === "bracelet") {
+          // Retry layout update to ensure viewport is ready
+          const retryBraceletLayout = () => {
+            const vp = braceletViewport.value;
+            if (vp && vp.clientWidth > 0) {
+              updateLayout("bracelet");
+              if (carousels.value.bracelet.index === 0 || carousels.value.bracelet.slideWidth === 0) {
+                goTo(RING_BRACELET_CLONE_COUNT, "bracelet", true);
+              }
+            } else {
+              // Retry after 50ms if viewport not ready
+              setTimeout(retryBraceletLayout, 50);
+            }
+          };
+          retryBraceletLayout();
+        }
+      });
+    }, 350); // Wait for tab-fade transition (0.3s) + small buffer
+  });
+});
+
 onMounted(() => {
-  const onResize = () => requestAnimationFrame(() => updateLayout());
+  const onResize = () => {
+    requestAnimationFrame(() => {
+      updateLayout("care");
+      if (window.innerWidth < 768) {
+        updateLayout("ring");
+        updateLayout("bracelet");
+      }
+    });
+  };
   window.addEventListener("resize", onResize);
   nextTick(() => {
     requestAnimationFrame(() => {
-      updateLayout();
-      // Start at index 3 (first real slide after 3 clones)
-      goTo(CLONE_COUNT, true);
+      updateLayout("care");
+      goTo(CLONE_COUNT, "care", true);
+      if (window.innerWidth < 768) {
+        updateLayout("ring");
+        goTo(RING_BRACELET_CLONE_COUNT, "ring", true);
+        updateLayout("bracelet");
+        goTo(RING_BRACELET_CLONE_COUNT, "bracelet", true);
+      }
     });
   });
   onUnmounted(() => window.removeEventListener("resize", onResize));

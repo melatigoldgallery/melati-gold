@@ -4,7 +4,7 @@
       <div class="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center mt-0">
         <!-- Content -->
         <div class="reveal-right">
-          <h2 class="section-title tracking-tight leading-tight text-center lg:text-left">Tentang Melati Gold</h2>
+          <h2 class="section-title tracking-tight leading-tight text-center lg:text-left">Tentang Melati Gold Shop</h2>
 
           <div class="mb-3 flex justify-center lg:justify-start">
             <span
@@ -16,12 +16,12 @@
           <p class="mt-6 mx-3 text-neutral-700 text-base md:text-lg leading-relaxed text-justify">
             Melati Gold Shop telah menjadi destinasi terpercaya bagi para pecinta perhiasan emas di Bali sejak tahun
             1983. Dengan lebih dari empat dekade pengalaman, kami terus berkembang dan berinovasi dalam menyajikan
-            koleksi perhiasan berkualitas dengan desain modern.
+            koleksi perhiasan berkualitas dengan desain modern dan menyediakan logam mulia dengan standar internasional.
           </p>
           <p class="mt-4 mx-3 text-neutral-700 text-base md:text-lg leading-relaxed text-justify">
-            Berlokasi di Jalan Diponegoro No. 116, Denpasar, toko kami yang ketiga ini dibuka pada tahun 2018 sebagai
-            komitmen kami untuk memberikan layanan terbaik kepada pelanggan setia. Kami bangga menjadi mitra dari
-            berbagai pabrik emas ternama dan menyediakan logam mulia dengan standar internasional.
+            Kini kami memiliki 4 cabang toko: Melati 1, Melati 2, Sakura yang berlokasi di Jalan Hasanudin Denpasar dan Melati 3 yang berlokasi di Jalan 
+            Diponegoro No. 116 Denpasar. Kami berkomitmen untuk terus memberikan pelayanan 
+            terbaik kepada pelanggan setia.  
           </p>
 
           <!-- Features List -->

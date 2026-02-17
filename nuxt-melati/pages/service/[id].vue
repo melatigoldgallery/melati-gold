@@ -1,6 +1,18 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import CatalogProductGrid from "~/components/catalog/ProductGrid.vue";
+import {
+  HomeIcon,
+  ChevronRightIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  TagIcon,
+  ExclamationTriangleIcon,
+  ArrowLeftIcon,
+  InboxIcon,
+  PhoneIcon,
+} from "@heroicons/vue/24/outline";
+import { StarIcon as StarIconSolid } from "@heroicons/vue/24/solid";
 
 // Disable default layout (which includes SiteHeader)
 definePageMeta({
@@ -104,7 +116,7 @@ useHead({
 
       <!-- Error State -->
       <div v-else-if="error" class="text-center py-20">
-        <i class="bi bi-exclamation-triangle text-6xl text-red-500"></i>
+        <ExclamationTriangleIcon class="w-16 h-16 text-red-500 mx-auto" />
         <p class="mt-4 text-gray-600">{{ error }}</p>
         <NuxtLink to="/" class="mt-4 inline-block px-6 py-2 bg-maroon text-white rounded-lg hover:bg-maroon-dark">
           Kembali ke Beranda
@@ -117,16 +129,16 @@ useHead({
         <nav class="mb-6 text-sm">
           <ol class="flex items-center gap-2 text-neutral-600 flex-wrap">
             <li>
-              <NuxtLink to="/" class="hover:text-maroon transition-colors">
-                <i class="bi bi-house-door"></i>
+              <NuxtLink to="/" class="hover:text-maroon transition-colors flex items-center gap-1">
+                <HomeIcon class="w-4 h-4" />
                 Home
               </NuxtLink>
             </li>
-            <li><i class="bi bi-chevron-right text-xs"></i></li>
+            <li><ChevronRightIcon class="w-3 h-3" /></li>
             <li>
               <NuxtLink to="/#custom" class="hover:text-maroon transition-colors">Layanan Custom</NuxtLink>
             </li>
-            <li><i class="bi bi-chevron-right text-xs"></i></li>
+            <li><ChevronRightIcon class="w-3 h-3" /></li>
             <li>
               <span class="font-semibold text-maroon">{{ service?.title }}</span>
             </li>
@@ -146,12 +158,12 @@ useHead({
             <!-- Features -->
             <div v-if="service?.features && service.features.length > 0" class="mb-4">
               <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <i class="bi bi-stars text-gold"></i>
+                <StarIconSolid class="w-5 h-5 text-gold" />
                 <span>Keunggulan Layanan</span>
               </h3>
               <ul class="space-y-2">
                 <li v-for="(feature, idx) in service.features" :key="idx" class="flex items-start gap-2">
-                  <i class="bi bi-check-circle-fill text-green-600 mt-1"></i>
+                  <CheckCircleIcon class="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
                   <span class="text-gray-700">{{ feature }}</span>
                 </li>
               </ul>
@@ -160,11 +172,11 @@ useHead({
             <!-- Meta Info -->
             <div class="flex flex-wrap gap-4 text-sm border-t pt-4 mt-4">
               <span v-if="service?.duration" class="flex items-center gap-2 text-gray-600">
-                <i class="bi bi-clock"></i>
+                <ClockIcon class="w-4 h-4" />
                 {{ service.duration }}
               </span>
               <span v-if="service?.price_info" class="flex items-center gap-2 text-maroon font-semibold">
-                <i class="bi bi-tag"></i>
+                <TagIcon class="w-4 h-4" />
                 {{ service.price_info }}
               </span>
             </div>
@@ -175,7 +187,7 @@ useHead({
                 @click="contactWhatsApp"
                 class="w-full md:w-auto px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
               >
-                <i class="bi bi-whatsapp text-xl"></i>
+                <PhoneIcon class="w-5 h-5" />
                 <span>Konsultasi via WhatsApp</span>
               </button>
             </div>
@@ -197,7 +209,7 @@ useHead({
 
         <!-- Empty Products State -->
         <div v-else class="mt-12 text-center py-16 bg-white rounded-xl shadow-md">
-          <i class="bi bi-box-seam text-6xl text-gray-400"></i>
+          <InboxIcon class="w-16 h-16 text-gray-400 mx-auto" />
           <p class="mt-4 text-gray-600 mb-6">
             Belum ada contoh produk untuk layanan ini.
             <br />
@@ -207,7 +219,7 @@ useHead({
             @click="contactWhatsApp"
             class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
           >
-            <i class="bi bi-whatsapp text-xl"></i>
+            <PhoneIcon class="w-5 h-5" />
             <span>Konsultasi via WhatsApp</span>
           </button>
         </div>
@@ -218,7 +230,7 @@ useHead({
             to="/#custom"
             class="inline-flex items-center gap-2 text-maroon hover:text-maroon-dark transition-colors"
           >
-            <i class="bi bi-arrow-left"></i>
+            <ArrowLeftIcon class="w-4 h-4" />
             <span>Kembali ke Layanan Custom</span>
           </NuxtLink>
         </div>

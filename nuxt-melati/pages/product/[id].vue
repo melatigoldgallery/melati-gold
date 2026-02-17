@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import ProductGallery from "~/components/product/ProductGallery.vue";
 import ProductInfo from "~/components/product/ProductInfo.vue";
 import ProductRelatedProducts from "~/components/product/RelatedProducts.vue";
+import { HomeIcon, ChevronRightIcon, ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
 
 // Disable default layout (which includes SiteHeader)
 definePageMeta({
@@ -109,7 +110,7 @@ useHead({
 
       <!-- Error State -->
       <div v-else-if="error" class="text-center py-20">
-        <i class="bi bi-exclamation-triangle text-6xl text-red-500"></i>
+        <ExclamationTriangleIcon class="w-16 h-16 text-red-500 mx-auto" />
         <p class="mt-4 text-gray-600">{{ error }}</p>
         <NuxtLink to="/" class="mt-4 inline-block px-6 py-2 bg-maroon text-white rounded-lg hover:bg-maroon-dark">
           Kembali ke Beranda
@@ -122,13 +123,13 @@ useHead({
         <nav class="mb-6 text-sm">
           <ol class="flex items-center gap-2 text-neutral-600 flex-wrap">
             <li>
-              <NuxtLink to="/" class="hover:text-maroon transition-colors">
-                <i class="bi bi-house-door"></i>
+              <NuxtLink to="/" class="hover:text-maroon transition-colors flex items-center gap-1">
+                <HomeIcon class="w-4 h-4" />
                 Home
               </NuxtLink>
             </li>
             <template v-if="product?.category_name">
-              <li><i class="bi bi-chevron-right text-xs"></i></li>
+              <li><ChevronRightIcon class="w-3 h-3" /></li>
               <li>
                 <NuxtLink
                   :to="`/catalog/${product.category_slug || product.category_name.toLowerCase().replace(/\s+/g, '-')}`"
@@ -138,7 +139,7 @@ useHead({
                 </NuxtLink>
               </li>
             </template>
-            <li><i class="bi bi-chevron-right text-xs"></i></li>
+            <li><ChevronRightIcon class="w-3 h-3" /></li>
             <li>
               <span class="font-semibold text-maroon">{{ product?.name }}</span>
             </li>
