@@ -74,20 +74,6 @@
           ></textarea>
         </div>
 
-        <!-- Cover Image -->
-        <div>
-          <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Cover Image</label>
-          <p class="text-xs text-gray-500 mb-2">Upload cover image untuk Subkategori ini</p>
-          <CloudinaryUploader
-            v-model="imageUrls"
-            @uploaded="handleImageUpload"
-            folder="subcategories"
-            :single="true"
-            :maxSize="5"
-            :showUrls="false"
-          />
-        </div>
-
         <!-- Display Order -->
         <div>
           <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Urutan Display</label>
@@ -130,9 +116,6 @@
 </template>
 
 <script setup lang="ts">
-// Lazy load CloudinaryUploader
-const CloudinaryUploader = defineAsyncComponent(() => import("~/components/CloudinaryUploader.vue"));
-
 const props = defineProps<{
   subcategory?: any;
   categories: any[];
@@ -148,13 +131,11 @@ const form = ref({
   name: "",
   slug: "",
   description: "",
-  cover_image: "",
   display_order: 0,
   is_active: true,
 });
 
 const saving = ref(false);
-const imageUrls = ref<string[]>([]);
 
 // Initialize form with existing data if editing
 if (props.subcategory) {
@@ -163,15 +144,9 @@ if (props.subcategory) {
     name: props.subcategory.name,
     slug: props.subcategory.slug,
     description: props.subcategory.description || "",
-    cover_image: props.subcategory.cover_image || "",
     display_order: props.subcategory.display_order || 0,
     is_active: props.subcategory.is_active ?? true,
   };
-
-  // Initialize imageUrls with existing cover_image
-  if (props.subcategory.cover_image) {
-    imageUrls.value = [props.subcategory.cover_image];
-  }
 }
 
 // Auto-generate slug from name
@@ -182,17 +157,6 @@ const autoGenerateSlug = () => {
       .toLowerCase()
       .replace(/\s+/g, "-")
       .replace(/[^a-z0-9-]/g, "");
-  }
-};
-
-// Handle image upload
-const handleImageUpload = (urls: string[]) => {
-  if (urls.length > 0) {
-    form.value.cover_image = urls[0];
-    imageUrls.value = urls;
-  } else {
-    form.value.cover_image = "";
-    imageUrls.value = [];
   }
 };
 

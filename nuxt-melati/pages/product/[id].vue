@@ -150,7 +150,11 @@ useHead({
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 mb-8 md:mb-10">
           <!-- Product Gallery -->
           <div class="lg:sticky lg:top-4 lg:self-start">
-            <ProductGallery :images="product?.images || []" :productName="product?.name" />
+            <ProductGallery
+              :images="product?.images || []"
+              :videoUrl="product?.video_url"
+              :productName="product?.name"
+            />
           </div>
 
           <!-- Product Info -->
@@ -166,8 +170,8 @@ useHead({
             :products="relatedProducts"
             @product-click="handleRelatedProductClick"
           />
-          <!-- Debug info when no related products -->
           <div v-else class="py-8 border-t">
+            <!-- Debug info when no related products -->
             <div class="mb-6">
               <h2 class="text-2xl md:text-3xl font-serif text-gray-900">Produk Terkait</h2>
               <p class="text-gray-600 mt-2">Tidak ada produk terkait tersedia saat ini</p>

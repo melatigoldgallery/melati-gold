@@ -96,7 +96,7 @@ onMounted(() => {
             :alt="p.title || p.name"
             loading="lazy"
             decoding="async"
-            class="h-56 md:h-56 w-full object-cover"
+            class="h-60 md:h-72 w-full object-cover"
           />
           <span
             v-if="p.is_best_seller"

@@ -343,7 +343,7 @@ const ringGuideSteps: GuideStep[] = [
   {
     title: "Ukur Keliling Jari",
     description:
-      "Jika tidak ada contoh cincin, gunakan tali atau kertas untuk mengukur lingkar jari. Kemudian kertas atau tali diukur menggunakan penggaris dimulai dari angka 0.",
+      "Jika tidak ada contoh cincin, gunakan tali atau kertas untuk mengukur lingkar jari. Kemudian kertas atau tali diukur menggunakan penggaris dimulai dari 0.",
   },
   {
     title: "Ukur Diameter Cincin",

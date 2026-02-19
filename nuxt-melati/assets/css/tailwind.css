@@ -3,22 +3,14 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --header-height: 70px; /* Default fallback */
+  }
+
   html {
     scroll-behavior: smooth;
-    /* Add scroll padding to account for fixed header */
-    scroll-padding-top: 5rem; /* Mobile: ~80px */
-  }
-
-  @media (min-width: 768px) {
-    html {
-      scroll-padding-top: 5.5rem; /* Tablet: ~88px */
-    }
-  }
-
-  @media (min-width: 1024px) {
-    html {
-      scroll-padding-top: 6rem; /* Desktop: ~96px */
-    }
+    /* Dynamic header height + consistent 20px margin */
+    scroll-padding-top: calc(var(--header-height) + 1.25rem);
   }
 
   body {

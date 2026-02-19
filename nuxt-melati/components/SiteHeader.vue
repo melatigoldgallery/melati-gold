@@ -4,6 +4,15 @@ const route = useRoute();
 const open = ref(false);
 const isScrolled = ref(false);
 
+// Update CSS variable with actual header height
+const updateHeaderHeight = () => {
+  const header = document.querySelector("header");
+  if (header) {
+    const height = header.offsetHeight;
+    document.documentElement.style.setProperty("--header-height", `${height}px`);
+  }
+};
+
 // Smart navigation handler - navigate to home with hash if not on home page
 const handleNavigation = async (hash: string) => {
   closeMenu();
@@ -11,16 +20,13 @@ const handleNavigation = async (hash: string) => {
   // If not on home page, navigate to home with hash
   if (route.path !== "/") {
     await router.push(`/${hash}`);
-  } else {
-    // If already on home, use native hash navigation
-    window.location.hash = hash.replace("#", "");
   }
 
-  // Smooth scroll to element after navigation
+  // Smooth scroll to element - respects scroll-padding-top from CSS
   setTimeout(() => {
     const element = document.querySelector(hash);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, 100);
 };
@@ -54,11 +60,18 @@ watch(open, (isOpen) => {
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
   window.addEventListener("keydown", handleKeydown);
+
+  // Set initial header height
+  updateHeaderHeight();
+
+  // Update on resize
+  window.addEventListener("resize", updateHeaderHeight);
 });
 
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
   window.removeEventListener("keydown", handleKeydown);
+  window.removeEventListener("resize", updateHeaderHeight);
   // Cleanup: restore body scroll
   document.body.style.overflow = "";
 });

@@ -164,6 +164,52 @@
             />
           </div>
 
+          <!-- Video Upload (Optional) -->
+          <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <label class="block text-sm font-semibold text-gray-900 mb-1">🎬 Video Produk (Opsional)</label>
+                <p class="text-xs text-gray-600">Video akan ditampilkan setelah gambar pertama di gallery. Max 50MB.</p>
+              </div>
+              <button
+                v-if="form.video_url"
+                @click="removeVideo"
+                type="button"
+                class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs transition-colors"
+              >
+                <i class="bi bi-trash mr-1"></i>
+                Hapus Video
+              </button>
+            </div>
+
+            <!-- Video Preview if exists -->
+            <div v-if="form.video_url" class="mb-3">
+              <div class="relative aspect-video bg-black rounded-lg overflow-hidden">
+                <video :src="form.video_url" controls class="w-full h-full" preload="metadata">
+                  Browser Anda tidak support video tag.
+                </video>
+              </div>
+              <p class="text-xs text-green-600 mt-2 flex items-center gap-1">
+                <i class="bi bi-check-circle-fill"></i>
+                Video berhasil diupload
+              </p>
+            </div>
+
+            <!-- Upload Video -->
+            <div v-else>
+              <CloudinaryUploader
+                :key="'video-' + (product?.id || 'new')"
+                v-model="videoUrls"
+                @uploaded="handleVideoUpload"
+                folder="product-videos"
+                :single="true"
+                :maxSize="50"
+                :showUrls="false"
+                accept="video/*"
+              />
+            </div>
+          </div>
+
           <!-- Custom Links (Optional Override) - Only for Superadmin -->
           <div v-if="isSuperAdmin" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h4 class="text-sm font-semibold mb-3 text-gray-900">🔗 Link Custom (Opsional)</h4>
@@ -259,6 +305,7 @@ const toast = useToast();
 // State
 const saving = ref(false);
 const imageUrls = ref<string[]>([]);
+const videoUrls = ref<string[]>([]);
 const goldPrices = ref<any[]>([]);
 const isInitializing = ref(false);
 
@@ -279,6 +326,7 @@ const form = ref<{
   price_override: boolean;
   thumbnail_image: string;
   images: string[];
+  video_url: string;
   specs: string[];
   is_featured: boolean;
   is_best_seller: boolean;
@@ -301,6 +349,7 @@ const form = ref<{
   price_override: false,
   thumbnail_image: "",
   images: [],
+  video_url: "",
   specs: [],
   is_featured: false,
   is_best_seller: false,
@@ -385,6 +434,11 @@ onMounted(async () => {
       imageUrls.value = [props.product.thumbnail_image];
     }
 
+    // Initialize videoUrls with existing video
+    if (props.product.video_url) {
+      videoUrls.value = [props.product.video_url];
+    }
+
     // Parse existing weight if numeric not set
     if (!form.value.weight_grams && form.value.weight) {
       const match = form.value.weight.match(/[\d.]+/);
@@ -415,6 +469,24 @@ const handleImagesUpload = (urls: string[]) => {
     form.value.thumbnail_image = urls[0];
   } else {
     form.value.thumbnail_image = "";
+  }
+};
+
+// Handle video upload
+const handleVideoUpload = (urls: string[]) => {
+  if (urls.length > 0) {
+    form.value.video_url = urls[0];
+    videoUrls.value = urls;
+    toast.success("Video berhasil diupload!", 3000);
+  }
+};
+
+// Remove video
+const removeVideo = () => {
+  if (confirm("Hapus video dari produk ini?")) {
+    form.value.video_url = "";
+    videoUrls.value = [];
+    toast.success("Video dihapus", 2000);
   }
 };
 

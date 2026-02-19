@@ -264,7 +264,7 @@ onMounted(() => {
       <div class="mb-12 text-center reveal-up">
         <h2 class="section-title text-maroon">Katalog Produk</h2>
         <p class="mt-4 text-lg text-neutral-600 max-w-2xl mx-auto">
-          Jelajahi koleksi perhiasan emas premium dengan berbagai kategori pilihan terbaik
+          Jelajahi koleksi perhiasan emas berkualitas dengan berbagai kategori pilihan terbaik
         </p>
       </div>
 

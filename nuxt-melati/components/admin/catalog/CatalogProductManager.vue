@@ -68,6 +68,13 @@
             <h3 class="font-semibold text-sm sm:text-lg line-clamp-2 flex-1">{{ product.title }}</h3>
             <div class="flex gap-1 ml-2 flex-shrink-0">
               <span
+                v-if="product.video_url"
+                class="px-1.5 sm:px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full"
+                title="Has Video"
+              >
+                <i class="bi bi-camera-video-fill"></i>
+              </span>
+              <span
                 v-if="product.is_featured"
                 class="px-1.5 sm:px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
                 title="Featured"

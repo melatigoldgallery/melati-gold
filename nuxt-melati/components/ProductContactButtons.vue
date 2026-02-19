@@ -8,7 +8,7 @@
       rel="noopener noreferrer"
       class="flex-1 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white px-3 sm:px-4 lg:px-4 py-2 sm:py-2.5 lg:py-2 rounded-lg font-medium text-center transition-colors flex items-center justify-center gap-2 text-xs sm:text-sm lg:text-sm"
     >
-      <i class="bi bi-shop text-sm sm:text-base lg:text-base"></i>
+      <BuildingStorefrontIcon class="w-4 h-4 sm:w-5 sm:h-5" />
       <span>Beli di Shopee</span>
     </a>
 
@@ -20,7 +20,7 @@
       rel="noopener noreferrer"
       class="flex-1 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-3 sm:px-4 lg:px-4 py-2 sm:py-2.5 lg:py-2 rounded-lg font-medium text-center transition-colors flex items-center justify-center gap-2 text-xs sm:text-sm lg:text-sm"
     >
-      <i class="bi bi-bag-check-fill text-sm sm:text-base lg:text-base"></i>
+      <ShoppingBagIcon class="w-4 h-4 sm:w-5 sm:h-5" />
       <span>Beli di Tokopedia</span>
     </a>
 
@@ -32,13 +32,15 @@
       rel="noopener noreferrer"
       class="flex-1 bg-green-500 hover:bg-green-600 active:bg-green-700 text-white px-3 sm:px-4 lg:px-4 py-2 sm:py-2.5 lg:py-2 rounded-lg font-medium text-center transition-colors flex items-center justify-center gap-2 text-xs sm:text-sm lg:text-sm"
     >
-      <i class="bi bi-whatsapp text-sm sm:text-base lg:text-base"></i>
+      <ChatBubbleLeftRightIcon class="w-4 h-4 sm:w-5 sm:h-5" />
       <span>Chat WhatsApp</span>
     </a>
   </div>
 </template>
 
 <script setup lang="ts">
+import { BuildingStorefrontIcon, ShoppingBagIcon, ChatBubbleLeftRightIcon } from "@heroicons/vue/24/outline";
+
 const props = defineProps<{
   product: any;
 }>();
