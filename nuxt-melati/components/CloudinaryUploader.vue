@@ -33,7 +33,7 @@
       </div>
 
       <div v-else>
-        <i class="bi bi-cloud-upload text-4xl text-gray-400 mb-2"></i>
+        <i :class="isVideoMode ? 'bi-camera-video' : 'bi-cloud-upload'" class="text-4xl text-gray-400 mb-2"></i>
         <p class="text-sm font-medium text-gray-700">
           {{ isDragging ? "Drop files here" : "Click to upload or drag & drop" }}
         </p>
@@ -44,15 +44,21 @@
 
     <!-- Preview Area -->
     <div v-if="previewUrls.length > 0" class="mt-4 space-y-3">
-      <h4 class="text-sm font-medium text-gray-700">Uploaded Images:</h4>
+      <h4 class="text-sm font-medium text-gray-700">{{ isVideoMode ? "Uploaded Videos:" : "Uploaded Images:" }}</h4>
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         <div
           v-for="(url, index) in previewUrls"
           :key="index"
           class="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden"
         >
-          <!-- ✨ Optimized preview thumbnail -->
+          <!-- Video Preview -->
+          <div v-if="isVideoMode" class="w-full h-full flex items-center justify-center bg-black">
+            <i class="bi bi-play-circle-fill text-white text-4xl"></i>
+          </div>
+
+          <!-- Image Preview (✨ Optimized thumbnail) -->
           <img
+            v-else
             :src="getOptimizedPreview(url)"
             :alt="`Preview ${index + 1}`"
             class="w-full h-full object-cover"
@@ -173,7 +179,17 @@ const viewerUrl = ref<string | null>(null);
 // Computed
 const acceptText = computed(() => {
   const maxSizeMB = props.maxSize || 5;
+
+  // Check if accept prop includes video
+  if (props.accept && props.accept.includes("video")) {
+    return `Video files (MP4, WebM, MOV) up to ${maxSizeMB}MB`;
+  }
+
   return `PNG, JPG, WebP up to ${maxSizeMB}MB`;
+});
+
+const isVideoMode = computed(() => {
+  return props.accept && props.accept.includes("video");
 });
 
 // Optimize preview images (thumbnail size for grid)
@@ -206,7 +222,7 @@ watch(
     if (newVal && JSON.stringify(newVal) !== JSON.stringify(previewUrls.value)) {
       previewUrls.value = [...newVal];
     }
-  }
+  },
 );
 
 // Trigger file input
@@ -256,10 +272,29 @@ const handleFiles = async (files: File[]) => {
   }
 
   // Validate file type
-  const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+  let validTypes: string[];
+
+  if (props.accept && props.accept.includes("video")) {
+    // Video mode - accept common video formats
+    validTypes = [
+      "video/mp4",
+      "video/webm",
+      "video/quicktime", // .mov
+      "video/x-msvideo", // .avi
+      "video/x-matroska", // .mkv
+    ];
+  } else {
+    // Image mode (default)
+    validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+  }
+
   const invalidFiles = files.filter((f) => !validTypes.includes(f.type));
   if (invalidFiles.length > 0) {
-    errorMessage.value = "Only JPG, PNG, and WebP images are allowed";
+    if (props.accept && props.accept.includes("video")) {
+      errorMessage.value = "Only MP4, WebM, MOV, and AVI video files are allowed";
+    } else {
+      errorMessage.value = "Only JPG, PNG, and WebP images are allowed";
+    }
     return;
   }
 

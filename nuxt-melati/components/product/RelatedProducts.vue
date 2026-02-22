@@ -9,9 +9,6 @@ const emit = defineEmits<{
   (e: "product-click", product: any): void;
 }>();
 
-// Debug
-console.log("[RelatedProducts] Received products:", props.products?.length || 0);
-
 // Carousel state (for mobile)
 const scrollContainer = ref<HTMLElement | null>(null);
 
@@ -69,9 +66,7 @@ const handleClick = (product: any) => {
     <!-- Desktop Grid -->
     <div class="hidden md:grid md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
       <article v-for="product in products" :key="product.id" class="group cursor-pointer" @click="handleClick(product)">
-        <div
-          class="bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300"
-        >
+        <div class="bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
           <!-- Image -->
           <div class="relative w-50 aspect-[3/4] overflow-hidden bg-gray-100">
             <img

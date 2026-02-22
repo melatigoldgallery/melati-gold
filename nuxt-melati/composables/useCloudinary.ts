@@ -14,15 +14,20 @@ export const useCloudinary = () => {
         throw new Error("Cloudinary not configured");
       }
 
+      // Detect if it's a video file
+      const isVideo = file.type.startsWith("video/");
+      const resourceType = isVideo ? "video" : "image";
+
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", uploadPreset);
       formData.append("folder", `melati-gold/${folder}`);
+      formData.append("resource_type", resourceType);
 
       // Add timestamp untuk unique filename
       formData.append("public_id", `${folder}_${Date.now()}`);
 
-      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -103,7 +108,7 @@ export const useCloudinary = () => {
       height?: number;
       quality?: number | string;
       format?: string;
-    } = {}
+    } = {},
   ) => {
     const transforms = [];
 

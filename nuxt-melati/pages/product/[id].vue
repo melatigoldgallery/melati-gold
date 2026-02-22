@@ -29,7 +29,6 @@ const fetchProductDetail = async () => {
   error.value = null;
 
   try {
-    console.log("[Product Page] Fetching product:", productId.value);
     const result = await getProductById(productId.value);
 
     if (!result.success || !result.data) {
@@ -40,16 +39,12 @@ const fetchProductDetail = async () => {
     }
 
     product.value = result.data;
-    console.log("[Product Page] Product loaded:", product.value);
 
     // Fetch related products
-    console.log("[Product Page] Fetching related products...");
     const relatedResult = await getRelatedProducts(productId.value, 6);
-    console.log("[Product Page] Related products result:", relatedResult);
 
     if (relatedResult.success) {
       relatedProducts.value = relatedResult.data;
-      console.log("[Product Page] Related products set:", relatedProducts.value.length);
     } else {
       console.error("[Product Page] Failed to fetch related products:", relatedResult.error);
     }
@@ -150,7 +145,11 @@ useHead({
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 mb-8 md:mb-10">
           <!-- Product Gallery -->
           <div class="lg:sticky lg:top-4 lg:self-start">
-            <ProductGallery :images="product?.images || []" :productName="product?.name" />
+            <ProductGallery
+              :images="product?.images || []"
+              :videoUrl="product?.video_url"
+              :productName="product?.name"
+            />
           </div>
 
           <!-- Product Info -->
@@ -166,8 +165,8 @@ useHead({
             :products="relatedProducts"
             @product-click="handleRelatedProductClick"
           />
-          <!-- Debug info when no related products -->
           <div v-else class="py-8 border-t">
+            <!-- Debug info when no related products -->
             <div class="mb-6">
               <h2 class="text-2xl md:text-3xl font-serif text-gray-900">Produk Terkait</h2>
               <p class="text-gray-600 mt-2">Tidak ada produk terkait tersedia saat ini</p>

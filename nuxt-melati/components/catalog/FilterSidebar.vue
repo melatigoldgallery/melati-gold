@@ -50,7 +50,6 @@ watch(() => props.category, loadSubcategories, { immediate: true });
 watch(
   () => props.filters,
   (newFilters) => {
-    console.log("[FilterSidebar] Props filters changed:", newFilters);
     localFilters.value = { ...newFilters };
   },
   { deep: true },
@@ -58,7 +57,6 @@ watch(
 
 // Handle filter changes
 const updateFilters = () => {
-  console.log("[FilterSidebar] Updating filters:", localFilters.value);
   emit("update:filters", { ...localFilters.value });
   showMobileFilters.value = false;
 };
@@ -131,7 +129,6 @@ const hasActiveFilters = computed(() => {
     localFilters.value.karat !== "" ||
     localFilters.value.sortBy !== "newest";
 
-  console.log("[FilterSidebar] Has active filters:", hasFilters, localFilters.value);
   return hasFilters;
 });
 </script>

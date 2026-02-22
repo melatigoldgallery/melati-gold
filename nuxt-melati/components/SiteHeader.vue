@@ -4,25 +4,25 @@ const route = useRoute();
 const open = ref(false);
 const isScrolled = ref(false);
 
-// Smart navigation handler - navigate to home with hash if not on home page
+// Simple scroll handler
 const handleNavigation = async (hash: string) => {
   closeMenu();
 
-  // If not on home page, navigate to home with hash
+  // Navigate to home if needed
   if (route.path !== "/") {
-    await router.push(`/${hash}`);
-  } else {
-    // If already on home, use native hash navigation
-    window.location.hash = hash.replace("#", "");
+    await router.push("/");
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
-  // Smooth scroll to element after navigation
-  setTimeout(() => {
-    const element = document.querySelector(hash);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  }, 100);
+  // Scroll to element
+  const el = document.querySelector(hash);
+  if (el) {
+    const headerHeight = 65;
+    const isMobile = window.innerWidth < 768;
+    const offset = isMobile ? 65 : 100; // Smaller offset for mobile
+    const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - offset;
+    window.scrollTo({ top, behavior: "smooth" });
+  }
 };
 
 // Detect scroll position
@@ -59,7 +59,6 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
   window.removeEventListener("keydown", handleKeydown);
-  // Cleanup: restore body scroll
   document.body.style.overflow = "";
 });
 </script>

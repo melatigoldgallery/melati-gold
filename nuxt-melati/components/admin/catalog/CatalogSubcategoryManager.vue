@@ -37,15 +37,6 @@
         :key="subcategory.id"
         class="border rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 hover:bg-gray-50 transition-colors"
       >
-        <!-- Image -->
-        <div class="flex-shrink-0 w-full sm:w-auto">
-          <img
-            :src="subcategory.cover_image || '/img/placeholder.jpg'"
-            :alt="subcategory.name"
-            class="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg"
-          />
-        </div>
-
         <!-- Info -->
         <div class="flex-1 w-full sm:w-auto">
           <div class="flex flex-wrap items-center gap-2 mb-1">
@@ -164,7 +155,7 @@ const handleSaved = () => {
 const confirmDelete = async (subcategory: any) => {
   if (
     !confirm(
-      `Are you sure you want to delete "${subcategory.name}"? This will also delete all products in this subcategory.`
+      `Are you sure you want to delete "${subcategory.name}"? This will also delete all products in this subcategory.`,
     )
   ) {
     return;

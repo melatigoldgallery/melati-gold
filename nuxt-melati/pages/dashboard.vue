@@ -21,7 +21,7 @@
 
           <!-- User Menu -->
           <div class="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto justify-between sm:justify-end">
-            <span class="text-sm text-gray-700">Selamat Datang, Admin</span>
+            <span class="text-sm text-gray-700">Selamat Datang, {{ user?.full_name || "Admin" }}</span>
             <button
               @click="handleLogout"
               class="bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -129,8 +129,9 @@
                   Manajemen Katalog
                 </NuxtLink>
                 <NuxtLink
+                  v-if="user?.role === 'superadmin'"
                   to="/admin/users"
-                  class="bg-purple-600 hover:bg-purple-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors d-none"
+                  class="bg-purple-600 hover:bg-purple-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
                 >
                   <i class="bi bi-people-fill mr-2"></i>
                   Admin Users
@@ -230,17 +231,18 @@ useHead({
   ],
 });
 
+// Use auth composable
+const { user, checkAuth, logout } = useAuth();
+
 // Handle logout
 const handleLogout = () => {
-  localStorage.removeItem("isLoggedIn");
-  localStorage.removeItem("loginTime");
+  logout();
   navigateTo("/login");
 };
 
 // Check authentication on mount
 onMounted(() => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
-  if (isLoggedIn !== "true") {
+  if (!checkAuth()) {
     navigateTo("/login");
   }
 });

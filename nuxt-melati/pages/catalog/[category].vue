@@ -90,8 +90,6 @@ const fetchProducts = async () => {
       let productList = result.data;
       paginationData.value = result.pagination;
 
-      console.log("[Catalog] Raw products:", productList.length);
-
       // Apply client-side filters (for filters not supported by API)
       // Price filter
       if (filters.value.priceMin !== null) {
@@ -145,7 +143,6 @@ const fetchProducts = async () => {
 
       products.value = productList;
       totalItems.value = productList.length;
-      console.log("[Catalog] Final products:", products.value.length, "Total:", totalItems.value);
     } else {
       products.value = [];
       totalItems.value = 0;
@@ -161,10 +158,8 @@ const fetchProducts = async () => {
 
 // Handle filter changes
 const handleFilterChange = async (newFilters: any) => {
-  console.log("[Catalog] Filter changed:", newFilters);
   filters.value = { ...filters.value, ...newFilters };
   currentPage.value = 1; // Reset to first page on filter change
-  console.log("[Catalog] Current filters:", filters.value);
 
   // Update URL query params
   await navigateTo(

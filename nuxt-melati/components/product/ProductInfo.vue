@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import {
+  InformationCircleIcon,
+  DocumentTextIcon,
+  ClipboardDocumentCheckIcon,
+  ShieldCheckIcon,
+  CheckIcon,
+} from "@heroicons/vue/24/outline";
 
 const props = defineProps<{
   product: any;
@@ -67,7 +74,7 @@ const specs = computed(() => {
     <div class="border-t border-b border-gray-200 py-3 md:py-4 bg-gradient-to-r from-amber-50/50 to-transparent">
       <div class="text-xl sm:text-2xl lg:text-xl font-bold text-maroon">± {{ formatPrice(product?.price) }}</div>
       <p v-if="product?.price" class="text-xs sm:text-sm text-gray-600 mt-1.5 flex items-center gap-1">
-        <i class="bi bi-info-circle"></i>
+        <InformationCircleIcon class="w-4 h-4" />
         <span>Harga dapat berubah mengikuti harga emas terbaru</span>
       </p>
     </div>
@@ -75,7 +82,7 @@ const specs = computed(() => {
     <!-- Description -->
     <div v-if="product?.description" class="prose prose-sm max-w-none">
       <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
-        <i class="bi bi-file-text text-maroon"></i>
+        <DocumentTextIcon class="w-5 h-5 text-maroon" />
         <span>Deskripsi</span>
       </h3>
       <p class="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-line">{{ product.description }}</p>
@@ -87,7 +94,7 @@ const specs = computed(() => {
       class="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-xl p-4 md:p-5 border border-gray-200"
     >
       <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-        <i class="bi bi-list-check text-maroon"></i>
+        <ClipboardDocumentCheckIcon class="w-5 h-5 text-maroon" />
         <span>Spesifikasi</span>
       </h3>
       <dl class="space-y-1.5">
@@ -97,7 +104,7 @@ const specs = computed(() => {
           class="flex justify-between items-center py-1 border-b border-gray-200 last:border-0 gap-2"
         >
           <dt class="text-sm sm:text-base text-gray-600 font-medium flex items-center gap-2">
-            <i class="bi bi-dot text-maroon text-xl"></i>
+            <span class="text-maroon text-xl leading-none">•</span>
             {{ spec.label }}
           </dt>
           <dd class="text-sm sm:text-base text-gray-900 font-semibold text-right">{{ spec.value }}</dd>
@@ -113,20 +120,20 @@ const specs = computed(() => {
     <!-- Additional Info -->
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 md:p-4 text-xs sm:text-sm text-blue-900">
       <div class="flex gap-2 md:gap-3">
-        <i class="bi bi-shield-check text-blue-600 flex-shrink-0 mt-0.5 text-lg"></i>
+        <ShieldCheckIcon class="w-6 h-6 text-blue-600 flex-shrink-0" />
         <div class="space-y-1.5">
           <p class="font-semibold text-sm sm:text-base">Jaminan Kualitas</p>
           <ul class="space-y-1 text-blue-800">
             <li class="flex items-start gap-2">
-              <i class="bi bi-check2 text-blue-600 flex-shrink-0 mt-0.5"></i>
+              <CheckIcon class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
               <span>Semua produk dijamin keasliannya dengan sertifikat</span>
             </li>
             <li class="flex items-start gap-2">
-              <i class="bi bi-check2 text-blue-600 flex-shrink-0 mt-0.5"></i>
+              <CheckIcon class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
               <span>Menerima jual dan tukar tambah emas</span>
             </li>
             <li class="flex items-start gap-2">
-              <i class="bi bi-check2 text-blue-600 flex-shrink-0 mt-0.5"></i>
+              <CheckIcon class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
               <span>Bisa custom perhiasan sesuai model yang diinginkan</span>
             </li>
           </ul>
