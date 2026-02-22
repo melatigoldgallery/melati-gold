@@ -4,31 +4,25 @@ const route = useRoute();
 const open = ref(false);
 const isScrolled = ref(false);
 
-// Update CSS variable with actual header height
-const updateHeaderHeight = () => {
-  const header = document.querySelector("header");
-  if (header) {
-    const height = header.offsetHeight;
-    document.documentElement.style.setProperty("--header-height", `${height}px`);
-  }
-};
-
-// Smart navigation handler - navigate to home with hash if not on home page
+// Simple scroll handler
 const handleNavigation = async (hash: string) => {
   closeMenu();
 
-  // If not on home page, navigate to home with hash
+  // Navigate to home if needed
   if (route.path !== "/") {
-    await router.push(`/${hash}`);
+    await router.push("/");
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
-  // Smooth scroll to element - respects scroll-padding-top from CSS
-  setTimeout(() => {
-    const element = document.querySelector(hash);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, 100);
+  // Scroll to element
+  const el = document.querySelector(hash);
+  if (el) {
+    const headerHeight = 65;
+    const isMobile = window.innerWidth < 768;
+    const offset = isMobile ? 65 : 100; // Smaller offset for mobile
+    const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - offset;
+    window.scrollTo({ top, behavior: "smooth" });
+  }
 };
 
 // Detect scroll position
@@ -60,19 +54,11 @@ watch(open, (isOpen) => {
 onMounted(() => {
   window.addEventListener("scroll", handleScroll);
   window.addEventListener("keydown", handleKeydown);
-
-  // Set initial header height
-  updateHeaderHeight();
-
-  // Update on resize
-  window.addEventListener("resize", updateHeaderHeight);
 });
 
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
   window.removeEventListener("keydown", handleKeydown);
-  window.removeEventListener("resize", updateHeaderHeight);
-  // Cleanup: restore body scroll
   document.body.style.overflow = "";
 });
 </script>

@@ -23,17 +23,30 @@ const currentSlide = computed(() => heroSlides[currentSlideIndex.value]);
 const isTransitioning = ref(false);
 
 let slideInterval = null;
-let transitionEndTime = 0; 
+let transitionEndTime = 0;
+
+// Handle CTA button click
+const handleCtaClick = (e) => {
+  e.preventDefault();
+  const el = document.querySelector("#produk");
+  if (el) {
+    const headerHeight = 65;
+    const isMobile = window.innerWidth < 768;
+    const offset = isMobile ? 40 : 100; // Smaller offset for mobile
+    const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - offset;
+    window.scrollTo({ top, behavior: "smooth" });
+  }
+};
 
 const nextSlide = () => {
   const now = Date.now();
-  if (now < transitionEndTime) return; 
+  if (now < transitionEndTime) return;
 
   isTransitioning.value = true;
 
   setTimeout(() => {
     currentSlideIndex.value = (currentSlideIndex.value + 1) % heroSlides.length;
-    isTransitioning.value = false; 
+    isTransitioning.value = false;
   }, 500);
 
   transitionEndTime = now + 1300;
@@ -47,7 +60,7 @@ const goToSlide = (index) => {
 
   setTimeout(() => {
     currentSlideIndex.value = index;
-    isTransitioning.value = false; 
+    isTransitioning.value = false;
   }, 500);
 
   transitionEndTime = now + 1300;
@@ -147,12 +160,12 @@ const onImageError = () => {
 
         <!-- CTA Button -->
         <div class="mt-10 transition-all duration-700 delay-300">
-          <a
-            href="#produk"
-            class="inline-block bg-gold hover:bg-gold/90 text-black font-semibold px-6 py-3 md:px-5 md:py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-base md:text-lg"
+          <button
+            @click="handleCtaClick"
+            class="inline-block bg-gold hover:bg-gold/90 text-black font-semibold px-6 py-3 md:px-5 md:py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-base md:text-lg cursor-pointer border-none"
           >
             {{ currentSlide.buttonText }}
-          </a>
+          </button>
         </div>
       </div>
     </div>

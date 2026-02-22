@@ -15,7 +15,7 @@ const screenshots = [
 </script>
 
 <template>
-  <section id="testimoni" class="container py-10 md:py-14">
+  <section id="testimoni" class="container py-10 md:py-20">
     <div class="mx-auto mb-12 text-center max-w-2xl reveal-in">
       <h2 class="section-title">Testimoni Pelanggan</h2>
       <p class="mt-2 text-neutral-600">Cuplikan testimoni pelanggan kami.</p>

@@ -63,7 +63,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="best-produk" class="container py-10 md:py-14">
+  <section id="best-produk" class="container py-10 md:py-20">
     <div class="mx-auto mb-6 text-center max-w-2xl reveal-in">
       <h2 class="section-title">Produk Pilihan</h2>
       <p class="mt-2 text-neutral-600">Koleksi favorit pilihan pelanggan, siap memancarkan pesonamu.</p>

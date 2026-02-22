@@ -4,7 +4,7 @@
       <div class="max-w-4xl mx-auto">
         <!-- Logo Desktop & Mobile -->
         <div class="flex justify-center items-center mb-6 reveal-up">
-          <img src="/img/logo.png" alt="Logo Melati Gold" class="w-48 lg:w-64 h-auto object-contain" />
+          <img src="/img/logo.png" alt="Logo Melati Gold" class="w-44 lg:w-54 h-auto object-contain" />
         </div>
 
         <!-- Title -->

@@ -29,7 +29,6 @@ const fetchProductDetail = async () => {
   error.value = null;
 
   try {
-    console.log("[Product Page] Fetching product:", productId.value);
     const result = await getProductById(productId.value);
 
     if (!result.success || !result.data) {
@@ -40,16 +39,12 @@ const fetchProductDetail = async () => {
     }
 
     product.value = result.data;
-    console.log("[Product Page] Product loaded:", product.value);
 
     // Fetch related products
-    console.log("[Product Page] Fetching related products...");
     const relatedResult = await getRelatedProducts(productId.value, 6);
-    console.log("[Product Page] Related products result:", relatedResult);
 
     if (relatedResult.success) {
       relatedProducts.value = relatedResult.data;
-      console.log("[Product Page] Related products set:", relatedProducts.value.length);
     } else {
       console.error("[Product Page] Failed to fetch related products:", relatedResult.error);
     }

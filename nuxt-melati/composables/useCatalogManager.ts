@@ -547,8 +547,6 @@ export const useCatalogManager = () => {
         } else {
           products = productsData || [];
         }
-      } else {
-        console.log("[getServiceWithProducts] No example_products to fetch");
       }
 
       const result = {
@@ -794,8 +792,6 @@ export const useCatalogManager = () => {
    */
   const getRelatedProducts = async (productId: string, limit: number = 6) => {
     try {
-      console.log("[getRelatedProducts] Fetching related products for:", productId);
-
       // First, get the current product to know its category/subcategory
       const { data: currentProduct, error: productError } = await $supabase
         .from("catalog_products")
@@ -812,8 +808,6 @@ export const useCatalogManager = () => {
         console.error("[getRelatedProducts] Current product not found");
         throw new Error("Product not found");
       }
-
-      console.log("[getRelatedProducts] Current product:", currentProduct);
 
       // Fetch related products from same subcategory first, then same category
       let query = $supabase
@@ -839,10 +833,8 @@ export const useCatalogManager = () => {
       // Prioritize same subcategory
       if (currentProduct.subcategory_id) {
         query = query.eq("subcategory_id", currentProduct.subcategory_id);
-        console.log("[getRelatedProducts] Filtering by subcategory:", currentProduct.subcategory_id);
       } else if (currentProduct.category_id) {
         query = query.eq("category_id", currentProduct.category_id);
-        console.log("[getRelatedProducts] Filtering by category:", currentProduct.category_id);
       }
 
       const { data, error } = await query.limit(limit);
@@ -852,11 +844,8 @@ export const useCatalogManager = () => {
         throw error;
       }
 
-      console.log("[getRelatedProducts] Found related products:", data?.length || 0);
-
       // If not enough products from subcategory, fetch more from category
       if (data && data.length < limit && currentProduct.subcategory_id && currentProduct.category_id) {
-        console.log("[getRelatedProducts] Fetching more products from category...");
         const remaining = limit - data.length;
         const { data: moreData, error: moreError } = await $supabase
           .from("catalog_products")
@@ -882,12 +871,10 @@ export const useCatalogManager = () => {
           .limit(remaining);
 
         if (!moreError && moreData) {
-          console.log("[getRelatedProducts] Found additional products:", moreData.length);
           data.push(...moreData);
         }
       }
 
-      console.log("[getRelatedProducts] Total related products:", data?.length || 0);
       return { success: true, data: data || [] };
     } catch (error) {
       console.error("[useCatalogManager] Error fetching related products:", error);

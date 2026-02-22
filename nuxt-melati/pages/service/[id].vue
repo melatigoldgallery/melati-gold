@@ -41,7 +41,6 @@ const fetchServiceDetail = async () => {
   error.value = null;
 
   try {
-    console.log("[Service Page] Fetching service:", serviceId.value);
     const result = await getServiceWithProducts(serviceId.value);
 
     if (!result.success || !result.data) {
@@ -53,8 +52,6 @@ const fetchServiceDetail = async () => {
 
     service.value = result.data;
     products.value = result.data.products || [];
-    console.log("[Service Page] Service loaded:", service.value);
-    console.log("[Service Page] Products:", products.value.length);
   } catch (err: any) {
     error.value = err.message || "Gagal memuat detail layanan";
     console.error("[Service] Error fetching data:", err);

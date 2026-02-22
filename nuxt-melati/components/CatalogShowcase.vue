@@ -259,9 +259,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="produk" class="relative bg-gradient-to-b from-cream via-white to-cream py-10 md:py-14 overflow-hidden">
+  <section id="produk" class="relative bg-gradient-to-b from-cream via-white to-cream py-10 md:py-20 overflow-hidden">
     <div class="container mx-auto max-w-7xl px-4">
-      <div class="mb-12 text-center reveal-up">
+      <div class="mb-10 text-center reveal-up">
         <h2 class="section-title text-maroon">Katalog Produk</h2>
         <p class="mt-4 text-lg text-neutral-600 max-w-2xl mx-auto">
           Jelajahi koleksi perhiasan emas berkualitas dengan berbagai kategori pilihan terbaik
