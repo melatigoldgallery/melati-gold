@@ -308,6 +308,7 @@ const imageUrls = ref<string[]>([]);
 const videoUrls = ref<string[]>([]);
 const goldPrices = ref<any[]>([]);
 const isInitializing = ref(false);
+const originalMediaUrls = ref<string[]>([]);
 
 const form = ref<{
   category_id: string;
@@ -436,6 +437,9 @@ onMounted(async () => {
       videoUrls.value = [props.product.video_url];
     }
 
+    // Snapshot all media URLs at load time for later diffing
+    originalMediaUrls.value = [...(props.product.images || []), props.product.video_url].filter(Boolean);
+
     // Parse existing weight if numeric not set
     if (!form.value.weight_grams && form.value.weight) {
       const match = form.value.weight.match(/[\d.]+/);
@@ -522,7 +526,9 @@ const save = async () => {
       }).format(form.value.price);
     }
 
-    const result = props.product ? await updateProduct(props.product.id, form.value) : await createProduct(form.value);
+    const result = props.product
+      ? await updateProduct(props.product.id, form.value, originalMediaUrls.value)
+      : await createProduct(form.value);
 
     if (result.success) {
       // Show success toast

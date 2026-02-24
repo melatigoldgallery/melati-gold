@@ -5,7 +5,7 @@ const heroSlides = [
     id: 1,
     image: "/img/bg.png",
     title: "Welcome to Melati Gold Shop",
-    subtitle: "Temukan koleksi perhiasan emas berkualitas dengan model terkini di Melati Gold Shop.",
+    subtitle: "Temukan koleksi perhiasan emas berkualitas dengan model terbaru di Melati Gold Shop.",
     buttonText: "Lihat Koleksi",
   },
   {

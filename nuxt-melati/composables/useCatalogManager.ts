@@ -2,6 +2,8 @@
 export const useCatalogManager = () => {
   const { $supabase } = useNuxtApp();
   const cache = useCacheManager();
+  // Harus dipanggil di top-level (synchronous context) agar useRuntimeConfig bekerja
+  const { deleteFileByUrl } = useCloudinary();
 
   if (!$supabase) {
     throw new Error("Supabase client is not available");
@@ -396,7 +398,7 @@ export const useCatalogManager = () => {
     }
   };
 
-  const updateProduct = async (id: string, productData: any) => {
+  const updateProduct = async (id: string, productData: any, oldMediaUrls?: string[]) => {
     try {
       // Remove joined relations, flattened fields, and read-only fields
       const {
@@ -422,6 +424,16 @@ export const useCatalogManager = () => {
       cache.clearPrefix("v_featured_products");
       cache.clearPrefix("v_best_sellers");
 
+      // Delete removed media from Cloudinary (best-effort)
+      if (oldMediaUrls && oldMediaUrls.length > 0) {
+        const newUrls = new Set([...(productData.images || []), productData.video_url].filter(Boolean));
+        for (const url of oldMediaUrls) {
+          if (!newUrls.has(url)) {
+            await deleteFileByUrl(url).catch((e) => console.warn("[Cloudinary] Failed to delete:", url, e));
+          }
+        }
+      }
+
       return { success: true, data };
     } catch (error) {
       console.error("Error updating product:", error);
@@ -431,6 +443,13 @@ export const useCatalogManager = () => {
 
   const deleteProduct = async (id: string) => {
     try {
+      // Fetch media URLs before deleting from DB
+      const { data: product } = await $supabase
+        .from("catalog_products")
+        .select("thumbnail_image, images, video_url")
+        .eq("id", id)
+        .single();
+
       const { error } = await $supabase.from("catalog_products").delete().eq("id", id);
 
       if (error) throw error;
@@ -439,6 +458,18 @@ export const useCatalogManager = () => {
       cache.clearPrefix("catalog_products");
       cache.clearPrefix("v_featured_products");
       cache.clearPrefix("v_best_sellers");
+
+      // Delete all media from Cloudinary (best-effort, after DB delete)
+      if (product) {
+        const urls = [product.thumbnail_image, ...(product.images || []), product.video_url].filter(
+          Boolean,
+        ) as string[];
+
+        const uniqueUrls = [...new Set(urls)];
+        for (const url of uniqueUrls) {
+          await deleteFileByUrl(url).catch((e) => console.warn("[Cloudinary] Failed to delete:", url, e));
+        }
+      }
 
       return { success: true };
     } catch (error) {

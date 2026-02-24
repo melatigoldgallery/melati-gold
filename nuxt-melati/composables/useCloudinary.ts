@@ -60,12 +60,23 @@ export const useCloudinary = () => {
     }
   };
 
+  // Extract Cloudinary public_id from URL
+  const extractPublicId = (url: string): { publicId: string; resourceType: string } | null => {
+    if (!url || !url.includes("cloudinary.com")) return null;
+    // Detect resource type from URL path
+    const resourceType = url.includes("/video/upload/") ? "video" : "image";
+    // Match path after '/upload/' (skip transformation segments like 'f_auto,q_auto')
+    const match = url.match(/\/upload\/(?:[^/]+\/)*?(melati-gold\/.+?)(?:\.[a-z0-9]+)?$/i);
+    if (!match) return null;
+    return { publicId: match[1], resourceType };
+  };
+
   // Delete file from Cloudinary
-  const deleteFile = async (publicId: string) => {
+  const deleteFile = async (publicId: string, resourceType = "image") => {
     try {
       const response = await $fetch("/api/cloudinary/delete", {
         method: "POST",
-        body: { publicId },
+        body: { publicId, resourceType },
       });
 
       return { success: true, data: response };
@@ -76,6 +87,13 @@ export const useCloudinary = () => {
         error: error.message || "Delete failed",
       };
     }
+  };
+
+  // Delete file from Cloudinary by URL (auto-detect resource type)
+  const deleteFileByUrl = async (url: string) => {
+    const extracted = extractPublicId(url);
+    if (!extracted) return { success: false, error: "Not a Cloudinary URL" };
+    return deleteFile(extracted.publicId, extracted.resourceType);
   };
 
   // Get Cloudinary usage
@@ -128,6 +146,8 @@ export const useCloudinary = () => {
     uploading: readonly(uploading),
     uploadFile,
     deleteFile,
+    deleteFileByUrl,
+    extractPublicId,
     getUsage,
     transformImage,
     getOptimizedUrl,

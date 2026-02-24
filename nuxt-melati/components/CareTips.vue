@@ -112,7 +112,7 @@
             <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Cara Mengukur Cincin</h3>
 
             <!-- Desktop: Grid -->
-            <div class="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-6 2xl:gap-8">
+            <div class="hidden md:grid md:grid-cols-3 gap-3 md:gap-6">
               <div
                 v-for="(step, index) in ringGuideSteps"
                 :key="index"
@@ -225,7 +225,7 @@
             <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Cara Mengukur Gelang</h3>
 
             <!-- Desktop: Grid -->
-            <div class="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-6 2xl:gap-8">
+            <div class="hidden md:grid md:grid-cols-3 gap-3 md:gap-6">
               <div
                 v-for="(step, index) in braceletGuideSteps"
                 :key="index"

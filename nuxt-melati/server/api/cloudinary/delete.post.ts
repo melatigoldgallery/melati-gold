@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const { publicId } = await readBody(event);
+    const { publicId, resourceType = "image" } = await readBody(event);
 
     if (!publicId) {
       throw createError({
@@ -43,13 +43,13 @@ export default defineEventHandler(async (event) => {
       api_secret: apiSecret,
     });
 
-    // Delete the image
-    const result = await cloudinary.uploader.destroy(publicId);
+    // Delete the asset (image or video)
+    const result = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
 
     return {
       success: true,
       result,
-      message: `Image ${publicId} deleted successfully`,
+      message: `Asset ${publicId} deleted successfully`,
     };
   } catch (error: any) {
     console.error("Cloudinary delete error:", error);
