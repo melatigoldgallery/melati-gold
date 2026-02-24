@@ -116,7 +116,7 @@ const form = ref({
 const showPassword = ref(false);
 const loading = ref(false);
 const error = ref("");
-const { login: authLogin, checkAuth } = useAuth();
+const auth = useAuth();
 
 // Handle login submission
 const handleLogin = async () => {
@@ -124,25 +124,26 @@ const handleLogin = async () => {
   error.value = "";
 
   try {
-    const result = await authLogin(form.value.username, form.value.password);
+    const result = await auth.login(form.value.username, form.value.password);
 
     if (result.success) {
       // Redirect to dashboard
       await navigateTo("/dashboard");
     } else {
-      error.value = result.message;
+      error.value = result.message || "Login gagal";
     }
   } catch (err) {
     console.error("Login error:", err);
-    error.value = "An error occurred during login";
+    error.value = "Terjadi kesalahan saat login";
   } finally {
     loading.value = false;
   }
 };
 
 // Check if already logged in
-onMounted(() => {
-  if (checkAuth()) {
+onMounted(async () => {
+  const isAuthenticated = await auth.checkAuth();
+  if (isAuthenticated) {
     navigateTo("/dashboard");
   }
 });

@@ -1,6 +1,6 @@
 <template>
   <section id="perawatan" class="bg-cream py-10 md:py-14">
-    <div class="mx-auto max-w-6xl px-4">
+    <div class="mx-auto max-w-7xl 2xl:max-w-[1600px] px-4 2xl:px-8">
       <Transition name="care-fade" appear>
         <div class="text-center mb-4 md:mb-12">
           <h2 class="mt-3 text-2xl md:text-4xl font-serif text-maroon leading-tight">
@@ -112,7 +112,7 @@
             <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Cara Mengukur Cincin</h3>
 
             <!-- Desktop: Grid -->
-            <div class="hidden md:grid md:grid-cols-3 gap-3 md:gap-6">
+            <div class="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-6 2xl:gap-8">
               <div
                 v-for="(step, index) in ringGuideSteps"
                 :key="index"
@@ -193,16 +193,28 @@
             </div>
           </div>
 
-          <!-- Ring Size Table Image -->
-          <div>
-            <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Tabel Ukuran Cincin</h3>
-            <div class="flex justify-center">
-              <div
-                class="bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60 overflow-hidden hover:-translate-y-1 transition-all duration-300 w-full max-w-lg"
+          <!-- Ring Size Table Button -->
+          <div class="flex justify-center mt-6 md:mt-8">
+            <button
+              @click="showRingModal = true"
+              class="group relative inline-flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-gold/20 to-maroon/10 hover:from-gold/30 hover:to-maroon/20 border-2 border-gold/40 hover:border-gold rounded-2xl font-semibold text-maroon shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-5 h-5 md:w-6 md:h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <img src="/img/Tabel-cincin.jpg" alt="Tabel Ukuran Cincin" class="w-full h-auto" loading="lazy" />
-              </div>
-            </div>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <span class="text-sm md:text-base">Lihat Tabel Ukuran Cincin</span>
+            </button>
           </div>
         </div>
 
@@ -213,7 +225,7 @@
             <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Cara Mengukur Gelang</h3>
 
             <!-- Desktop: Grid -->
-            <div class="hidden md:grid md:grid-cols-3 gap-3 md:gap-6">
+            <div class="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-6 2xl:gap-8">
               <div
                 v-for="(step, index) in braceletGuideSteps"
                 :key="index"
@@ -294,19 +306,111 @@
             </div>
           </div>
 
-          <!-- Bracelet Size Table Image -->
-          <div>
-            <h3 class="text-xl md:text-2xl font-serif text-maroon text-center mb-4 md:mb-6">Tabel Ukuran Gelang</h3>
-            <div class="flex justify-center">
-              <div
-                class="bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60 overflow-hidden hover:-translate-y-1 transition-all duration-300 w-full max-w-lg"
+          <!-- Bracelet Size Table Button -->
+          <div class="flex justify-center mt-6 md:mt-8">
+            <button
+              @click="showBraceletModal = true"
+              class="group relative inline-flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-gold/20 to-maroon/10 hover:from-gold/30 hover:to-maroon/20 border-2 border-gold/40 hover:border-gold rounded-2xl font-semibold text-maroon shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-5 h-5 md:w-6 md:h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <img src="/img/Tabel-gelang.jpg" alt="Tabel Ukuran Gelang" class="w-full h-auto" loading="lazy" />
-              </div>
-            </div>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <span class="text-sm md:text-base">Lihat Tabel Ukuran Gelang</span>
+            </button>
           </div>
         </div>
       </Transition>
+
+      <!-- Modal: Ring Size Table -->
+      <Teleport to="body">
+        <Transition name="modal-fade">
+          <div
+            v-if="showRingModal"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            @click.self="showRingModal = false"
+          >
+            <div
+              class="relative bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-hidden"
+              @click.stop
+            >
+              <!-- Modal Header -->
+              <div class="flex items-center justify-between px-3 py-1 md:p-3 border-b border-gray-200">
+                <h3 class="text-lg md:text-xl font-serif font-semibold text-maroon">Tabel Ukuran Cincin</h3>
+                <button
+                  @click="showRingModal = false"
+                  class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Tutup"
+                >
+                  <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Modal Body -->
+              <div class="overflow-y-auto max-h-[calc(90vh-80px)] p-1 md:p-2">
+                <img
+                  src="public/img/Tabel-cincin.jpg"
+                  alt="Tabel Ukuran Cincin"
+                  class="w-full h-auto rounded-lg shadow-md"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
+
+      <!-- Modal: Bracelet Size Table -->
+      <Teleport to="body">
+        <Transition name="modal-fade">
+          <div
+            v-if="showBraceletModal"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            @click.self="showBraceletModal = false"
+          >
+            <div
+              class="relative bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-hidden"
+              @click.stop
+            >
+              <!-- Modal Header -->
+              <div class="flex items-center justify-between px-3 py-1 md:p-3 border-b border-gray-200">
+                <h3 class="text-lg md:text-xl font-serif font-semibold text-maroon">Tabel Ukuran Gelang</h3>
+                <button
+                  @click="showBraceletModal = false"
+                  class="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Tutup"
+                >
+                  <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Modal Body -->
+              <div class="overflow-y-auto max-h-[calc(90vh-80px)] p-1 md:p-2">
+                <img
+                  src="public/img/Tabel-gelang.jpg"
+                  alt="Tabel Ukuran Gelang"
+                  class="w-full h-auto rounded-lg shadow-md"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
     </div>
   </section>
 </template>
@@ -473,6 +577,18 @@ const touchCurrentX = ref(0);
 const touchDragging = ref(false);
 const touchStartOffset = ref(0);
 const SWIPE_THRESHOLD = 20; // Minimum pixels to detect as swipe
+
+// Modal state
+const showRingModal = ref(false);
+const showBraceletModal = ref(false);
+
+// Close modal on ESC key
+function handleEscKey(e: KeyboardEvent) {
+  if (e.key === "Escape") {
+    if (showRingModal.value) showRingModal.value = false;
+    if (showBraceletModal.value) showBraceletModal.value = false;
+  }
+}
 
 function getMetrics(type: "care" | "ring" | "bracelet" = "care") {
   const vp = type === "care" ? viewport.value : type === "ring" ? ringViewport.value : braceletViewport.value;
@@ -690,6 +806,16 @@ watch(activeTab, (newTab) => {
   });
 });
 
+// Lock body scroll when modal is open
+watch([showRingModal, showBraceletModal], ([ringOpen, braceletOpen]) => {
+  if (typeof document === "undefined") return;
+  if (ringOpen || braceletOpen) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+});
+
 onMounted(() => {
   const onResize = () => {
     requestAnimationFrame(() => {
@@ -701,6 +827,8 @@ onMounted(() => {
     });
   };
   window.addEventListener("resize", onResize);
+  window.addEventListener("keydown", handleEscKey);
+
   nextTick(() => {
     requestAnimationFrame(() => {
       updateLayout("care");
@@ -713,7 +841,15 @@ onMounted(() => {
       }
     });
   });
-  onUnmounted(() => window.removeEventListener("resize", onResize));
+
+  onUnmounted(() => {
+    window.removeEventListener("resize", onResize);
+    window.removeEventListener("keydown", handleEscKey);
+    // Restore body scroll when component unmounts
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = "";
+    }
+  });
 });
 </script>
 
@@ -877,5 +1013,29 @@ onMounted(() => {
     background: linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent);
     pointer-events: none;
   }
+}
+
+/* Modal transitions */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-active > div,
+.modal-fade-leave-active > div {
+  transition: transform 0.3s ease;
+}
+
+.modal-fade-enter-from > div {
+  transform: scale(0.95) translateY(20px);
+}
+
+.modal-fade-leave-to > div {
+  transform: scale(0.95) translateY(20px);
 }
 </style>

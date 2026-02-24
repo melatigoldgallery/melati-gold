@@ -21,7 +21,7 @@
 
           <!-- User Menu -->
           <div class="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto justify-between sm:justify-end">
-            <span class="text-sm text-gray-700">Selamat Datang, {{ user?.full_name || "Admin" }}</span>
+            <span class="text-sm text-gray-700">Selamat Datang, {{ auth.user?.full_name || "Admin" }}</span>
             <button
               @click="handleLogout"
               class="bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -120,23 +120,13 @@
           </div>
           <div class="p-4 sm:p-6">
             <div class="space-y-4">
-              <div class="grid grid-cols-1 sm:grid-cols-1 gap-3">
-                <NuxtLink
-                  to="/admin/catalog"
-                  class="bg-yellow-600 hover:bg-yellow-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
-                >
-                  <i class="bi bi-grid-3x3-gap mr-2"></i>
-                  Manajemen Katalog
-                </NuxtLink>
-                <NuxtLink
-                  v-if="user?.role === 'superadmin'"
-                  to="/admin/users"
-                  class="bg-purple-600 hover:bg-purple-700 text-white text-center py-2 px-3 rounded-lg text-sm font-medium transition-colors"
-                >
-                  <i class="bi bi-people-fill mr-2"></i>
-                  Admin Users
-                </NuxtLink>
-              </div>
+              <NuxtLink
+                to="/admin/catalog"
+                class="block w-full bg-yellow-600 hover:bg-yellow-700 text-white text-center py-3 px-4 rounded-lg font-medium transition-colors text-sm sm:text-base"
+              >
+                <i class="bi bi-grid-3x3-gap mr-2"></i>
+                Manajemen Katalog
+              </NuxtLink>
               <p class="text-sm text-gray-500 text-center">Kelola katalog, produk, layanan, dan konten situs web</p>
             </div>
           </div>
@@ -232,17 +222,18 @@ useHead({
 });
 
 // Use auth composable
-const { user, checkAuth, logout } = useAuth();
+const auth = useAuth();
 
 // Handle logout
-const handleLogout = () => {
-  logout();
+const handleLogout = async () => {
+  await auth.logout();
   navigateTo("/login");
 };
 
 // Check authentication on mount
-onMounted(() => {
-  if (!checkAuth()) {
+onMounted(async () => {
+  const isAuthenticated = await auth.checkAuth();
+  if (!isAuthenticated) {
     navigateTo("/login");
   }
 });

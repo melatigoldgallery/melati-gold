@@ -210,8 +210,8 @@
             </div>
           </div>
 
-          <!-- Custom Links (Optional Override) - Only for Superadmin -->
-          <div v-if="isSuperAdmin" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <!-- Custom Links (Optional Override) - Only for Supervisor -->
+          <div v-if="auth.canSeeCustomLinks.value" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <h4 class="text-sm font-semibold mb-3 text-gray-900">🔗 Link Custom (Opsional)</h4>
             <p class="text-xs text-gray-500 mb-3">
               Kosongkan untuk menggunakan link default berdasarkan kadar. Isi hanya jika produk ini perlu link khusus.
@@ -299,7 +299,7 @@ const emit = defineEmits(["close", "saved"]);
 
 const { createProduct, updateProduct } = useCatalogManager();
 const { getGoldPrices, calculatePrice } = useGoldPricing();
-const { user } = useAuth();
+const auth = useAuth();
 const toast = useToast();
 
 // State
@@ -308,9 +308,6 @@ const imageUrls = ref<string[]>([]);
 const videoUrls = ref<string[]>([]);
 const goldPrices = ref<any[]>([]);
 const isInitializing = ref(false);
-
-// Check if user is superadmin
-const isSuperAdmin = computed(() => user.value?.role === "superadmin");
 
 const form = ref<{
   category_id: string;
@@ -510,8 +507,8 @@ const save = async () => {
     // Always sync name with title to ensure consistency
     form.value.name = form.value.title;
 
-    // Security: Clear custom links if not superadmin
-    if (user.value?.role !== "superadmin") {
+    // Security: Clear custom links if not supervisor
+    if (!auth.isSupervisor.value) {
       form.value.custom_shopee_link = "";
       form.value.custom_whatsapp_number = "";
     }

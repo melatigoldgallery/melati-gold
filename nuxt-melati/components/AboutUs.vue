@@ -1,7 +1,7 @@
 <template>
   <section id="tentang" class="bg-cream py-10 md:py-14">
     <div class="container">
-      <div class="max-w-4xl mx-auto">
+      <div class="max-w-6xl 2xl:max-w-7xl mx-auto px-4 2xl:px-8">
         <!-- Logo Desktop & Mobile -->
         <div class="flex justify-center items-center mb-6 reveal-up">
           <img src="/img/logo.png" alt="Logo Melati Gold" class="w-44 lg:w-54 h-auto object-contain" />

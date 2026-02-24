@@ -398,10 +398,14 @@ export const useCatalogManager = () => {
 
   const updateProduct = async (id: string, productData: any) => {
     try {
-      // Remove joined relations and read-only fields
+      // Remove joined relations, flattened fields, and read-only fields
       const {
         category,
         subcategory,
+        category_name,
+        category_slug,
+        subcategory_name,
+        subcategory_slug,
         id: _id, // Primary key - don't update
         created_at, // Read-only
         updated_at, // Auto-managed by trigger

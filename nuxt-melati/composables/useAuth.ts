@@ -1,119 +1,253 @@
-// Authentication composable with Supabase
+// Authentication composable with Supabase Auth (RBAC Implementation)
+// Uses alias-based login with hardcoded email mapping to avoid RLS recursion
+// Aliases: 'adminmelati' → melatigoldshopid@gmail.com (admin)
+//          'supervisor' → fattahula98@gmail.com (supervisor)
 export const useAuth = () => {
-  const isLoggedIn = ref(false);
-  const user = ref<{ id: string; username: string; full_name: string; role: string } | null>(null);
   const { $supabase } = useNuxtApp();
+  const user = useState<any>("auth_user", () => null);
+  const isAuthenticated = useState<boolean>("is_authenticated", () => false);
+  const userRole = useState<string>("user_role", () => "");
 
-  // Check authentication status
-  const checkAuth = () => {
-    if (process.client) {
-      const authStatus = localStorage.getItem("isLoggedIn");
-      const loginTime = localStorage.getItem("loginTime");
-      const storedUser = localStorage.getItem("user");
-
-      if (authStatus === "true" && loginTime && storedUser) {
-        // Check if session is still valid (24 hours)
-        const sessionDuration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-        const currentTime = Date.now();
-        const sessionStart = parseInt(loginTime);
-
-        if (currentTime - sessionStart < sessionDuration) {
-          isLoggedIn.value = true;
-          user.value = JSON.parse(storedUser);
-          return true;
-        } else {
-          // Session expired
-          logout();
-          return false;
-        }
-      }
-    }
-    return false;
-  };
-
-  // Login function with Supabase
-  const login = async (username: string, password: string) => {
-    try {
-      if (!$supabase) {
-        return { success: false, message: "Database connection not available" };
-      }
-
-      // Query admin user from Supabase
-      const { data: adminUser, error } = await $supabase
-        .from("admin_users")
-        .select("id, username, full_name, email, role, is_active")
-        .eq("username", username)
-        .eq("is_active", true)
-        .single();
-
-      if (error || !adminUser) {
-        return { success: false, message: "Invalid username or password" };
-      }
-
-      // Verify password (we'll use a simple check for now, in production use bcrypt)
-      // For now, we'll accept if user exists since bcrypt verification needs server-side
-      // You should implement proper password hashing verification on server-side
-      const { data: verifyData, error: verifyError } = await $supabase.rpc("verify_admin_password", {
-        p_username: username,
-        p_password: password,
-      });
-
-      // Fallback: if RPC doesn't exist yet, allow login (for initial setup)
-      const isPasswordValid = verifyError ? true : verifyData;
-
-      if (!isPasswordValid) {
-        return { success: false, message: "Invalid username or password" };
-      }
-
-      // Update last login time
-      await $supabase.from("admin_users").update({ last_login: new Date().toISOString() }).eq("id", adminUser.id);
-
-      // Store session in localStorage
-      if (process.client) {
-        const userData = {
-          id: adminUser.id,
-          username: adminUser.username,
-          full_name: adminUser.full_name,
-          role: adminUser.role,
-        };
-
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("loginTime", Date.now().toString());
-        localStorage.setItem("user", JSON.stringify(userData));
-
-        isLoggedIn.value = true;
-        user.value = userData;
-      }
-
-      return { success: true, message: "Login successful" };
-    } catch (error) {
-      console.error("Login error:", error);
-      return { success: false, message: "Login failed. Please try again." };
-    }
-  };
-
-  // Logout function
-  const logout = () => {
-    if (process.client) {
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("loginTime");
-      localStorage.removeItem("user");
-    }
-
-    isLoggedIn.value = false;
-    user.value = null;
-  };
-
-  // Initialize auth state on composable creation
-  if (process.client) {
-    checkAuth();
+  if (!$supabase) {
+    throw new Error("Supabase client is not available");
   }
 
+  /**
+   * Login dengan alias (adminmelati atau supervisor)
+   * Direct mapping to email - No admin_users query to avoid RLS recursion
+   */
+  const login = async (alias: string, password: string) => {
+    try {
+      // Alias mapping: adminmelati → melatigoldshopid@gmail.com, supervisor → fattahula98@gmail.com
+      const aliasMap: Record<string, { email: string; role: string; fullName: string }> = {
+        adminmelati: {
+          email: "melatigoldshopid@gmail.com",
+          role: "admin",
+          fullName: "Admin Melati",
+        },
+        supervisor: {
+          email: "fattahula98@gmail.com",
+          role: "supervisor",
+          fullName: "Supervisor",
+        },
+      };
+
+      const userConfig = aliasMap[alias.toLowerCase()];
+
+      if (!userConfig) {
+        return {
+          success: false,
+          message: "Username tidak valid. Gunakan 'adminmelati' atau 'supervisor'",
+        };
+      }
+
+      // Sign in with Supabase Auth using email
+      const { data: authData, error: authError } = await $supabase.auth.signInWithPassword({
+        email: userConfig.email,
+        password: password,
+      });
+
+      if (authError) {
+        console.error("[useAuth] Auth error:", authError);
+        return {
+          success: false,
+          message: authError.message === "Invalid login credentials" ? "Password salah" : authError.message,
+        };
+      }
+
+      if (!authData.user) {
+        return {
+          success: false,
+          message: "Authentication gagal",
+        };
+      }
+
+      // Set user state from mapping (no admin_users query)
+      user.value = {
+        id: authData.user.id,
+        username: alias,
+        email: userConfig.email,
+        role: userConfig.role,
+        full_name: userConfig.fullName,
+      };
+      isAuthenticated.value = true;
+      userRole.value = userConfig.role;
+
+      return {
+        success: true,
+        message: "Login berhasil",
+        user: user.value,
+      };
+    } catch (error: any) {
+      console.error("[useAuth] Login error:", error);
+      return {
+        success: false,
+        message: error.message || "Login gagal",
+      };
+    }
+  };
+
+  /**
+   * Logout - Sign out from Supabase Auth
+   */
+  const logout = async () => {
+    try {
+      const { error } = await $supabase.auth.signOut();
+
+      if (error) {
+        console.error("[useAuth] Logout error:", error);
+      }
+
+      // Clear state
+      user.value = null;
+      isAuthenticated.value = false;
+      userRole.value = "";
+
+      // Clear localStorage (backward compatibility)
+      if (process.client) {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("loginTime");
+        localStorage.removeItem("user");
+      }
+
+      return { success: true };
+    } catch (error: any) {
+      console.error("[useAuth] Logout error:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  /**
+   * Check authentication status
+   * Called by middleware and on mount
+   * Uses email-based role detection (no admin_users query)
+   */
+  const checkAuth = async () => {
+    try {
+      // Get current session from Supabase Auth
+      const {
+        data: { session },
+        error,
+      } = await $supabase.auth.getSession();
+
+      if (error) {
+        console.error("[useAuth] Session error:", error);
+        isAuthenticated.value = false;
+        user.value = null;
+        return false;
+      }
+
+      if (!session || !session.user) {
+        isAuthenticated.value = false;
+        user.value = null;
+        return false;
+      }
+
+      // Determine role from email (no admin_users query to avoid recursion)
+      const email = session.user.email;
+      let role = "";
+      let username = "";
+      let fullName = "";
+
+      if (email === "fattahula98@gmail.com") {
+        role = "supervisor";
+        username = "supervisor";
+        fullName = "Supervisor";
+      } else if (email === "melatigoldshopid@gmail.com") {
+        role = "admin";
+        username = "adminmelati";
+        fullName = "Admin Melati";
+      } else {
+        // Unknown email - sign out
+        console.error("[useAuth] Unknown email:", email);
+        isAuthenticated.value = false;
+        user.value = null;
+        await $supabase.auth.signOut();
+        return false;
+      }
+
+      // Set authenticated state
+      user.value = {
+        id: session.user.id,
+        username: username,
+        email: email,
+        role: role,
+        full_name: fullName,
+      };
+      isAuthenticated.value = true;
+      userRole.value = role;
+
+      return true;
+    } catch (error) {
+      console.error("[useAuth] checkAuth error:", error);
+      isAuthenticated.value = false;
+      user.value = null;
+      return false;
+    }
+  };
+
+  /**
+   * Initialize auth state (alias for checkAuth)
+   * Used by middleware
+   */
+  const initAuth = async () => {
+    return await checkAuth();
+  };
+
+  // Computed properties for role-based permissions
+  const isSupervisor = computed(() => userRole.value === "supervisor");
+  const isAdmin = computed(() => userRole.value === "admin");
+
+  // Both roles have full CRUD access to catalog
+  const canCreate = computed(() => isAuthenticated.value);
+  const canRead = computed(() => isAuthenticated.value);
+  const canUpdate = computed(() => isAuthenticated.value);
+  const canDelete = computed(() => isAuthenticated.value);
+
+  // Feature-specific permissions
+  const canAccessUserManagement = computed(() => isSupervisor.value);
+  const canSeeCustomLinks = computed(() => isSupervisor.value);
+
+  // Initialize on mount
+  onMounted(() => {
+    checkAuth();
+
+    // Listen to auth state changes
+    $supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("[useAuth] Auth state changed:", event);
+
+      if (event === "SIGNED_IN" && session) {
+        await checkAuth();
+      } else if (event === "SIGNED_OUT") {
+        user.value = null;
+        isAuthenticated.value = false;
+        userRole.value = "";
+      }
+    });
+  });
+
   return {
-    isLoggedIn: readonly(isLoggedIn),
+    // State
     user: readonly(user),
+    isAuthenticated: readonly(isAuthenticated),
+    userRole: readonly(userRole),
+
+    // Role checks
+    isSupervisor,
+    isAdmin,
+
+    // Permission checks
+    canCreate,
+    canRead,
+    canUpdate,
+    canDelete,
+    canAccessUserManagement,
+    canSeeCustomLinks,
+
+    // Methods
     login,
     logout,
     checkAuth,
+    initAuth,
   };
 };

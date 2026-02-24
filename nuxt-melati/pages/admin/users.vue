@@ -240,7 +240,7 @@
 <script setup>
 definePageMeta({
   layout: false,
-  middleware: "auth",
+  middleware: ["auth", "supervisor-only"],
 });
 
 useHead({
@@ -254,7 +254,7 @@ useHead({
 });
 
 const { $supabase } = useNuxtApp();
-const { user, checkAuth } = useAuth();
+const auth = useAuth();
 
 const users = ref([]);
 const showCreateModal = ref(false);
@@ -420,20 +420,6 @@ const formatDate = (dateString) => {
 
 // Load users on mount
 onMounted(() => {
-  // Check if user is authenticated and has superadmin role
-  if (!checkAuth()) {
-    navigateTo("/login");
-    return;
-  }
-
-  if (user.value?.role !== "superadmin") {
-    showAlert("error", "Access denied. Only superadmin can access this page.");
-    setTimeout(() => {
-      navigateTo("/dashboard");
-    }, 2000);
-    return;
-  }
-
   loadUsers();
 });
 </script>

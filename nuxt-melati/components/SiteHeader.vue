@@ -72,7 +72,9 @@ onUnmounted(() => {
       />
     </div>
     <div class="w-full overflow-x-hidden">
-      <div class="container mx-auto flex max-w-7xl items-center justify-between py-3 px-4 sm:px-6 lg:px-8">
+      <div
+        class="container mx-auto flex max-w-7xl 2xl:max-w-[1600px] items-center justify-between py-3 px-4 sm:px-6 lg:px-8 2xl:px-12"
+      >
         <NuxtLink to="/" class="flex items-center gap-3 group">
           <div>
             <h1

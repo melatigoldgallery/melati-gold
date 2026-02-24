@@ -133,7 +133,7 @@ const onImageError = () => {
     </div>
 
     <!-- Hero Content -->
-    <div class="container relative z-20 mx-auto max-w-6xl px-4 text-center">
+    <div class="container relative z-20 mx-auto max-w-7xl 2xl:max-w-[1600px] px-4 2xl:px-12 text-center">
       <div class="space-y-8" :class="{ 'slide-in': !isTransitioning, 'slide-out': isTransitioning }">
         <!-- Logo -->
         <div class="mb-6 transition-all duration-700">
@@ -171,7 +171,7 @@ const onImageError = () => {
     </div>
 
     <!-- Slide Navigation Dots -->
-    <!-- <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex space-x-4">
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex space-x-4">
       <button
         v-for="(slide, index) in heroSlides"
         :key="slide.id"
@@ -183,7 +183,7 @@ const onImageError = () => {
         }"
         :aria-label="`Go to slide ${index + 1}`"
       />
-    </div> -->
+    </div>
   </section>
 </template>
 

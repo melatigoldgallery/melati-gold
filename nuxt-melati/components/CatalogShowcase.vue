@@ -11,7 +11,7 @@ const loading = ref(true);
 // Carousel refs and state (Clone Technique for infinite loop)
 const viewport = ref<HTMLElement | null>(null);
 const track = ref<HTMLElement | null>(null);
-const activeIndex = ref(4); // Start at index 4 (first real slide after 4 clones)
+const activeIndex = ref(6); // Start at index 6 (first real slide after 6 clones)
 const offsetPx = ref(0);
 const slideWidthPx = ref(0);
 const transitionEnabled = ref(true);
@@ -27,9 +27,9 @@ const touchStartOffset = ref(0);
 const SWIPE_THRESHOLD = 20; // Minimum pixels to detect as swipe
 
 // Create display array with clones for infinite loop
-// Clone 4 cards (max visible on desktop) at each end to prevent empty spaces
-// Structure: [Last 4 cloned, ...RealSlides, First 4 cloned]
-const CLONE_COUNT = 4;
+// Clone 6 cards (max visible on ultra-wide desktop) at each end to prevent empty spaces
+// Structure: [Last 6 cloned, ...RealSlides, First 6 cloned]
+const CLONE_COUNT = 6;
 const displayCategories = computed(() => {
   if (categories.value.length === 0) return [];
 
@@ -239,7 +239,7 @@ const loadCategories = async () => {
   await nextTick();
   requestAnimationFrame(() => {
     updateLayout();
-    // Start at index 4 (first real slide after 4 clones)
+    // Start at index 6 (first real slide after 6 clones)
     goTo(CLONE_COUNT, true);
   });
 };
@@ -260,7 +260,7 @@ onMounted(() => {
 
 <template>
   <section id="produk" class="relative bg-gradient-to-b from-cream via-white to-cream py-10 md:py-20 overflow-hidden">
-    <div class="container mx-auto max-w-7xl px-4">
+    <div class="container mx-auto max-w-[1400px] 2xl:max-w-[1600px] px-4 2xl:px-8">
       <div class="mb-10 text-center reveal-up">
         <h2 class="section-title text-maroon">Katalog Produk</h2>
         <p class="mt-4 text-lg text-neutral-600 max-w-2xl mx-auto">
