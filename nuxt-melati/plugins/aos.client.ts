@@ -8,7 +8,7 @@ export default defineNuxtPlugin(() => {
   AOS.init({
     duration: 800, // Animation duration in milliseconds
     delay: 100, // Delay between animations
-    once: false, // Allow animations to repeat on scroll
+    once: true, // Animasi hanya sekali - cegah elemen tersembunyi saat kembali ke halaman
     offset: 100, // Trigger offset from viewport bottom
     easing: "ease-in-out-cubic", // Smooth easing for luxury feel
     anchorPlacement: "top-bottom", // Animation trigger position

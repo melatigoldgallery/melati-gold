@@ -10,18 +10,10 @@ definePageMeta({
   layout: false,
 });
 
-// Get route params
 const route = useRoute();
 const categorySlug = computed(() => route.params.category as string);
 
-// Composables
 const { getCategoryBySlug, getProducts } = useCatalogManager();
-
-// State
-const category = ref<any>(null);
-const products = ref<any[]>([]);
-const loading = ref(true);
-const error = ref<string | null>(null);
 
 // Filters state
 const filters = ref({
@@ -39,39 +31,35 @@ const totalItems = ref(0);
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
 const paginationData = ref<any>(null);
 
-// Fetch category data
-const fetchCategoryData = async () => {
-  loading.value = true;
-  error.value = null;
+// Products state (managed separately from category)
+const products = ref<any[]>([]);
+const productsLoading = ref(false);
 
-  try {
-    // Get category by slug
-    const categoryResult = await getCategoryBySlug(categorySlug.value);
+// useAsyncData tanpa await: halaman render langsung dengan loading state
+// watch: [categorySlug] otomatis re-fetch saat slug berubah
+const {
+  data: categoryResult,
+  status: categoryStatus,
+  error: categoryFetchError,
+} = useAsyncData(
+  () => `category-${categorySlug.value}`,
+  () => getCategoryBySlug(categorySlug.value),
+  { watch: [categorySlug] },
+);
 
-    if (!categoryResult.success || !categoryResult.data) {
-      throw createError({
-        statusCode: 404,
-        message: "Kategori tidak ditemukan",
-      });
-    }
-
-    category.value = categoryResult.data;
-
-    // Fetch products for this category
-    await fetchProducts();
-  } catch (err: any) {
-    error.value = err.message || "Gagal memuat data katalog";
-    console.error("[Catalog] Error fetching data:", err);
-  } finally {
-    loading.value = false;
-  }
-};
+const category = computed(() => (categoryResult.value?.success ? categoryResult.value.data : null));
+const loading = computed(() => categoryStatus.value === "pending" || productsLoading.value);
+const error = computed(() => {
+  if (categoryFetchError.value) return categoryFetchError.value.message;
+  if (categoryResult.value && !categoryResult.value.success) return "Kategori tidak ditemukan";
+  return null;
+});
 
 // Fetch products with filters
 const fetchProducts = async () => {
   if (!category.value) return;
 
-  loading.value = true;
+  productsLoading.value = true;
   try {
     const productFilters: any = {
       categoryId: category.value.id,
@@ -109,7 +97,6 @@ const fetchProducts = async () => {
       if (filters.value.karat) {
         productList = productList.filter((p: any) => {
           if (!p.karat) return false;
-          // Normalize karat format (18k, 18K, 18 Karat, etc.)
           const productKarat = p.karat.toLowerCase().replace(/[^0-9]/g, "");
           const filterKarat = filters.value.karat.toLowerCase().replace(/[^0-9]/g, "");
           return productKarat === filterKarat;
@@ -119,25 +106,15 @@ const fetchProducts = async () => {
       // Apply sorting
       switch (filters.value.sortBy) {
         case "price-asc":
-          productList.sort((a: any, b: any) => {
-            const priceA = a.price || 0;
-            const priceB = b.price || 0;
-            return priceA - priceB;
-          });
+          productList.sort((a: any, b: any) => (a.price || 0) - (b.price || 0));
           break;
         case "price-desc":
-          productList.sort((a: any, b: any) => {
-            const priceA = a.price || 0;
-            const priceB = b.price || 0;
-            return priceB - priceA;
-          });
+          productList.sort((a: any, b: any) => (b.price || 0) - (a.price || 0));
           break;
         case "newest":
         default:
           productList.sort((a: any, b: any) => {
-            const dateA = new Date(a.created_at || 0).getTime();
-            const dateB = new Date(b.created_at || 0).getTime();
-            return dateB - dateA;
+            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
           });
       }
 
@@ -152,16 +129,20 @@ const fetchProducts = async () => {
     products.value = [];
     totalItems.value = 0;
   } finally {
-    loading.value = false;
+    productsLoading.value = false;
   }
 };
+
+// Fetch products saat category siap
+watch(category, (cat) => {
+  if (cat) fetchProducts();
+});
 
 // Handle filter changes
 const handleFilterChange = async (newFilters: any) => {
   filters.value = { ...filters.value, ...newFilters };
-  currentPage.value = 1; // Reset to first page on filter change
+  currentPage.value = 1;
 
-  // Update URL query params
   await navigateTo(
     {
       path: route.path,
@@ -178,7 +159,6 @@ const handleFilterChange = async (newFilters: any) => {
     { replace: true },
   );
 
-  // Refetch products
   await fetchProducts();
 };
 
@@ -188,42 +168,34 @@ const handlePageChange = async (page: number) => {
   await navigateTo(
     {
       path: route.path,
-      query: {
-        ...route.query,
-        page,
-      },
+      query: { ...route.query, page },
     },
     { replace: true },
   );
   await fetchProducts();
-  // Smooth scroll to top
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 // Handle items per page change
 const handleItemsPerPageChange = async (limit: number) => {
   itemsPerPage.value = limit;
-  currentPage.value = 1; // Reset to first page
+  currentPage.value = 1;
   await navigateTo(
     {
       path: route.path,
-      query: {
-        ...route.query,
-        limit,
-        page: 1,
-      },
+      query: { ...route.query, limit, page: 1 },
     },
     { replace: true },
   );
   await fetchProducts();
 };
 
-// Handle product click - navigate to product detail page
+// Handle product click
 const handleProductClick = (product: any) => {
   navigateTo(`/product/${product.id}`);
 };
 
-// Watch route changes
+// Watch route.query untuk sinkronisasi filter dari URL
 watch(
   () => route.query,
   () => {
@@ -236,30 +208,30 @@ watch(
     };
     currentPage.value = route.query.page ? Number(route.query.page) : 1;
     itemsPerPage.value = route.query.limit ? Number(route.query.limit) : 24;
-    fetchProducts();
+    if (category.value) fetchProducts();
   },
 );
 
-// Initial fetch
-await fetchCategoryData();
-
-// SEO Meta tags
-useHead({
-  title: `${category.value?.name || "Katalog"} - Melati Gold Shop`,
-  meta: [
-    {
-      name: "description",
-      content: category.value?.description || `Jelajahi koleksi ${category.value?.name} premium dari Melati Gold Shop`,
-    },
-    { property: "og:title", content: `${category.value?.name} - Melati Gold Shop` },
-    {
-      property: "og:description",
-      content: category.value?.description || `Koleksi ${category.value?.name} berkualitas tinggi`,
-    },
-    { property: "og:image", content: category.value?.cover_image || "/img/placeholder.jpg" },
-    { property: "og:type", content: "website" },
-  ],
-});
+// SEO Meta tags - reaktif mengikuti data kategori
+useHead(
+  computed(() => ({
+    title: `${category.value?.name || "Katalog"} - Melati Gold Shop`,
+    meta: [
+      {
+        name: "description",
+        content:
+          category.value?.description || `Jelajahi koleksi ${category.value?.name} premium dari Melati Gold Shop`,
+      },
+      { property: "og:title", content: `${category.value?.name} - Melati Gold Shop` },
+      {
+        property: "og:description",
+        content: category.value?.description || `Koleksi ${category.value?.name} berkualitas tinggi`,
+      },
+      { property: "og:image", content: category.value?.cover_image || "/img/placeholder.jpg" },
+      { property: "og:type", content: "website" },
+    ],
+  })),
+);
 </script>
 
 <template>

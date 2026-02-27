@@ -46,11 +46,6 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
-// Navigate to product detail page
-const goToDetail = (productId: string) => {
-  navigateTo(`/product/${productId}`);
-};
-
 // Load on mount
 onMounted(() => {
   loadFeaturedProducts();
@@ -78,11 +73,11 @@ onMounted(() => {
 
     <!-- Products Grid -->
     <div v-else class="grid gap-4 md:gap-5 lg:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-      <article
+      <NuxtLink
         v-for="p in products"
         :key="p.id"
-        @click="goToDetail(p.id)"
-        class="glass overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant reveal-up"
+        :to="`/product/${p.id}`"
+        class="glass overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant reveal-up block"
       >
         <div class="relative">
           <!-- ✨ Optimized image with lazy loading & responsive srcset -->
@@ -113,14 +108,13 @@ onMounted(() => {
           <!-- Price info -->
           <p class="text-xs md:text-sm text-neutral-600">Mulai dari {{ formatPrice(p.price) }}</p>
 
-          <button
-            @click.stop="goToDetail(p.id)"
-            class="btn-outline text-xs md:text-xs px-3 py-1.5 md:px-3 md:py-1.5 whitespace-nowrap rounded-md mt-1"
+          <span
+            class="btn-outline text-xs md:text-xs px-3 py-1.5 md:px-3 md:py-1.5 whitespace-nowrap rounded-md mt-1 inline-block"
           >
             Lihat Detail
-          </button>
+          </span>
         </div>
-      </article>
+      </NuxtLink>
     </div>
   </section>
 </template>

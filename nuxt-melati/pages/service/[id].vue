@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import CatalogProductGrid from "~/components/catalog/ProductGrid.vue";
 import {
   HomeIcon,
@@ -19,87 +19,67 @@ definePageMeta({
   layout: false,
 });
 
-// Get route params
 const route = useRoute();
 const serviceId = computed(() => route.params.id as string);
 
-// Composables
 const { getServiceWithProducts } = useCatalogManager();
 
-// State
-const service = ref<any>(null);
-const products = ref<any[]>([]);
-const loading = ref(true);
-const error = ref<string | null>(null);
-
-// WhatsApp contact
 const whatsappNumber = "6281234567890";
 
-// Fetch service detail with products
-const fetchServiceDetail = async () => {
-  loading.value = true;
-  error.value = null;
-
-  try {
+// useAsyncData tanpa await: halaman render langsung dengan loading state
+// watch: [serviceId] otomatis re-fetch saat navigasi antar layanan
+const {
+  data: pageData,
+  status,
+  error: fetchError,
+} = useAsyncData(
+  () => `service-${serviceId.value}`,
+  async () => {
     const result = await getServiceWithProducts(serviceId.value);
 
     if (!result.success || !result.data) {
-      throw createError({
-        statusCode: 404,
-        message: "Layanan tidak ditemukan",
-      });
+      throw createError({ statusCode: 404, message: "Layanan tidak ditemukan" });
     }
 
-    service.value = result.data;
-    products.value = result.data.products || [];
-  } catch (err: any) {
-    error.value = err.message || "Gagal memuat detail layanan";
-    console.error("[Service] Error fetching data:", err);
-  } finally {
-    loading.value = false;
-  }
-};
+    return {
+      service: result.data,
+      products: result.data.products || [],
+    };
+  },
+  { watch: [serviceId] },
+);
 
-// Navigate to product detail
+const service = computed(() => pageData.value?.service ?? null);
+const products = computed(() => pageData.value?.products ?? []);
+const loading = computed(() => status.value === "pending");
+const error = computed(() => fetchError.value?.message ?? null);
+
 const handleProductClick = (product: any) => {
   navigateTo(`/product/${product.id}`);
 };
 
-// Contact via WhatsApp
 const contactWhatsApp = () => {
   const text = `Halo, saya ingin konsultasi tentang layanan ${service.value?.title}`;
   window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`, "_blank");
 };
 
-// Initial fetch
-await fetchServiceDetail();
-
-// SEO Meta tags
-useHead({
-  title: `${service.value?.title || "Layanan"} - Melati Gold Shop`,
-  meta: [
-    {
-      name: "description",
-      content: service.value?.description || `Layanan custom ${service.value?.title}`,
-    },
-    { property: "og:title", content: `${service.value?.title} - Melati Gold Shop` },
-    {
-      property: "og:description",
-      content: service.value?.description || "Layanan pembuatan perhiasan custom sesuai keinginan Anda",
-    },
-    {
-      property: "og:image",
-      content: service.value?.image_url || "/img/placeholder.jpg",
-    },
-    { property: "og:type", content: "website" },
-  ],
-  link: [
-    {
-      rel: "canonical",
-      href: `https://melatigoldshop.com/service/${serviceId.value}`,
-    },
-  ],
-});
+// SEO Meta tags - reaktif mengikuti data layanan
+useHead(
+  computed(() => ({
+    title: `${service.value?.title || "Layanan"} - Melati Gold Shop`,
+    meta: [
+      { name: "description", content: service.value?.description || `Layanan custom ${service.value?.title}` },
+      { property: "og:title", content: `${service.value?.title} - Melati Gold Shop` },
+      {
+        property: "og:description",
+        content: service.value?.description || "Layanan pembuatan perhiasan custom sesuai keinginan Anda",
+      },
+      { property: "og:image", content: service.value?.image_url || "/img/placeholder.jpg" },
+      { property: "og:type", content: "website" },
+    ],
+    link: [{ rel: "canonical", href: `https://melatigoldshop.com/service/${serviceId.value}` }],
+  })),
+);
 </script>
 
 <template>

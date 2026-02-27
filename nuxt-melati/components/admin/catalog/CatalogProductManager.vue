@@ -49,102 +49,99 @@
     </div>
 
     <!-- Products Grid -->
-    <div v-else-if="paginatedProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+    <div
+      v-else-if="paginatedProducts.length > 0"
+      class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4"
+    >
       <div
         v-for="product in paginatedProducts"
         :key="product.id"
-        class="border rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow"
+        class="group border rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-white flex flex-col"
       >
-        <!-- Image -->
-        <img
-          :src="product.thumbnail_image || '/img/placeholder.jpg'"
-          :alt="product.title"
-          class="w-full h-40 sm:h-48 object-cover rounded-lg mb-2 sm:mb-3"
-        />
+        <!-- Image with overlay badges & toggle buttons -->
+        <div class="relative">
+          <img
+            :src="product.thumbnail_image || '/img/placeholder.jpg'"
+            :alt="product.title"
+            class="w-full h-28 sm:h-36 lg:h-44 object-cover"
+          />
+
+          <!-- Status badges (top-left) -->
+          <div class="absolute top-1.5 left-1.5 flex flex-col gap-1">
+            <span
+              v-if="product.video_url"
+              class="px-1.5 py-0.5 bg-purple-600/90 text-white text-[10px] rounded-full leading-none backdrop-blur-sm"
+            >
+              <i class="bi bi-camera-video-fill"></i>
+            </span>
+          </div>
+
+          <!-- Toggle buttons (top-right) — mobile: always visible; desktop: on hover -->
+          <div
+            class="absolute top-1.5 right-1.5 flex flex-col gap-1 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
+          >
+            <button
+              @click="toggleFeatured(product)"
+              :class="[
+                'w-6 h-6 rounded-full text-[10px] flex items-center justify-center transition-colors shadow-sm',
+                product.is_featured ? 'bg-blue-600 text-white' : 'bg-white/80 text-gray-500 hover:bg-blue-100',
+              ]"
+              title="Toggle Featured"
+            >
+              <i class="bi bi-star-fill"></i>
+            </button>
+            <button
+              @click="toggleBestSeller(product)"
+              :class="[
+                'w-6 h-6 rounded-full text-[10px] flex items-center justify-center transition-colors shadow-sm',
+                product.is_best_seller ? 'bg-yellow-500 text-white' : 'bg-white/80 text-gray-500 hover:bg-yellow-100',
+              ]"
+              title="Toggle Best Seller"
+            >
+              <i class="bi bi-trophy-fill"></i>
+            </button>
+          </div>
+        </div>
 
         <!-- Info -->
-        <div class="mb-2 sm:mb-3">
-          <div class="flex items-start justify-between mb-1 sm:mb-2">
-            <h3 class="font-semibold text-sm sm:text-lg line-clamp-2 flex-1">{{ product.title }}</h3>
-            <div class="flex gap-1 ml-2 flex-shrink-0">
-              <span
-                v-if="product.video_url"
-                class="px-1.5 sm:px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full"
-                title="Has Video"
-              >
-                <i class="bi bi-camera-video-fill"></i>
-              </span>
-              <span
-                v-if="product.is_featured"
-                class="px-1.5 sm:px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
-                title="Featured"
-              >
-                <i class="bi bi-star-fill"></i>
-              </span>
-              <span
-                v-if="product.is_best_seller"
-                class="px-1.5 sm:px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full"
-                title="Best Seller"
-              >
-                <i class="bi bi-trophy-fill"></i>
-              </span>
-            </div>
-          </div>
-
-          <p class="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2">
-            {{ formatPrice(product.price) }}
+        <div class="p-2 sm:p-3 flex flex-col flex-1">
+          <h3 class="font-semibold text-xs sm:text-sm line-clamp-2 leading-tight mb-1 text-gray-900">
+            {{ product.title }}
+          </h3>
+          <p class="text-xs text-gray-600 font-medium mb-1">{{ formatPrice(product.price) }}</p>
+          <p class="text-[10px] sm:text-xs text-gray-400 truncate mb-1.5">
+            {{ product.category?.name }}
+            <span v-if="product.subcategory?.name">› {{ product.subcategory?.name }}</span>
           </p>
-          <p class="text-xs text-gray-500 truncate">{{ product.category?.name }} → {{ product.subcategory?.name }}</p>
 
-          <div class="flex flex-wrap gap-1 sm:gap-2 mt-1 sm:mt-2 text-xs">
-            <span v-if="product.karat" class="px-2 py-0.5 sm:py-1 bg-gray-100 rounded">{{ product.karat }}</span>
-            <span v-if="product.weight" class="px-2 py-0.5 sm:py-1 bg-gray-100 rounded">{{ product.weight }}</span>
+          <div class="flex flex-wrap gap-1 mb-2">
+            <span v-if="product.karat" class="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] sm:text-xs text-gray-600">
+              {{ product.karat }}
+            </span>
+            <span v-if="product.weight" class="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] sm:text-xs text-gray-600">
+              {{ product.weight }}
+            </span>
           </div>
-        </div>
 
-        <!-- Actions -->
-        <div class="flex gap-1 sm:gap-2">
-          <button
-            @click="toggleFeatured(product)"
-            :class="[
-              'flex-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors',
-              product.is_featured
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300',
-            ]"
-          >
-            <i class="bi bi-star-fill"></i>
-            <span class="hidden xs:inline ml-1">Featured</span>
-          </button>
-          <button
-            @click="toggleBestSeller(product)"
-            :class="[
-              'flex-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors',
-              product.is_best_seller
-                ? 'bg-yellow-600 text-white hover:bg-yellow-700'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300',
-            ]"
-          >
-            <i class="bi bi-trophy-fill"></i>
-            <span class="hidden xs:inline ml-1">Best</span>
-          </button>
-        </div>
-
-        <div class="flex gap-1 sm:gap-2 mt-1 sm:mt-2">
-          <button
-            @click="openModal(product)"
-            class="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs sm:text-sm"
-          >
-            <i class="bi bi-pencil"></i>
-            <span class="hidden xs:inline ml-1">Edit</span>
-          </button>
-          <button
-            @click="confirmDelete(product)"
-            class="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs sm:text-sm"
-          >
-            <i class="bi bi-trash"></i>
-            <span class="hidden xs:inline ml-1">Delete</span>
-          </button>
+          <!-- Actions -->
+          <div class="flex gap-1 mt-auto">
+            <button
+              @click="openModal(product)"
+              :disabled="loading"
+              class="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i v-if="loading" class="bi bi-hourglass-split animate-spin"></i>
+              <i v-else class="bi bi-pencil"></i>
+              <span class="hidden sm:inline">Edit</span>
+            </button>
+            <button
+              @click="confirmDelete(product)"
+              class="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs transition-colors"
+            >
+              <i class="bi bi-trash"></i>
+              <span class="hidden sm:inline">Hapus</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -351,19 +348,26 @@ const openModal = async (product?: any) => {
   if (product) {
     // Fetch full product data with all fields
     loading.value = true;
-    const result = await getProductById(product.id);
-    loading.value = false;
 
-    if (result.success) {
-      selectedProduct.value = result.data;
-    } else {
-      emit("alert", "Failed to load product details", "error");
-      return;
+    try {
+      const result = await getProductById(product.id);
+
+      if (result.success) {
+        selectedProduct.value = result.data;
+        showModal.value = true; // Only open modal if fetch succeeded
+      } else {
+        emit("alert", "Failed to load product: " + (result.error || "Unknown error"), "error");
+      }
+    } catch (error: any) {
+      console.error("[openModal] Exception:", error);
+      emit("alert", "Error loading product: " + (error?.message || "Unknown error"), "error");
+    } finally {
+      loading.value = false; // Always reset loading state
     }
   } else {
     selectedProduct.value = null;
+    showModal.value = true;
   }
-  showModal.value = true;
 };
 
 const closeModal = () => {

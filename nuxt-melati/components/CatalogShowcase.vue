@@ -350,11 +350,9 @@ onMounted(() => {
                   class="relative flex-none"
                   :style="{ flex: `0 0 ${slideWidthPx}px` }"
                 >
-                  <div
-                    class="group relative block w-full overflow-hidden rounded-1xl card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 aspect-[3/4] cursor-pointer"
-                    @click="navigateTo(`/catalog/${category.slug || category.name.toLowerCase()}`)"
-                    role="button"
-                    tabindex="0"
+                  <NuxtLink
+                    :to="`/catalog/${category.slug || category.name.toLowerCase()}`"
+                    class="group relative block w-full overflow-hidden rounded-1xl card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 aspect-[3/4]"
                   >
                     <img
                       :src="category.cover_image || '/img/placeholder.jpg'"
@@ -378,7 +376,7 @@ onMounted(() => {
                         <span>Lihat katalog</span>
                       </div>
                     </div>
-                  </div>
+                  </NuxtLink>
                 </article>
               </div>
             </div>

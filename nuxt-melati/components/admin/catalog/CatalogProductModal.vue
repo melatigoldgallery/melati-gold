@@ -263,6 +263,17 @@
           </div>
 
           <!-- Actions -->
+          <!-- Inline error display -->
+          <div v-if="saveError" class="bg-red-50 border-2 border-red-400 text-red-800 rounded-lg px-4 py-3 text-sm">
+            <div class="flex items-start gap-2">
+              <i class="bi bi-exclamation-triangle-fill text-lg mt-0.5 flex-shrink-0"></i>
+              <div class="flex-1">
+                <p class="font-semibold mb-1">Gagal menyimpan produk:</p>
+                <p class="text-xs">{{ saveError }}</p>
+              </div>
+            </div>
+          </div>
+
           <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
             <button
               type="submit"
@@ -304,6 +315,7 @@ const toast = useToast();
 
 // State
 const saving = ref(false);
+const saveError = ref<string>("");
 const imageUrls = ref<string[]>([]);
 const videoUrls = ref<string[]>([]);
 const goldPrices = ref<any[]>([]);
@@ -498,6 +510,7 @@ const removeVideo = () => {
 // Save
 const save = async () => {
   saving.value = true;
+  saveError.value = "";
 
   try {
     // Ensure weight string is synced with weight_grams before save
@@ -511,6 +524,18 @@ const save = async () => {
     }
     // Specs kept as empty array - auto-generated from product fields on display
     form.value.specs = [];
+
+    // 🔍 DEBUG: Log data being sent (especially media URLs)
+    console.log("[CatalogProductModal] Saving product with data:", {
+      title: form.value.title,
+      has_images: form.value.images.length > 0,
+      images_count: form.value.images.length,
+      first_image_length: form.value.images[0]?.length || 0,
+      has_thumbnail: !!form.value.thumbnail_image,
+      thumbnail_length: form.value.thumbnail_image?.length || 0,
+      has_video: !!form.value.video_url,
+      video_length: form.value.video_url?.length || 0,
+    });
 
     // Always sync name with title to ensure consistency
     form.value.name = form.value.title;
@@ -530,9 +555,13 @@ const save = async () => {
       }).format(form.value.price);
     }
 
+    console.log("[CatalogProductModal] Calling", props.product ? "updateProduct" : "createProduct");
+
     const result = props.product
       ? await updateProduct(props.product.id, form.value, originalMediaUrls.value)
       : await createProduct(form.value);
+
+    console.log("[CatalogProductModal] Result:", result);
 
     if (result.success) {
       // Show success toast
@@ -544,13 +573,16 @@ const save = async () => {
       );
       emit("saved");
     } else {
-      // Show error toast
-      toast.error(`Gagal menyimpan produk: ${result.error || "Terjadi kesalahan"}`, 5000);
+      const msg = result.error || "Terjadi kesalahan tidak diketahui";
+      saveError.value = msg;
+      console.error("[CatalogProductModal] Save failed:", msg);
+      toast.error(`Gagal menyimpan produk: ${msg}`, 5000);
     }
-  } catch (error) {
-    console.error("Save error:", error);
-    // Show error toast
-    toast.error("Terjadi kesalahan saat menyimpan produk. Silakan coba lagi.", 5000);
+  } catch (error: any) {
+    const msg = error?.message || "Terjadi kesalahan saat menyimpan produk";
+    saveError.value = msg;
+    console.error("[CatalogProductModal] Exception:", error);
+    toast.error(msg + " - Cek console untuk detail.", 5000);
   } finally {
     saving.value = false;
   }

@@ -346,11 +346,9 @@ onMounted(() => {
                   class="relative flex-none"
                   :style="{ flex: `0 0 ${slideWidthPx}px` }"
                 >
-                  <div
+                  <NuxtLink
+                    :to="`/service/${service.id}`"
                     class="group relative block w-full overflow-hidden rounded-1xl bg-gray-900 transition-all duration-300 hover:-translate-y-1 aspect-[3/4]"
-                    @click="openService(service)"
-                    role="button"
-                    tabindex="0"
                   >
                     <img
                       v-if="service.image_url"
@@ -390,7 +388,7 @@ onMounted(() => {
                         <span class="text-white/90 text-xs sm:text-sm">Lihat Contoh Produk</span>
                       </div>
                     </div>
-                  </div>
+                  </NuxtLink>
                 </article>
               </div>
             </div>

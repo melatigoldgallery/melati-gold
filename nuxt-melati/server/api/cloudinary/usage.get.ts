@@ -2,15 +2,16 @@
 export default defineEventHandler(async (event) => {
   try {
     // Check if cloudinary is configured
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    const apiKey = process.env.CLOUDINARY_API_KEY;
-    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    const config = useRuntimeConfig();
+    const cloudName = config.public.cloudinaryCloudName;
+    const apiKey = config.public.cloudinaryApiKey;
+    const apiSecret = config.cloudinaryApiSecret;
 
     if (!cloudName || !apiKey || !apiSecret) {
       throw createError({
         statusCode: 500,
         statusMessage:
-          "Cloudinary not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in environment variables.",
+          "Cloudinary not configured. Please set NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME, NUXT_PUBLIC_CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in environment variables.",
       });
     }
 

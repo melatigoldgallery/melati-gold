@@ -72,10 +72,10 @@ const specs = computed(() => {
 
     <!-- Price -->
     <div class="border-t border-b border-gray-200 py-3 md:py-4 bg-gradient-to-r from-amber-50/50 to-transparent">
-      <div class="text-xl sm:text-2xl lg:text-xl font-bold text-maroon">± {{ formatPrice(product?.price) }}</div>
+      <div class="text-xl sm:text-2xl lg:text-xl font-bold text-maroon">Mulai dari {{ formatPrice(product?.price) }}</div>
       <p v-if="product?.price" class="text-xs sm:text-sm text-gray-600 mt-1.5 flex items-center gap-1">
         <InformationCircleIcon class="w-4 h-4" />
-        <span>Harga dapat berubah mengikuti harga emas terbaru</span>
+        <span>Harga disesuaikan mengikuti berat yang tersedia dan harga emas terbaru</span>
       </p>
     </div>
 

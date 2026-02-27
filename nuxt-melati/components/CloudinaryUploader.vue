@@ -49,7 +49,7 @@
         <div
           v-for="(url, index) in previewUrls"
           :key="index"
-          class="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden"
+          class="relative group aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden"
         >
           <!-- Video Preview -->
           <div v-if="isVideoMode" class="w-full h-full flex items-center justify-center bg-black">

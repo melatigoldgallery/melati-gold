@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import ProductGallery from "~/components/product/ProductGallery.vue";
 import ProductInfo from "~/components/product/ProductInfo.vue";
 import ProductRelatedProducts from "~/components/product/RelatedProducts.vue";
@@ -10,88 +10,64 @@ definePageMeta({
   layout: false,
 });
 
-// Get route params
 const route = useRoute();
 const productId = computed(() => route.params.id as string);
 
-// Composables
 const { getProductById, getRelatedProducts } = useCatalogManager();
 
-// State
-const product = ref<any>(null);
-const relatedProducts = ref<any[]>([]);
-const loading = ref(true);
-const error = ref<string | null>(null);
-
-// Fetch product detail
-const fetchProductDetail = async () => {
-  loading.value = true;
-  error.value = null;
-
-  try {
+// useAsyncData tanpa await: halaman baru langsung render dengan loading state
+// watch: [productId] otomatis re-fetch saat navigasi antar produk
+const {
+  data: pageData,
+  status,
+  error: fetchError,
+} = useAsyncData(
+  () => `product-${productId.value}`,
+  async () => {
     const result = await getProductById(productId.value);
 
     if (!result.success || !result.data) {
-      throw createError({
-        statusCode: 404,
-        message: "Produk tidak ditemukan",
-      });
+      throw createError({ statusCode: 404, message: "Produk tidak ditemukan" });
     }
 
-    product.value = result.data;
-
-    // Fetch related products
     const relatedResult = await getRelatedProducts(productId.value, 6);
 
-    if (relatedResult.success) {
-      relatedProducts.value = relatedResult.data;
-    } else {
-      console.error("[Product Page] Failed to fetch related products:", relatedResult.error);
-    }
-  } catch (err: any) {
-    error.value = err.message || "Gagal memuat detail produk";
-    console.error("[Product] Error fetching data:", err);
-  } finally {
-    loading.value = false;
-  }
-};
+    return {
+      product: result.data,
+      relatedProducts: relatedResult.success ? relatedResult.data : [],
+    };
+  },
+  { watch: [productId] },
+);
 
-// Navigate to related product
+const product = computed(() => pageData.value?.product ?? null);
+const relatedProducts = computed(() => pageData.value?.relatedProducts ?? []);
+const loading = computed(() => status.value === "pending");
+const error = computed(() => fetchError.value?.message ?? null);
+
 const handleRelatedProductClick = (relatedProduct: any) => {
   navigateTo(`/product/${relatedProduct.id}`);
 };
 
-// Initial fetch
-await fetchProductDetail();
-
-// SEO Meta tags
-useHead({
-  title: `${product.value?.name || "Produk"} - Melati Gold Shop`,
-  meta: [
-    {
-      name: "description",
-      content: product.value?.description || `Detail produk ${product.value?.name}`,
-    },
-    { property: "og:title", content: `${product.value?.name} - Melati Gold Shop` },
-    {
-      property: "og:description",
-      content: product.value?.description || `Produk perhiasan emas berkualitas`,
-    },
-    {
-      property: "og:image",
-      content: product.value?.thumbnail_image || product.value?.images?.[0] || "/img/placeholder.jpg",
-    },
-    { property: "og:type", content: "product" },
-    { property: "product:price:amount", content: product.value?.price || 0 },
-    { property: "product:price:currency", content: "IDR" },
-  ],
-  link: [
-    {
-      rel: "canonical",
-      href: `https://melatigoldshop.com/product/${productId.value}`,
-    },
-  ],
-});
+// SEO Meta tags - reaktif mengikuti data produk
+useHead(
+  computed(() => ({
+    title: `${product.value?.name || "Produk"} - Melati Gold Shop`,
+    meta: [
+      { name: "description", content: product.value?.description || `Detail produk ${product.value?.name}` },
+      { property: "og:title", content: `${product.value?.name} - Melati Gold Shop` },
+      { property: "og:description", content: product.value?.description || "Produk perhiasan emas berkualitas" },
+      {
+        property: "og:image",
+        content: product.value?.thumbnail_image || product.value?.images?.[0] || "/img/placeholder.jpg",
+      },
+      { property: "og:type", content: "product" },
+      { property: "product:price:amount", content: product.value?.price || 0 },
+      { property: "product:price:currency", content: "IDR" },
+    ],
+    link: [{ rel: "canonical", href: `https://melatigoldshop.com/product/${productId.value}` }],
+  })),
+);
 </script>
 
 <template>

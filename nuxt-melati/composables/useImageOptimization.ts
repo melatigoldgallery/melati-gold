@@ -51,7 +51,7 @@ export const useImageOptimization = () => {
     // Thumbnail kecil untuk strip/grid (max display ~80-160px)
     thumbnail: (url: string) =>
       getOptimizedUrl(url, {
-        width: 200,
+        width: 150,
         height: 200,
         quality: "auto",
         format: "auto",
@@ -62,7 +62,7 @@ export const useImageOptimization = () => {
     // Card image untuk product grid (max display ~390px di mobile, ~300px di desktop)
     card: (url: string) =>
       getOptimizedUrl(url, {
-        width: 400,
+        width: 300,
         height: 400,
         quality: "auto",
         format: "auto",
@@ -83,7 +83,7 @@ export const useImageOptimization = () => {
     // Detail/lightbox (q_auto lebih cerdas dari q_90 fixed)
     detail: (url: string) =>
       getOptimizedUrl(url, {
-        width: 800,
+        width: 600,
         height: 800,
         quality: "auto",
         format: "auto",
@@ -94,7 +94,7 @@ export const useImageOptimization = () => {
     // Gallery carousel (main slide - mobile ~390px, desktop ~500px)
     gallery: (url: string) =>
       getOptimizedUrl(url, {
-        width: 600,
+        width: 450,
         height: 600,
         quality: "auto",
         format: "auto",

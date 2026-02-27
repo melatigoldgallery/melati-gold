@@ -170,10 +170,10 @@ const onTouchEnd = () => {
 </script>
 
 <template>
-  <div class="space-y-3 md:space-y-4 max-w-full lg:max-w-md xl:max-w-lg mx-auto">
+  <div class="space-y-3 md:space-y-4 max-w-full lg:max-w-xs xl:max-w-sm mx-auto">
     <!-- Main Media (Image or Video) -->
     <div
-      class="relative aspect-square bg-gray-100 rounded-xl md:rounded-2xl overflow-hidden group shadow-md hover:shadow-xl transition-shadow duration-300 touch-pan-y"
+      class="relative aspect-[3/4] bg-gray-100 rounded-xl md:rounded-2xl overflow-hidden group shadow-md hover:shadow-xl transition-shadow duration-300 touch-pan-y"
       @touchstart.passive="onTouchStart"
       @touchmove="onTouchMove"
       @touchend.passive="onTouchEnd"
@@ -228,15 +228,6 @@ const onTouchEnd = () => {
       >
         <MagnifyingGlassPlusIcon class="w-4 h-4" />
         <span class="hidden sm:inline">Zoom</span>
-      </div>
-
-      <!-- Video Badge -->
-      <div
-        v-if="isVideo"
-        class="absolute top-3 left-3 bg-purple-600 text-white px-3 py-1.5 rounded-full text-xs md:text-sm backdrop-blur-sm flex items-center gap-1.5"
-      >
-        <VideoCameraIcon class="w-4 h-4" />
-        <span class="hidden sm:inline">Video</span>
       </div>
 
       <!-- Image Counter -->

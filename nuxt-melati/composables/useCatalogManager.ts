@@ -332,9 +332,52 @@ export const useCatalogManager = () => {
     }
   };
 
-  const getProductById = async (id: string) => {
+  const getProductById = async (id: string, retryAttempt: number = 0) => {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAYS = [500, 1000, 2000]; // Faster retries for read operations
+
     try {
-      const { data, error } = await $supabase
+      // ✅ SESSION VALIDATION & REFRESH (prevent mid-fetch token expiry)
+      const { data: sessionData } = await $supabase.auth.getSession();
+      if (!sessionData?.session) {
+        console.error("[getProductById] ❌ No active session!");
+        return {
+          success: false,
+          error: "Session expired. Please refresh the page and login again.",
+        };
+      }
+
+      const session = sessionData.session;
+      const expiresAt = session.expires_at || 0;
+      const expiresIn = expiresAt - Date.now() / 1000;
+
+      console.log("[getProductById] Session check:", {
+        productId: id,
+        user: session.user.email,
+        expiresIn: `${Math.round(expiresIn)}s`,
+        retry: retryAttempt > 0 ? `${retryAttempt}/${MAX_RETRIES}` : "first attempt",
+      });
+
+      // Refresh session if expires in < 60 seconds
+      if (expiresIn < 60) {
+        console.log("[getProductById] 🔄 Session expires soon, refreshing...");
+        const { error: refreshError } = await $supabase.auth.refreshSession();
+        if (refreshError) {
+          console.warn("[getProductById] ⚠️ Session refresh failed:", refreshError.message);
+        } else {
+          console.log("[getProductById] ✅ Session refreshed");
+        }
+      }
+
+      // 15-second timeout for read operations (faster than create/update)
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error("⏱️ Timeout loading product details. Please check your connection and try again.")),
+          15000,
+        ),
+      );
+
+      const fetchPromise = $supabase
         .from("catalog_products")
         .select(
           `
@@ -346,7 +389,29 @@ export const useCatalogManager = () => {
         .eq("id", id)
         .single();
 
-      if (error) throw error;
+      console.log("[getProductById] Fetching product data...");
+      const { data, error } = (await Promise.race([fetchPromise, timeoutPromise])) as Awaited<typeof fetchPromise>;
+      console.log("[getProductById] ✅ Fetch completed");
+
+      if (error) {
+        console.error("[getProductById] ❌ Supabase error:", {
+          code: error.code,
+          message: error.message,
+          retryable: isRetryableError(error),
+        });
+
+        // ✅ RETRY LOGIC: If error is transient and retries remaining
+        if (isRetryableError(error) && retryAttempt < MAX_RETRIES) {
+          const delay = RETRY_DELAYS[retryAttempt];
+          console.warn(
+            `[getProductById] 🔄 Retrying (${retryAttempt + 1}/${MAX_RETRIES}) after ${delay}ms due to: ${error.message}`,
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          return getProductById(id, retryAttempt + 1);
+        }
+
+        throw error;
+      }
 
       // Flatten nested category and subcategory data for easier access
       if (data) {
@@ -369,9 +434,34 @@ export const useCatalogManager = () => {
     }
   };
 
-  const createProduct = async (productData: any) => {
+  // Helper: Check if error is retryable (transient failures)
+  const isRetryableError = (error: any): boolean => {
+    if (!error) return false;
+    const code = error.code || "";
+    const message = (error.message || "").toLowerCase();
+
+    // Retryable conditions:
+    // - JWT expired mid-request (PGRST301)
+    // - Network timeouts
+    // - Connection errors
+    // - Rate limit (429)
+    return (
+      code === "PGRST301" || // JWT expired
+      code === "PGRST504" || // Gateway timeout
+      message.includes("timeout") ||
+      message.includes("network") ||
+      message.includes("econnrefused") ||
+      message.includes("fetch failed") ||
+      error.status === 429 // Rate limit
+    );
+  };
+
+  const createProduct = async (productData: any, retryAttempt: number = 0) => {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAYS = [1000, 2000, 4000]; // 1s, 2s, 4s exponential backoff
+
     try {
-      // Remove joined relations and read-only fields
+      // Remove joined relations, read-only fields, and frontend-only fields
       const {
         category,
         subcategory,
@@ -382,9 +472,91 @@ export const useCatalogManager = () => {
         ...cleanData
       } = productData;
 
-      const { data, error } = await $supabase.from("catalog_products").insert([cleanData]).select().single();
+      // ✅ SESSION VALIDATION & REFRESH (prevent mid-save token expiry)
+      const { data: sessionData } = await $supabase.auth.getSession();
+      if (!sessionData?.session) {
+        console.error("[createProduct] ❌ No active session!");
+        return {
+          success: false,
+          error: "Session expired. Please refresh the page and login again.",
+        };
+      }
 
-      if (error) throw error;
+      const session = sessionData.session;
+      const expiresAt = session.expires_at || 0;
+      const expiresIn = expiresAt - Date.now() / 1000;
+
+      console.log("[createProduct] Session check:", {
+        user: session.user.email,
+        expiresIn: `${Math.round(expiresIn)}s`,
+        retry: retryAttempt > 0 ? `${retryAttempt}/${MAX_RETRIES}` : "first attempt",
+      });
+
+      // Refresh session if expires in < 60 seconds
+      if (expiresIn < 60) {
+        console.log("[createProduct] 🔄 Session expires soon, refreshing...");
+        const { error: refreshError } = await $supabase.auth.refreshSession();
+        if (refreshError) {
+          console.warn("[createProduct] ⚠️ Session refresh failed:", refreshError.message);
+        } else {
+          console.log("[createProduct] ✅ Session refreshed");
+        }
+      }
+
+      // 🔍 DEBUG: Log what's being sent to Supabase
+      console.log("[createProduct] Sending to Supabase:", {
+        title: cleanData.title,
+        category_id: cleanData.category_id,
+        subcategory_id: cleanData.subcategory_id,
+        has_thumbnail: !!cleanData.thumbnail_image,
+        thumbnail_url_preview: cleanData.thumbnail_image?.substring(0, 100) + "...",
+        images_count: cleanData.images?.length || 0,
+        images_array_preview: cleanData.images?.map((url: string) => url.substring(0, 60) + "..."),
+        has_video: !!cleanData.video_url,
+        video_url_preview: cleanData.video_url?.substring(0, 100) + "...",
+        price: cleanData.price,
+      });
+
+      // 30-second timeout to prevent infinite hang
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                "⏱️ Request timeout: Supabase tidak merespons setelah 30 detik. Kemungkinan: (1) Koneksi internet lambat, (2) Proyek Supabase sedang sleep (free tier), (3) RLS policy blocking.",
+              ),
+            ),
+          30000,
+        ),
+      );
+
+      const insertPromise = $supabase.from("catalog_products").insert([cleanData]).select().single();
+
+      console.log("[createProduct] Waiting for Supabase response...");
+      const { data, error } = (await Promise.race([insertPromise, timeoutPromise])) as Awaited<typeof insertPromise>;
+      console.log("[createProduct] ✅ Supabase responded");
+
+      if (error) {
+        console.error("[createProduct] ❌ Supabase error:", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          retryable: isRetryableError(error),
+        });
+
+        // ✅ RETRY LOGIC: If error is transient and retries remaining
+        if (isRetryableError(error) && retryAttempt < MAX_RETRIES) {
+          const delay = RETRY_DELAYS[retryAttempt];
+          console.warn(
+            `[createProduct] 🔄 Retrying (${retryAttempt + 1}/${MAX_RETRIES}) after ${delay}ms due to: ${error.message}`,
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          return createProduct(productData, retryAttempt + 1);
+        }
+
+        throw error;
+      }
 
       // Invalidate products cache after create
       cache.clearPrefix("catalog_products");

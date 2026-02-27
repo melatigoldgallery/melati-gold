@@ -271,7 +271,12 @@ export const useAuth = () => {
 
     // Listen to auth state changes
     $supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("[useAuth] Auth state changed:", event);
+      console.log("[useAuth] Auth state changed:", event, {
+        hasSession: !!session,
+        user: session?.user?.email || "none",
+        expiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toLocaleString("id-ID") : null,
+        expiresIn: session?.expires_at ? `${Math.round(session.expires_at - Date.now() / 1000)}s` : null,
+      });
 
       if (event === "SIGNED_IN" && session) {
         await checkAuth();
@@ -279,6 +284,10 @@ export const useAuth = () => {
         user.value = null;
         isAuthenticated.value = false;
         userRole.value = "";
+      } else if (event === "TOKEN_REFRESHED") {
+        console.log("[useAuth] ✅ Token auto-refreshed successfully");
+      } else if (event === "INITIAL_SESSION") {
+        console.log("[useAuth] 📦 Initial session loaded from storage");
       }
     });
   });

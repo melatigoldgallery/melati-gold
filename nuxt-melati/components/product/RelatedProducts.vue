@@ -86,12 +86,12 @@ const handleClick = (product: any) => {
           </div>
 
           <!-- Info -->
-          <div class="p-1.5">
-            <h3 class="font-semibold text-gray-900 text-xs line-clamp-2 mb-0.5">
+          <div class="p-1.5 text-center">
+            <h3 class="font-semibold text-gray-900 text-base line-clamp-2 mb-0.5">
               {{ product.title || product.name }}
             </h3>
-            <p class="text-maroon font-bold text-xs">
-              {{ formatPrice(product.price) }}
+            <p class="text-maroon font-bold text-sm">
+              Mulai dari {{ formatPrice(product.price) }}
             </p>
           </div>
         </div>
@@ -119,12 +119,12 @@ const handleClick = (product: any) => {
                 decoding="async"
               />
             </div>
-            <div class="p-2">
+            <div class="p-2 text-center">
               <h3 class="font-semibold text-gray-900 text-xs line-clamp-2 mb-1">
                 {{ product.title || product.name }}
               </h3>
               <p class="text-maroon font-bold text-xs">
-                {{ formatPrice(product.price) }}
+                Mulai dari {{ formatPrice(product.price) }}
               </p>
             </div>
           </div>
