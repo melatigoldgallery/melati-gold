@@ -30,7 +30,7 @@ const specs = computed(() => {
     result.push({ label: "Karat", value: props.product.karat });
   }
   if (props.product?.weight) {
-    result.push({ label: "Berat", value: `± ${props.product.weight}` });
+    result.push({ label: "Berat", value: `Mulai dari ${props.product.weight}` });
   }
   if (props.product?.stone_type) {
     result.push({ label: "Jenis Batu", value: props.product.stone_type });

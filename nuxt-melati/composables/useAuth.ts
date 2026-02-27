@@ -3,43 +3,6 @@
 // Aliases: 'adminmelati' → melatigoldshopid@gmail.com (admin)
 //          'supervisor' → fattahula98@gmail.com (supervisor)
 
-// ── Inactivity timeout (module-level agar persist antar pemanggilan composable) ──
-const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 menit
-let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
-const ACTIVITY_EVENTS = ["mousemove", "keydown", "click", "touchstart", "scroll"] as const;
-
-const clearInactivityTimer = () => {
-  if (inactivityTimer) {
-    clearTimeout(inactivityTimer);
-    inactivityTimer = null;
-  }
-};
-
-const startInactivityTimer = (logoutFn: () => Promise<void>) => {
-  if (!process.client) return;
-  clearInactivityTimer();
-
-  const resetTimer = () => {
-    clearInactivityTimer();
-    inactivityTimer = setTimeout(async () => {
-      // Remove listeners before logout
-      ACTIVITY_EVENTS.forEach((e) => window.removeEventListener(e, resetTimer));
-      await logoutFn();
-      window.location.replace("/login");
-    }, INACTIVITY_TIMEOUT_MS);
-  };
-
-  ACTIVITY_EVENTS.forEach((e) => window.addEventListener(e, resetTimer, { passive: true }));
-  resetTimer(); // Start the initial timer
-};
-
-const stopInactivityTimer = () => {
-  if (!process.client) return;
-  clearInactivityTimer();
-  // Remove all activity listeners by re-registering a no-op resetTimer reference is gone,
-  // so we just clear — listeners will fire but timer won't be reset (timer is null)
-};
-
 export const useAuth = () => {
   const { $supabase } = useNuxtApp();
   const user = useState<any>("auth_user", () => null);
@@ -111,14 +74,6 @@ export const useAuth = () => {
       isAuthenticated.value = true;
       userRole.value = userConfig.role;
 
-      // Start inactivity timer after successful login
-      startInactivityTimer(async () => {
-        await $supabase.auth.signOut();
-        user.value = null;
-        isAuthenticated.value = false;
-        userRole.value = "";
-      });
-
       return {
         success: true,
         message: "Login berhasil",
@@ -148,9 +103,6 @@ export const useAuth = () => {
       user.value = null;
       isAuthenticated.value = false;
       userRole.value = "";
-
-      // Stop inactivity timer on manual logout
-      stopInactivityTimer();
 
       // Clear localStorage (backward compatibility)
       if (process.client) {
@@ -226,14 +178,6 @@ export const useAuth = () => {
       isAuthenticated.value = true;
       userRole.value = role;
 
-      // (Re-)start inactivity timer on each checkAuth (handles page refresh)
-      startInactivityTimer(async () => {
-        await $supabase.auth.signOut();
-        user.value = null;
-        isAuthenticated.value = false;
-        userRole.value = "";
-      });
-
       return true;
     } catch (error) {
       console.error("[useAuth] checkAuth error:", error);
@@ -265,32 +209,8 @@ export const useAuth = () => {
   const canAccessUserManagement = computed(() => isSupervisor.value);
   const canSeeCustomLinks = computed(() => isSupervisor.value);
 
-  // Initialize on mount
-  onMounted(() => {
-    checkAuth();
-
-    // Listen to auth state changes
-    $supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("[useAuth] Auth state changed:", event, {
-        hasSession: !!session,
-        user: session?.user?.email || "none",
-        expiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toLocaleString("id-ID") : null,
-        expiresIn: session?.expires_at ? `${Math.round(session.expires_at - Date.now() / 1000)}s` : null,
-      });
-
-      if (event === "SIGNED_IN" && session) {
-        await checkAuth();
-      } else if (event === "SIGNED_OUT") {
-        user.value = null;
-        isAuthenticated.value = false;
-        userRole.value = "";
-      } else if (event === "TOKEN_REFRESHED") {
-        console.log("[useAuth] ✅ Token auto-refreshed successfully");
-      } else if (event === "INITIAL_SESSION") {
-        console.log("[useAuth] 📦 Initial session loaded from storage");
-      }
-    });
-  });
+  // Note: Auth state listener moved to z-supabase-auth.client.ts plugin
+  // to avoid lifecycle hooks being called in non-component context (middleware)
 
   return {
     // State

@@ -190,7 +190,6 @@ export const useCatalogManager = () => {
 
       // Invalidate subcategories cache after update
       cache.clearPrefix("catalog_subcategories");
-      console.log("[useCatalogManager] Cache invalidated after updating subcategory");
 
       return { success: true, data };
     } catch (error) {
@@ -351,21 +350,11 @@ export const useCatalogManager = () => {
       const expiresAt = session.expires_at || 0;
       const expiresIn = expiresAt - Date.now() / 1000;
 
-      console.log("[getProductById] Session check:", {
-        productId: id,
-        user: session.user.email,
-        expiresIn: `${Math.round(expiresIn)}s`,
-        retry: retryAttempt > 0 ? `${retryAttempt}/${MAX_RETRIES}` : "first attempt",
-      });
-
       // Refresh session if expires in < 60 seconds
       if (expiresIn < 60) {
-        console.log("[getProductById] 🔄 Session expires soon, refreshing...");
         const { error: refreshError } = await $supabase.auth.refreshSession();
         if (refreshError) {
-          console.warn("[getProductById] ⚠️ Session refresh failed:", refreshError.message);
-        } else {
-          console.log("[getProductById] ✅ Session refreshed");
+          console.warn("[getProductById] Session refresh failed:", refreshError.message);
         }
       }
 
@@ -389,9 +378,7 @@ export const useCatalogManager = () => {
         .eq("id", id)
         .single();
 
-      console.log("[getProductById] Fetching product data...");
       const { data, error } = (await Promise.race([fetchPromise, timeoutPromise])) as Awaited<typeof fetchPromise>;
-      console.log("[getProductById] ✅ Fetch completed");
 
       if (error) {
         console.error("[getProductById] ❌ Supabase error:", {
@@ -486,36 +473,13 @@ export const useCatalogManager = () => {
       const expiresAt = session.expires_at || 0;
       const expiresIn = expiresAt - Date.now() / 1000;
 
-      console.log("[createProduct] Session check:", {
-        user: session.user.email,
-        expiresIn: `${Math.round(expiresIn)}s`,
-        retry: retryAttempt > 0 ? `${retryAttempt}/${MAX_RETRIES}` : "first attempt",
-      });
-
       // Refresh session if expires in < 60 seconds
       if (expiresIn < 60) {
-        console.log("[createProduct] 🔄 Session expires soon, refreshing...");
         const { error: refreshError } = await $supabase.auth.refreshSession();
         if (refreshError) {
-          console.warn("[createProduct] ⚠️ Session refresh failed:", refreshError.message);
-        } else {
-          console.log("[createProduct] ✅ Session refreshed");
+          console.warn("[createProduct] Session refresh failed:", refreshError.message);
         }
       }
-
-      // 🔍 DEBUG: Log what's being sent to Supabase
-      console.log("[createProduct] Sending to Supabase:", {
-        title: cleanData.title,
-        category_id: cleanData.category_id,
-        subcategory_id: cleanData.subcategory_id,
-        has_thumbnail: !!cleanData.thumbnail_image,
-        thumbnail_url_preview: cleanData.thumbnail_image?.substring(0, 100) + "...",
-        images_count: cleanData.images?.length || 0,
-        images_array_preview: cleanData.images?.map((url: string) => url.substring(0, 60) + "..."),
-        has_video: !!cleanData.video_url,
-        video_url_preview: cleanData.video_url?.substring(0, 100) + "...",
-        price: cleanData.price,
-      });
 
       // 30-second timeout to prevent infinite hang
       const timeoutPromise = new Promise<never>((_, reject) =>
@@ -532,9 +496,7 @@ export const useCatalogManager = () => {
 
       const insertPromise = $supabase.from("catalog_products").insert([cleanData]).select().single();
 
-      console.log("[createProduct] Waiting for Supabase response...");
       const { data, error } = (await Promise.race([insertPromise, timeoutPromise])) as Awaited<typeof insertPromise>;
-      console.log("[createProduct] ✅ Supabase responded");
 
       if (error) {
         console.error("[createProduct] ❌ Supabase error:", {
@@ -820,7 +782,6 @@ export const useCatalogManager = () => {
 
       // Invalidate custom services cache after delete
       cache.clearPrefix("custom_services");
-      console.log("[useCatalogManager] Cache invalidated after deleting custom service");
 
       return { success: true };
     } catch (error) {

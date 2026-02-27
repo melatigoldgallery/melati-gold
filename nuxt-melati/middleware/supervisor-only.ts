@@ -14,7 +14,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   // Check if user is supervisor
   if (!auth.isSupervisor.value) {
-    console.warn(`[supervisor-only] Access denied for role: ${auth.userRole.value}`);
     return navigateTo("/dashboard");
   }
 });

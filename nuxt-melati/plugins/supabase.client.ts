@@ -9,10 +9,10 @@ export default defineNuxtPlugin((nuxtApp) => {
     url && key
       ? createClient(url, key, {
           auth: {
-            persistSession: true, // Persist session to localStorage
-            autoRefreshToken: true, // Auto-refresh JWT before expiry (CRITICAL!)
-            detectSessionInUrl: true, // Detect auth redirects
-            flowType: "pkce", // More secure auth flow
+            persistSession: true, 
+            autoRefreshToken: true,
+            detectSessionInUrl: true, 
+            flowType: "pkce", 
           },
           global: {
             headers: {

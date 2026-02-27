@@ -101,27 +101,27 @@
 <script setup lang="ts">
 // Lazy load heavy admin components
 const CatalogCategoryManager = defineAsyncComponent(
-  () => import("~/components/admin/catalog/CatalogCategoryManager.vue")
+  () => import("~/components/admin/catalog/CatalogCategoryManager.vue"),
 );
 
 const CatalogSubcategoryManager = defineAsyncComponent(
-  () => import("~/components/admin/catalog/CatalogSubcategoryManager.vue")
+  () => import("~/components/admin/catalog/CatalogSubcategoryManager.vue"),
 );
 
 const CatalogProductManager = defineAsyncComponent(
-  () => import("~/components/admin/catalog/CatalogProductManager.vue")
+  () => import("~/components/admin/catalog/CatalogProductManager.vue"),
 );
 
 const CatalogFeaturedManager = defineAsyncComponent(
-  () => import("~/components/admin/catalog/CatalogFeaturedManager.vue")
+  () => import("~/components/admin/catalog/CatalogFeaturedManager.vue"),
 );
 
 const CatalogBestSellerManager = defineAsyncComponent(
-  () => import("~/components/admin/catalog/CatalogBestSellerManager.vue")
+  () => import("~/components/admin/catalog/CatalogBestSellerManager.vue"),
 );
 
 const CatalogServiceManager = defineAsyncComponent(
-  () => import("~/components/admin/catalog/CatalogServiceManager.vue")
+  () => import("~/components/admin/catalog/CatalogServiceManager.vue"),
 );
 
 const GoldPriceManager = defineAsyncComponent(() => import("~/components/admin/GoldPriceManager.vue"));
@@ -139,6 +139,7 @@ useHead({
     {
       rel: "stylesheet",
       href: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css",
+      as: "style",
     },
   ],
 });
@@ -156,24 +157,15 @@ watch(
       activeTab.value = newTab.toString();
       componentKey.value++; // Force re-render on tab change
     }
-  }
+  },
 );
 
 // Watch activeTab changes
 watch(activeTab, (newTab) => {
-  console.log("[Catalog] Tab changed to:", newTab);
   componentKey.value++; // Force component re-mount
 });
 
-// Debug: Log Supabase connection on mount
-onMounted(() => {
-  const { $supabase } = useNuxtApp();
-  console.log("[Catalog] Supabase client available:", !!$supabase);
-  if (!$supabase) {
-    console.error("[Catalog] ERROR: Supabase client is NULL. Check your .env configuration!");
-    showAlert("Supabase not configured. Please check .env file.", "error");
-  }
-});
+// Note: Auth and Supabase initialization handled by middleware and plugins
 
 const tabs = [
   { key: "categories", label: "Kategori", shortLabel: "Kategori", icon: "bi bi-grid-3x3-gap" },
@@ -201,13 +193,6 @@ const alertClass = computed(() => {
 
 const showAlert = (message: string, type: "success" | "error" = "success") => {
   alert.value = { show: true, type, message };
-
-  // Log to console for debugging
-  if (type === "error") {
-    console.error("[Catalog Alert]", message);
-  } else {
-    console.log("[Catalog Alert]", message);
-  }
 
   setTimeout(() => {
     alert.value.show = false;

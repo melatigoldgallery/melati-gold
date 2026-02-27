@@ -206,6 +206,7 @@
 <script setup>
 // Disable default layout for dashboard page
 definePageMeta({
+  middleware: "auth",
   layout: false,
 });
 
@@ -217,6 +218,7 @@ useHead({
     {
       rel: "stylesheet",
       href: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css",
+      as: "style",
     },
   ],
 });
@@ -230,11 +232,6 @@ const handleLogout = async () => {
   navigateTo("/login");
 };
 
-// Check authentication on mount
-onMounted(async () => {
-  const isAuthenticated = await auth.checkAuth();
-  if (!isAuthenticated) {
-    navigateTo("/login");
-  }
-});
+// Note: Authentication is now handled by middleware
+// No need for manual auth check in onMounted - middleware will redirect before page renders
 </script>

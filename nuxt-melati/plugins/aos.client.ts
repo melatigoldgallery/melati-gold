@@ -6,13 +6,13 @@ export default defineNuxtPlugin(() => {
 
   // Initialize AOS with optimal settings for jewelry landing page
   AOS.init({
-    duration: 800, // Animation duration in milliseconds
-    delay: 100, // Delay between animations
-    once: true, // Animasi hanya sekali - cegah elemen tersembunyi saat kembali ke halaman
-    offset: 100, // Trigger offset from viewport bottom
-    easing: "ease-in-out-cubic", // Smooth easing for luxury feel
-    anchorPlacement: "top-bottom", // Animation trigger position
-    disable: false, // Enable on all devices
+    duration: 800, 
+    delay: 100, 
+    once: true,
+    offset: 100,
+    easing: "ease-in-out-cubic",
+    anchorPlacement: "top-bottom", 
+    disable: false, 
   } as any);
 
   // Refresh AOS after route changes (for Nuxt)

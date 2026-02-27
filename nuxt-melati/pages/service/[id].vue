@@ -175,7 +175,7 @@ useHead(
         <div v-if="products.length > 0" class="mt-12">
           <div class="mb-6">
             <h2 class="text-xl md:text-2xl lg:text-xl font-serif font-bold text-gray-900 mb-2">Contoh Produk</h2>
-            <p class="text-gray-600 text-sm">Berikut adalah contoh produk dari layanan {{ service?.title }}</p>
+            <p class="text-gray-600 text-sm">Berikut adalah contoh produk dari custom {{ service?.title }}</p>
           </div>
 
           <!-- Wrapper untuk grid lebih kecil dan proporsional -->

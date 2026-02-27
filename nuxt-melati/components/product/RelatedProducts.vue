@@ -123,7 +123,7 @@ const handleClick = (product: any) => {
               <h3 class="font-semibold text-gray-900 text-xs line-clamp-2 mb-1">
                 {{ product.title || product.name }}
               </h3>
-              <p class="text-maroon font-bold text-xs">
+              <p class="text-maroon font-bold text-[10px]">
                 Mulai dari {{ formatPrice(product.price) }}
               </p>
             </div>

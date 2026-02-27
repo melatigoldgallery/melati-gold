@@ -1,7 +1,6 @@
 // Cloudinary usage endpoint
 export default defineEventHandler(async (event) => {
   try {
-    // Check if cloudinary is configured
     const config = useRuntimeConfig();
     const cloudName = config.public.cloudinaryCloudName;
     const apiKey = config.public.cloudinaryApiKey;
@@ -47,7 +46,7 @@ export default defineEventHandler(async (event) => {
 
     // Handle specific error types
     if (error.statusCode) {
-      throw error; // Re-throw createError instances
+      throw error;
     }
 
     throw createError({

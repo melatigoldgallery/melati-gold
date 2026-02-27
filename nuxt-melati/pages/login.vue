@@ -5,7 +5,7 @@
     <div class="max-w-md w-full">
       <!-- Logo/Brand -->
       <div class="text-center mb-6 sm:mb-8">
-        <img src="public/img/logo.png" alt="Melati Gold Logo" class="mx-auto w-20 h-20 md:w-20 md:h-20" />
+        <img src="public/img/logo.png" alt="Melati Gold Logo" class="mx-auto w-24 h-20 md:w-24 md:h-20" />
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">Melati Gold</h1>
         <p class="text-sm sm:text-base text-gray-600">Admin Dashboard</p>
       </div>
@@ -103,6 +103,7 @@ useHead({
     {
       rel: "stylesheet",
       href: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css",
+      as: "style",
     },
   ],
 });

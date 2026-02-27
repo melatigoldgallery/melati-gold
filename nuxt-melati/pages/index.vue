@@ -39,8 +39,8 @@ useHead({
     {
       rel: "stylesheet",
       href: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css",
+      as: "style",
     },
-    // 🚀 Preconnect to Cloudinary CDN so the first image (LCP) loads faster
     { rel: "preconnect", href: "https://res.cloudinary.com", crossorigin: "" },
     { rel: "dns-prefetch", href: "https://res.cloudinary.com" },
   ],
@@ -58,7 +58,6 @@ useHead({
   opacity: 0;
 }
 
-/* ── 1 section per layar (tanpa snap, scroll bebas) ── */
 .section-full {
   min-height: 100vh;
   display: flex;

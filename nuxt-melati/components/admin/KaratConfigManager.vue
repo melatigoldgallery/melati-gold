@@ -201,11 +201,7 @@ const getConfigs = async () => {
 
 const updateConfig = async (id: string, updates: any) => {
   try {
-    console.log("[KaratConfig] Updating config:", { id, updates });
-
     const { data, error, count } = await supabase.from("karat_configurations").update(updates).eq("id", id).select();
-
-    console.log("[KaratConfig] Update result:", { data, error, count });
 
     if (error) throw error;
 
@@ -257,12 +253,10 @@ const saveConfig = async () => {
   if (!editingConfig.value) return;
 
   saving.value = true;
-  console.log("[KaratConfig] Saving config:", editingConfig.value.id, editForm.value);
 
   const result = await updateConfig(editingConfig.value.id, editForm.value);
 
   if (result.success) {
-    console.log("[KaratConfig] Save successful, reloading configs...");
     await loadConfigs();
     cancelEdit();
     alert("Konfigurasi berhasil disimpan!");

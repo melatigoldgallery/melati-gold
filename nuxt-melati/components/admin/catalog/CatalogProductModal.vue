@@ -525,18 +525,6 @@ const save = async () => {
     // Specs kept as empty array - auto-generated from product fields on display
     form.value.specs = [];
 
-    // 🔍 DEBUG: Log data being sent (especially media URLs)
-    console.log("[CatalogProductModal] Saving product with data:", {
-      title: form.value.title,
-      has_images: form.value.images.length > 0,
-      images_count: form.value.images.length,
-      first_image_length: form.value.images[0]?.length || 0,
-      has_thumbnail: !!form.value.thumbnail_image,
-      thumbnail_length: form.value.thumbnail_image?.length || 0,
-      has_video: !!form.value.video_url,
-      video_length: form.value.video_url?.length || 0,
-    });
-
     // Always sync name with title to ensure consistency
     form.value.name = form.value.title;
 
@@ -555,13 +543,9 @@ const save = async () => {
       }).format(form.value.price);
     }
 
-    console.log("[CatalogProductModal] Calling", props.product ? "updateProduct" : "createProduct");
-
     const result = props.product
       ? await updateProduct(props.product.id, form.value, originalMediaUrls.value)
       : await createProduct(form.value);
-
-    console.log("[CatalogProductModal] Result:", result);
 
     if (result.success) {
       // Show success toast
