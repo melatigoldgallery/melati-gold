@@ -153,10 +153,10 @@ const hasActiveFilters = computed(() => {
 
     <!-- Desktop Sidebar -->
     <div
-      class="hidden lg:block bg-white/95 backdrop-blur rounded-2xl shadow-lg border-l-4 border-gold p-5 lg:p-6 sticky top-4"
+      class="hidden lg:block bg-white/95 backdrop-blur rounded-2xl shadow-lg border-l-4 border-gold p-4 sticky top-4"
     >
       <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+        <h3 class="text-base lg:text-lg font-bold text-gray-900 flex items-center gap-2">
           <i class="bi bi-funnel text-maroon"></i>
           Filter
         </h3>
@@ -170,7 +170,7 @@ const hasActiveFilters = computed(() => {
       </div>
 
       <!-- Subcategories -->
-      <div class="mb-6 border-b border-gray-200 pb-6">
+      <div class="mb-5 border-b border-gray-200 pb-5">
         <h4 class="text-xs font-bold text-gray-700 mb-3 uppercase tracking-wider">Sub-Kategori</h4>
         <div v-if="loading" class="text-center py-4">
           <div class="inline-block w-6 h-6 border-2 border-maroon border-t-transparent rounded-full animate-spin"></div>
@@ -194,7 +194,7 @@ const hasActiveFilters = computed(() => {
       </div>
 
       <!-- Price Range -->
-      <div class="mb-6 border-b border-gray-200 pb-6">
+      <div class="mb-5 border-b border-gray-200 pb-5">
         <h4 class="text-xs font-bold text-gray-700 mb-3 uppercase tracking-wider">Harga</h4>
         <div class="space-y-2">
           <button
@@ -214,7 +214,7 @@ const hasActiveFilters = computed(() => {
       </div>
 
       <!-- Karat -->
-      <div class="mb-6 border-b border-gray-200 pb-6">
+      <div class="mb-5 border-b border-gray-200 pb-5">
         <h4 class="text-xs font-bold text-gray-700 mb-3 uppercase tracking-wider">Karat</h4>
         <div class="space-y-2">
           <label

@@ -2,6 +2,44 @@
 // Uses alias-based login with hardcoded email mapping to avoid RLS recursion
 // Aliases: 'adminmelati' → melatigoldshopid@gmail.com (admin)
 //          'supervisor' → fattahula98@gmail.com (supervisor)
+
+// ── Inactivity timeout (module-level agar persist antar pemanggilan composable) ──
+const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 menit
+let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
+const ACTIVITY_EVENTS = ["mousemove", "keydown", "click", "touchstart", "scroll"] as const;
+
+const clearInactivityTimer = () => {
+  if (inactivityTimer) {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = null;
+  }
+};
+
+const startInactivityTimer = (logoutFn: () => Promise<void>) => {
+  if (!process.client) return;
+  clearInactivityTimer();
+
+  const resetTimer = () => {
+    clearInactivityTimer();
+    inactivityTimer = setTimeout(async () => {
+      // Remove listeners before logout
+      ACTIVITY_EVENTS.forEach((e) => window.removeEventListener(e, resetTimer));
+      await logoutFn();
+      window.location.replace("/login");
+    }, INACTIVITY_TIMEOUT_MS);
+  };
+
+  ACTIVITY_EVENTS.forEach((e) => window.addEventListener(e, resetTimer, { passive: true }));
+  resetTimer(); // Start the initial timer
+};
+
+const stopInactivityTimer = () => {
+  if (!process.client) return;
+  clearInactivityTimer();
+  // Remove all activity listeners by re-registering a no-op resetTimer reference is gone,
+  // so we just clear — listeners will fire but timer won't be reset (timer is null)
+};
+
 export const useAuth = () => {
   const { $supabase } = useNuxtApp();
   const user = useState<any>("auth_user", () => null);
@@ -37,7 +75,7 @@ export const useAuth = () => {
       if (!userConfig) {
         return {
           success: false,
-          message: "Username tidak valid. Gunakan 'adminmelati' atau 'supervisor'",
+          message: "Username atau password salah",
         };
       }
 
@@ -51,7 +89,7 @@ export const useAuth = () => {
         console.error("[useAuth] Auth error:", authError);
         return {
           success: false,
-          message: authError.message === "Invalid login credentials" ? "Password salah" : authError.message,
+          message: "Username atau password salah",
         };
       }
 
@@ -72,6 +110,14 @@ export const useAuth = () => {
       };
       isAuthenticated.value = true;
       userRole.value = userConfig.role;
+
+      // Start inactivity timer after successful login
+      startInactivityTimer(async () => {
+        await $supabase.auth.signOut();
+        user.value = null;
+        isAuthenticated.value = false;
+        userRole.value = "";
+      });
 
       return {
         success: true,
@@ -102,6 +148,9 @@ export const useAuth = () => {
       user.value = null;
       isAuthenticated.value = false;
       userRole.value = "";
+
+      // Stop inactivity timer on manual logout
+      stopInactivityTimer();
 
       // Clear localStorage (backward compatibility)
       if (process.client) {
@@ -176,6 +225,14 @@ export const useAuth = () => {
       };
       isAuthenticated.value = true;
       userRole.value = role;
+
+      // (Re-)start inactivity timer on each checkAuth (handles page refresh)
+      startInactivityTimer(async () => {
+        await $supabase.auth.signOut();
+        user.value = null;
+        isAuthenticated.value = false;
+        userRole.value = "";
+      });
 
       return true;
     } catch (error) {

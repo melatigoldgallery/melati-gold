@@ -264,10 +264,10 @@ useHead({
 
 <template>
   <div class="min-h-screen bg-gradient-to-b from-cream via-white to-cream overflow-x-hidden">
-    <main class="container mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-3 md:py-3 overflow-x-hidden">
+    <main class="container mx-auto max-w-[1900px] px-3 sm:px-4 lg:px-6 xl:px-8 py-4 md:py-6 overflow-x-hidden">
       <!-- Breadcrumb - Enhanced -->
-      <nav class="mb-1">
-        <div class="px-5 py-3 inline-flex">
+      <nav class="mb-3 md:mb-4">
+        <div class="inline-flex">
           <ol class="flex items-center gap-2 text-xs text-neutral-600">
             <li>
               <NuxtLink to="/" class="hover:text-maroon transition-colors duration-300 flex items-center gap-2">
@@ -308,23 +308,23 @@ useHead({
       </div>
 
       <!-- Main Content -->
-      <div v-else class="flex flex-col lg:flex-row gap-2 lg:gap-8">
+      <div v-else class="flex flex-col lg:flex-row gap-4 lg:gap-6 xl:gap-8">
         <!-- Filter Sidebar -->
-        <aside class="lg:w-64 flex-shrink-0">
+        <aside class="lg:w-64 xl:w-72 flex-shrink-0">
           <CatalogFilterSidebar :category="category" :filters="filters" @update:filters="handleFilterChange" />
         </aside>
 
         <!-- Product Grid -->
         <div class="flex-1 min-w-0">
           <!-- Category Header - Enhanced -->
-          <div class="mb-6">
-            <div class="flex items-center gap-2.5 mb-1">
-              <h1 class="text-xl md:text-3xl lg:text-2xl font-serif font-bold text-maroon">
+          <div class="mb-5 md:mb-6">
+            <div class="flex items-center gap-2.5 mb-2">
+              <h1 class="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-maroon">
                 {{ category?.name }}
               </h1>
             </div>
             <div class="h-1 w-20 bg-gradient-to-r from-gold to-maroon rounded-full mb-3"></div>
-            <p v-if="category?.description" class="text-neutral-600 text-base leading-relaxed max-w-3xl">
+            <p v-if="category?.description" class="text-neutral-600 text-sm md:text-base leading-relaxed max-w-3xl">
               {{ category.description }}
             </p>
           </div>

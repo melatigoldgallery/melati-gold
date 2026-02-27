@@ -19,6 +19,16 @@ const props = defineProps<{
 const currentSlide = ref(0);
 const showLightbox = ref(false);
 
+// Touch swipe support for mobile
+const touchStartX = ref(0);
+const touchStartY = ref(0);
+const touchCurrentX = ref(0);
+const touchCurrentY = ref(0);
+const touchDragging = ref(false);
+const isHorizontalSwipe = ref(false);
+const SWIPE_THRESHOLD = 50; // Minimum pixels to trigger slide change
+const DIRECTION_THRESHOLD = 10; // Minimum pixels to detect scroll direction
+
 // Computed
 const displayImages = computed(() => {
   const items: Array<{ type: string; url: string }> = [];
@@ -53,15 +63,22 @@ const currentItem = computed(() => displayImages.value[currentSlide.value]);
 const currentImage = computed(() => currentItem.value?.url || "");
 const isVideo = computed(() => currentItem.value?.type === "video");
 
-// Image optimization
+// Image optimization via composable (hemat bandwidth Cloudinary free tier)
+const { presets, generateSrcSet } = useImageOptimization();
+
 const optimizeImage = (url: string, size: "large" | "thumbnail" = "large") => {
-  if (!url || !url.includes("cloudinary.com")) {
-    return url;
-  }
+  if (!url || !url.includes("cloudinary.com")) return url;
+  return size === "large" ? presets.gallery(url) : presets.thumbnail(url);
+};
 
-  const transformations = size === "large" ? "w_1000,h_1000,c_fill,f_auto,q_90" : "w_150,h_150,c_fill,f_auto,q_auto";
+const getMainImageSrcSet = (url: string) => {
+  if (!url || !url.includes("cloudinary.com")) return undefined;
+  return generateSrcSet(url, [400, 700, 1000]);
+};
 
-  return url.replace("/upload/", `/upload/${transformations}/`);
+const getThumbnailSrcSet = (url: string) => {
+  if (!url || !url.includes("cloudinary.com")) return undefined;
+  return generateSrcSet(url, [80, 160, 200]);
 };
 
 // Navigation
@@ -85,13 +102,81 @@ const openLightbox = () => {
 const closeLightbox = () => {
   showLightbox.value = false;
 };
+
+// Touch swipe handlers for mobile with scroll direction detection
+const onTouchStart = (e: TouchEvent) => {
+  if (displayImages.value.length <= 1) return; // No swipe if only 1 item
+
+  const touch = e.touches[0];
+  touchStartX.value = touch.clientX;
+  touchStartY.value = touch.clientY;
+  touchCurrentX.value = touch.clientX;
+  touchCurrentY.value = touch.clientY;
+  touchDragging.value = true;
+  isHorizontalSwipe.value = false; // Reset direction flag
+};
+
+const onTouchMove = (e: TouchEvent) => {
+  if (!touchDragging.value) return;
+
+  const touch = e.touches[0];
+  touchCurrentX.value = touch.clientX;
+  touchCurrentY.value = touch.clientY;
+
+  // Calculate deltas
+  const deltaX = Math.abs(touchCurrentX.value - touchStartX.value);
+  const deltaY = Math.abs(touchCurrentY.value - touchStartY.value);
+
+  // Detect scroll direction on first significant movement
+  if (!isHorizontalSwipe.value && (deltaX > DIRECTION_THRESHOLD || deltaY > DIRECTION_THRESHOLD)) {
+    // Determine if this is horizontal or vertical gesture
+    isHorizontalSwipe.value = deltaX > deltaY;
+  }
+
+  // Only prevent page scroll if horizontal swipe
+  if (isHorizontalSwipe.value) {
+    e.preventDefault();
+  } else if (deltaY > DIRECTION_THRESHOLD) {
+    // Vertical scroll detected - cancel swipe
+    touchDragging.value = false;
+  }
+};
+
+const onTouchEnd = () => {
+  if (!touchDragging.value) return;
+
+  touchDragging.value = false;
+
+  // Only process if it was a horizontal swipe
+  if (isHorizontalSwipe.value) {
+    const deltaX = touchCurrentX.value - touchStartX.value;
+    const absDelta = Math.abs(deltaX);
+
+    // Only trigger swipe if threshold is met
+    if (absDelta >= SWIPE_THRESHOLD) {
+      if (deltaX > 0) {
+        // Swiped right = previous
+        prevSlide();
+      } else {
+        // Swiped left = next
+        nextSlide();
+      }
+    }
+  }
+
+  // Reset flags
+  isHorizontalSwipe.value = false;
+};
 </script>
 
 <template>
   <div class="space-y-3 md:space-y-4 max-w-full lg:max-w-md xl:max-w-lg mx-auto">
     <!-- Main Media (Image or Video) -->
     <div
-      class="relative aspect-square bg-gray-100 rounded-xl md:rounded-2xl overflow-hidden group shadow-md hover:shadow-xl transition-shadow duration-300"
+      class="relative aspect-square bg-gray-100 rounded-xl md:rounded-2xl overflow-hidden group shadow-md hover:shadow-xl transition-shadow duration-300 touch-pan-y"
+      @touchstart.passive="onTouchStart"
+      @touchmove="onTouchMove"
+      @touchend.passive="onTouchEnd"
     >
       <!-- Video Player -->
       <video
@@ -109,8 +194,12 @@ const closeLightbox = () => {
       <img
         v-else
         :src="optimizeImage(currentImage, 'large')"
+        :srcset="getMainImageSrcSet(currentImage)"
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 500px"
         :alt="productName || 'Product image'"
         class="w-full h-full object-cover cursor-zoom-in transition-transform duration-300 group-hover:scale-105"
+        loading="eager"
+        decoding="async"
         @click="openLightbox"
       />
 
@@ -153,7 +242,7 @@ const closeLightbox = () => {
       <!-- Image Counter -->
       <div
         v-if="displayImages.length > 1"
-        class="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1.5 rounded-full text-xs md:text-sm backdrop-blur-sm font-medium"
+        class="absolute bottom-2 right-2 bg-black/60 text-white px-3 py-1.5 rounded-full text-[10px] md:text-sm backdrop-blur-sm font-medium"
       >
         {{ currentSlide + 1 }} / {{ displayImages.length }}
       </div>
@@ -184,8 +273,12 @@ const closeLightbox = () => {
         <img
           v-else
           :src="optimizeImage(item.url, 'thumbnail')"
+          :srcset="getThumbnailSrcSet(item.url)"
+          sizes="80px"
           :alt="`${productName} thumbnail ${index + 1}`"
           class="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
       </button>
     </div>
@@ -288,5 +381,11 @@ const closeLightbox = () => {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Better touch handling for mobile gallery */
+.touch-pan-y {
+  touch-action: pan-y pinch-zoom;
+  -webkit-overflow-scrolling: touch;
 }
 </style>

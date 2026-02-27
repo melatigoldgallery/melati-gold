@@ -56,7 +56,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="relative overflow-hidden py-12 md:py-16 bg-cream">
+  <section class="relative overflow-hidden py-24 md:py-16 bg-cream mb-10">
     <!-- Decorative Elements - Responsive -->
     <div class="absolute inset-0 -z-10 overflow-hidden">
       <div

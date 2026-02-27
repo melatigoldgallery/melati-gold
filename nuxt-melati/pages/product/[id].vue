@@ -96,7 +96,7 @@ useHead({
 
 <template>
   <div class="min-h-screen bg-cream overflow-x-hidden">
-    <main class="container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden">
+    <main class="container mx-auto max-w-[2000px] px-3 sm:px-4 lg:px-6 xl:px-8 py-4 md:py-6 lg:py-8 overflow-x-hidden">
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-20">
         <div class="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-yellow-600"></div>
@@ -115,7 +115,7 @@ useHead({
       <!-- Product Detail -->
       <div v-else>
         <!-- Breadcrumb -->
-        <nav class="mb-6 text-sm">
+        <nav class="mb-4 md:mb-6 text-sm">
           <ol class="flex items-center gap-2 text-neutral-600 flex-wrap">
             <li>
               <NuxtLink to="/" class="hover:text-maroon transition-colors flex items-center gap-1">
@@ -142,7 +142,7 @@ useHead({
         </nav>
 
         <!-- Product Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 mb-8 md:mb-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-10 xl:gap-12 mb-8 md:mb-10 lg:mb-12">
           <!-- Product Gallery -->
           <div class="lg:sticky lg:top-4 lg:self-start">
             <ProductGallery
@@ -159,7 +159,7 @@ useHead({
         </div>
 
         <!-- Related Products -->
-        <div class="mt-8">
+        <div class="mt-8 md:mt-10 lg:mt-12">
           <ProductRelatedProducts
             v-if="relatedProducts.length > 0"
             :products="relatedProducts"

@@ -12,18 +12,11 @@ const emit = defineEmits<{
 // Carousel state (for mobile)
 const scrollContainer = ref<HTMLElement | null>(null);
 
-// Image optimization
-const optimizeImage = (url: string) => {
-  if (!url || !url.includes("cloudinary.com")) {
-    return url;
-  }
-  return url.replace("/upload/", "/upload/w_400,h_500,c_fill,f_auto,q_auto/");
-};
+// 🚀 Image optimization via composable (hemat bandwidth Cloudinary free tier)
+const { presets, generateSrcSet } = useImageOptimization();
 
-const getProductImage = (product: any) => {
-  // Handle both thumbnail_image and images array (can be jsonb or regular array)
+const getRawImageUrl = (product: any): string => {
   let imageUrl = product.thumbnail_image;
-
   if (!imageUrl && product.images) {
     if (Array.isArray(product.images)) {
       imageUrl = product.images[0];
@@ -36,8 +29,19 @@ const getProductImage = (product: any) => {
       }
     }
   }
+  return imageUrl || "/img/placeholder.jpg";
+};
 
-  return optimizeImage(imageUrl || "/img/placeholder.jpg");
+const getProductImage = (product: any) => {
+  const url = getRawImageUrl(product);
+  if (!url.includes("cloudinary.com")) return url;
+  return presets.card(url);
+};
+
+const getProductSrcSet = (product: any) => {
+  const url = getRawImageUrl(product);
+  if (!url || !url.includes("cloudinary.com")) return undefined;
+  return generateSrcSet(url, [200, 400]);
 };
 
 // Format price
@@ -71,9 +75,12 @@ const handleClick = (product: any) => {
           <div class="relative w-50 aspect-[3/4] overflow-hidden bg-gray-100">
             <img
               :src="getProductImage(product)"
+              :srcset="getProductSrcSet(product)"
+              sizes="(max-width: 640px) 16vw, (max-width: 1024px) 25vw, 16vw"
               :alt="product.title || product.name"
               class="w-full h-full object-cover transition-transform duration-500"
               loading="lazy"
+              decoding="async"
             />
             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
           </div>
@@ -104,9 +111,12 @@ const handleClick = (product: any) => {
             <div class="relative aspect-[4/5] overflow-hidden bg-gray-100">
               <img
                 :src="getProductImage(product)"
+                :srcset="getProductSrcSet(product)"
+                sizes="(max-width: 640px) 42vw, 33vw"
                 :alt="product.title || product.name"
                 class="w-full h-full object-cover"
                 loading="lazy"
+                decoding="async"
               />
             </div>
             <div class="p-2">

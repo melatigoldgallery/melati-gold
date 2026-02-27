@@ -18,6 +18,9 @@ interface CacheOptions {
 
 // Memory cache (runtime only, faster)
 const memoryCache = new Map<string, CacheEntry<any>>();
+// In-flight requests deduplication
+const inflight = new Map<string, Promise<any>>();
+const MAX_MEMORY_ENTRIES = 100;
 
 export const useCacheManager = () => {
   const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
@@ -30,7 +33,7 @@ export const useCacheManager = () => {
     const sortedParams = Object.keys(params)
       .sort()
       .map((key) => `${key}:${params[key]}`)
-      .join('|');
+      .join("|");
     return `${prefix}:${sortedParams}`;
   };
 
@@ -73,15 +76,20 @@ export const useCacheManager = () => {
       localStorage.removeItem(key);
       return null;
     } catch (error) {
-      console.error('Cache read error:', error);
+      console.error("Cache read error:", error);
       return null;
     }
   };
 
   /**
-   * Set to memory cache
+   * Set to memory cache (evicts oldest entry when limit is reached)
    */
   const setToMemory = <T>(key: string, data: T, ttl: number): void => {
+    if (memoryCache.size >= MAX_MEMORY_ENTRIES && !memoryCache.has(key)) {
+      // LRU eviction: remove the oldest (first inserted) entry
+      const firstKey = memoryCache.keys().next().value;
+      if (firstKey !== undefined) memoryCache.delete(firstKey);
+    }
     memoryCache.set(key, {
       data,
       timestamp: Date.now(),
@@ -102,7 +110,7 @@ export const useCacheManager = () => {
       };
       localStorage.setItem(key, JSON.stringify(entry));
     } catch (error) {
-      console.error('Cache write error:', error);
+      console.error("Cache write error:", error);
     }
   };
 
@@ -139,11 +147,7 @@ export const useCacheManager = () => {
    * Set cached data
    */
   const set = <T>(key: string, data: T, options: CacheOptions = {}): void => {
-    const {
-      ttl = DEFAULT_TTL,
-      useMemoryCache = true,
-      useLocalStorage = true,
-    } = options;
+    const { ttl = DEFAULT_TTL, useMemoryCache = true, useLocalStorage = true } = options;
 
     if (useMemoryCache) {
       setToMemory(key, data, ttl);
@@ -217,23 +221,32 @@ export const useCacheManager = () => {
   /**
    * Wrapper untuk fetch dengan cache
    * Cache-First strategy: Cek cache dulu, kalau tidak ada baru fetch
+   * In-flight deduplication: concurrent calls untuk key yang sama berbagi 1 promise
    */
-  const fetchWithCache = async <T>(
-    key: string,
-    fetchFn: () => Promise<T>,
-    options: CacheOptions = {}
-  ): Promise<T> => {
+  const fetchWithCache = async <T>(key: string, fetchFn: () => Promise<T>, options: CacheOptions = {}): Promise<T> => {
     // Try cache first
     const cached = get<T>(key, options);
     if (cached !== null) {
       return cached;
     }
-    const data = await fetchFn();
 
-    // Store in cache
-    set(key, data, options);
+    // Return in-flight promise if a fetch is already running for this key
+    if (inflight.has(key)) {
+      return inflight.get(key) as Promise<T>;
+    }
 
-    return data;
+    // Start fetch and register as in-flight
+    const promise = fetchFn()
+      .then((data) => {
+        set(key, data, options);
+        return data;
+      })
+      .finally(() => {
+        inflight.delete(key);
+      });
+
+    inflight.set(key, promise);
+    return promise;
   };
 
   return {

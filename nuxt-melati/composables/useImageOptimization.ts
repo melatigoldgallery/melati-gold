@@ -6,10 +6,10 @@
 interface CloudinaryTransformOptions {
   width?: number;
   height?: number;
-  quality?: 'auto' | number;
-  format?: 'auto' | 'webp' | 'jpg' | 'png';
-  crop?: 'fill' | 'fit' | 'scale' | 'thumb';
-  gravity?: 'auto' | 'face' | 'center';
+  quality?: "auto" | number;
+  format?: "auto" | "webp" | "jpg" | "png";
+  crop?: "fill" | "fit" | "scale" | "thumb";
+  gravity?: "auto" | "face" | "center";
 }
 
 export const useImageOptimization = () => {
@@ -18,22 +18,12 @@ export const useImageOptimization = () => {
    * Contoh: https://res.cloudinary.com/demo/image/upload/v1/sample.jpg
    * Menjadi: https://res.cloudinary.com/demo/image/upload/w_400,h_400,f_auto,q_auto/v1/sample.jpg
    */
-  const getOptimizedUrl = (
-    originalUrl: string,
-    options: CloudinaryTransformOptions = {}
-  ): string => {
-    if (!originalUrl || !originalUrl.includes('cloudinary.com')) {
+  const getOptimizedUrl = (originalUrl: string, options: CloudinaryTransformOptions = {}): string => {
+    if (!originalUrl || !originalUrl.includes("cloudinary.com")) {
       return originalUrl; // Return original if not Cloudinary URL
     }
 
-    const {
-      width,
-      height,
-      quality = 'auto',
-      format = 'auto',
-      crop = 'fill',
-      gravity = 'auto',
-    } = options;
+    const { width, height, quality = "auto", format = "auto", crop = "fill", gravity = "auto" } = options;
 
     // Build transformation string
     const transformations: string[] = [];
@@ -45,35 +35,39 @@ export const useImageOptimization = () => {
     transformations.push(`f_${format}`); // Auto format (WebP jika browser support)
     transformations.push(`q_${quality}`); // Auto quality optimization
 
-    const transformString = transformations.join(',');
+    const transformString = transformations.join(",");
 
     // Insert transformation into Cloudinary URL
     // Before: .../upload/v1/sample.jpg
     // After: .../upload/w_400,h_400,f_auto,q_auto/v1/sample.jpg
-    return originalUrl.replace('/upload/', `/upload/${transformString}/`);
+    return originalUrl.replace("/upload/", `/upload/${transformString}/`);
   };
 
   /**
    * Preset transformations untuk berbagai use cases
+   * Dioptimasi untuk Cloudinary Free Tier - hemat bandwidth mobile
    */
   const presets = {
-    // Thumbnail untuk grid produk
+    // Thumbnail kecil untuk strip/grid (max display ~80-160px)
     thumbnail: (url: string) =>
+      getOptimizedUrl(url, {
+        width: 200,
+        height: 200,
+        quality: "auto",
+        format: "auto",
+        crop: "fill",
+        gravity: "auto",
+      }),
+
+    // Card image untuk product grid (max display ~390px di mobile, ~300px di desktop)
+    card: (url: string) =>
       getOptimizedUrl(url, {
         width: 400,
         height: 400,
-        quality: 'auto',
-        format: 'auto',
-        crop: 'fill',
-      }),
-
-    // Card image medium
-    card: (url: string) =>
-      getOptimizedUrl(url, {
-        width: 600,
-        height: 600,
-        quality: 'auto',
-        format: 'auto',
+        quality: "auto",
+        format: "auto",
+        crop: "fill",
+        gravity: "auto",
       }),
 
     // Hero/banner image
@@ -81,27 +75,31 @@ export const useImageOptimization = () => {
       getOptimizedUrl(url, {
         width: 1200,
         height: 600,
-        quality: 85,
-        format: 'auto',
-        crop: 'fill',
+        quality: "auto",
+        format: "auto",
+        crop: "fill",
       }),
 
-    // Detail modal (high quality but still optimized)
+    // Detail/lightbox (q_auto lebih cerdas dari q_90 fixed)
     detail: (url: string) =>
-      getOptimizedUrl(url, {
-        width: 1000,
-        height: 1000,
-        quality: 90,
-        format: 'auto',
-      }),
-
-    // Gallery carousel
-    gallery: (url: string) =>
       getOptimizedUrl(url, {
         width: 800,
         height: 800,
-        quality: 'auto',
-        format: 'auto',
+        quality: "auto",
+        format: "auto",
+        crop: "fill",
+        gravity: "auto",
+      }),
+
+    // Gallery carousel (main slide - mobile ~390px, desktop ~500px)
+    gallery: (url: string) =>
+      getOptimizedUrl(url, {
+        width: 600,
+        height: 600,
+        quality: "auto",
+        format: "auto",
+        crop: "fill",
+        gravity: "auto",
       }),
 
     // Logo/icon
@@ -109,8 +107,8 @@ export const useImageOptimization = () => {
       getOptimizedUrl(url, {
         width: 200,
         height: 200,
-        quality: 'auto',
-        format: 'auto',
+        quality: "auto",
+        format: "auto",
       }),
   };
 
@@ -123,12 +121,12 @@ export const useImageOptimization = () => {
       .map((size) => {
         const optimizedUrl = getOptimizedUrl(url, {
           width: size,
-          quality: 'auto',
-          format: 'auto',
+          quality: "auto",
+          format: "auto",
         });
         return `${optimizedUrl} ${size}w`;
       })
-      .join(', ');
+      .join(", ");
   };
 
   return {

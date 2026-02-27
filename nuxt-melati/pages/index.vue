@@ -2,28 +2,28 @@
   <div class="min-h-screen bg-cream overflow-x-hidden">
     <SiteHeader />
     <main class="relative overflow-x-hidden">
-      <div data-aos="fade-in">
+      <div class="section-full" data-aos="fade-in">
         <HeroSection />
       </div>
-      <div data-aos="zoom-in" data-aos-duration="800">
+      <div class="section-full" data-aos="zoom-in" data-aos-duration="800">
         <CatalogShowcase />
       </div>
-      <div data-aos="fade-up" data-aos-duration="900" data-aos-delay="100">
+      <div class="section-full" data-aos="fade-up" data-aos-duration="900" data-aos-delay="100">
         <FeaturedProducts />
       </div>
-      <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="50">
+      <div class="section-full" data-aos="fade-up" data-aos-duration="800" data-aos-delay="50">
         <CustomServices />
       </div>
-      <div data-aos="fade-up" data-aos-duration="850" data-aos-delay="75">
+      <div class="section-full" data-aos="fade-up" data-aos-duration="850" data-aos-delay="75">
         <CareTips />
       </div>
-      <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
+      <div class="section-full" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
         <Testimonials />
       </div>
-      <div data-aos="fade-left" data-aos-duration="900" data-aos-delay="50">
+      <div class="section-full" data-aos="fade-left" data-aos-duration="900" data-aos-delay="50">
         <AboutUs />
       </div>
-      <div data-aos="zoom-in" data-aos-duration="800" data-aos-delay="100">
+      <div class="section-full" data-aos="zoom-in" data-aos-duration="800" data-aos-delay="100">
         <FinalCta />
       </div>
     </main>
@@ -40,6 +40,9 @@ useHead({
       rel: "stylesheet",
       href: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css",
     },
+    // 🚀 Preconnect to Cloudinary CDN so the first image (LCP) loads faster
+    { rel: "preconnect", href: "https://res.cloudinary.com", crossorigin: "" },
+    { rel: "dns-prefetch", href: "https://res.cloudinary.com" },
   ],
 });
 </script>
@@ -53,5 +56,13 @@ useHead({
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* ── 1 section per layar (tanpa snap, scroll bebas) ── */
+.section-full {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 </style>

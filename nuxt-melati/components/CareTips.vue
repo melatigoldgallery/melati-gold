@@ -56,12 +56,12 @@
             <div class="relative flex-1 min-w-0">
               <div
                 ref="viewport"
-                class="overflow-hidden"
+                class="overflow-hidden touch-pan-y"
                 tabindex="0"
                 @keydown="onKeydown"
-                @touchstart="(e) => onTouchStart(e, 'care')"
+                @touchstart.passive="(e) => onTouchStart(e, 'care')"
                 @touchmove="(e) => onTouchMove(e, 'care')"
-                @touchend="() => onTouchEnd('care')"
+                @touchend.passive="() => onTouchEnd('care')"
               >
                 <div
                   ref="track"
@@ -148,10 +148,10 @@
               <div class="relative flex-1 min-w-0">
                 <div
                   ref="ringViewport"
-                  class="overflow-hidden"
-                  @touchstart="(e) => onTouchStart(e, 'ring')"
+                  class="overflow-hidden touch-pan-y"
+                  @touchstart.passive="(e) => onTouchStart(e, 'ring')"
                   @touchmove="(e) => onTouchMove(e, 'ring')"
-                  @touchend="() => onTouchEnd('ring')"
+                  @touchend.passive="() => onTouchEnd('ring')"
                 >
                   <div
                     ref="ringTrack"
@@ -261,10 +261,10 @@
               <div class="relative flex-1 min-w-0">
                 <div
                   ref="braceletViewport"
-                  class="overflow-hidden"
-                  @touchstart="(e) => onTouchStart(e, 'bracelet')"
+                  class="overflow-hidden touch-pan-y"
+                  @touchstart.passive="(e) => onTouchStart(e, 'bracelet')"
                   @touchmove="(e) => onTouchMove(e, 'bracelet')"
-                  @touchend="() => onTouchEnd('bracelet')"
+                  @touchend.passive="() => onTouchEnd('bracelet')"
                 >
                   <div
                     ref="braceletTrack"
@@ -574,9 +574,12 @@ const displayBraceletSteps = computed(() => {
 const touchStartX = ref(0);
 const touchStartY = ref(0);
 const touchCurrentX = ref(0);
+const touchCurrentY = ref(0);
 const touchDragging = ref(false);
 const touchStartOffset = ref(0);
+const isHorizontalSwipe = ref(false); // Track if current gesture is horizontal
 const SWIPE_THRESHOLD = 20; // Minimum pixels to detect as swipe
+const DIRECTION_THRESHOLD = 10; // Minimum pixels to detect scroll direction
 
 // Modal state
 const showRingModal = ref(false);
@@ -711,44 +714,84 @@ function carouselNext(type: "ring" | "bracelet") {
   goTo(newIndex, type);
 }
 
-// Touch swipe handlers for mobile
+// Touch swipe handlers for mobile with scroll direction detection
 function onTouchStart(e: TouchEvent, type: "care" | "ring" | "bracelet" = "care") {
   if (type === "care" && tips.length <= 1) return;
   const touch = e.touches[0];
   touchStartX.value = touch.clientX;
   touchStartY.value = touch.clientY;
   touchCurrentX.value = touch.clientX;
+  touchCurrentY.value = touch.clientY;
   touchDragging.value = true;
   touchStartOffset.value = carousels.value[type].offset;
+  isHorizontalSwipe.value = false; // Reset direction flag
   carousels.value[type].transitionEnabled = false;
 }
 
 function onTouchMove(e: TouchEvent, type: "care" | "ring" | "bracelet" = "care") {
   if (!touchDragging.value) return;
+
   const touch = e.touches[0];
   touchCurrentX.value = touch.clientX;
-  const deltaX = touchCurrentX.value - touchStartX.value;
-  const newOffset = Math.max(0, touchStartOffset.value - deltaX);
-  carousels.value[type].offset = newOffset;
+  touchCurrentY.value = touch.clientY;
+
+  // Calculate deltas
+  const deltaX = Math.abs(touchCurrentX.value - touchStartX.value);
+  const deltaY = Math.abs(touchCurrentY.value - touchStartY.value);
+
+  // Detect scroll direction on first significant movement
+  if (!isHorizontalSwipe.value && (deltaX > DIRECTION_THRESHOLD || deltaY > DIRECTION_THRESHOLD)) {
+    // Determine if this is horizontal or vertical gesture
+    isHorizontalSwipe.value = deltaX > deltaY;
+  }
+
+  // Only handle horizontal swipe and prevent page scroll
+  if (isHorizontalSwipe.value) {
+    // Prevent default to stop page scroll
+    e.preventDefault();
+
+    // Calculate current offset based on touch position
+    const deltaXSigned = touchCurrentX.value - touchStartX.value;
+    const newOffset = Math.max(0, touchStartOffset.value - deltaXSigned);
+    carousels.value[type].offset = newOffset;
+  } else if (deltaY > DIRECTION_THRESHOLD) {
+    // Vertical scroll detected - allow page scroll by canceling carousel drag
+    touchDragging.value = false;
+    carousels.value[type].transitionEnabled = true;
+    // Reset to original position
+    goTo(carousels.value[type].index, type, true);
+  }
 }
 
 function onTouchEnd(type: "care" | "ring" | "bracelet" = "care") {
   if (!touchDragging.value) return;
+
   touchDragging.value = false;
   carousels.value[type].transitionEnabled = true;
-  const deltaX = touchCurrentX.value - touchStartX.value;
-  const absDelta = Math.abs(deltaX);
-  if (absDelta >= SWIPE_THRESHOLD) {
-    if (deltaX > 0) {
-      if (type === "care") prev();
-      else carouselPrev(type);
+
+  // Only process if it was a horizontal swipe
+  if (isHorizontalSwipe.value) {
+    const deltaX = touchCurrentX.value - touchStartX.value;
+    const absDelta = Math.abs(deltaX);
+
+    if (absDelta >= SWIPE_THRESHOLD) {
+      if (deltaX > 0) {
+        if (type === "care") prev();
+        else carouselPrev(type);
+      } else {
+        if (type === "care") next();
+        else carouselNext(type);
+      }
     } else {
-      if (type === "care") next();
-      else carouselNext(type);
+      goTo(carousels.value[type].index, type);
     }
   } else {
-    goTo(carousels.value[type].index, type);
+    // Was vertical scroll, just reset position
+    goTo(carousels.value[type].index, type, true);
   }
+
+  // Reset flags
+  isHorizontalSwipe.value = false;
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -1037,5 +1080,11 @@ onMounted(() => {
 
 .modal-fade-leave-to > div {
   transform: scale(0.95) translateY(20px);
+}
+
+/* Better touch handling for mobile carousel */
+.touch-pan-y {
+  touch-action: pan-y pinch-zoom;
+  -webkit-overflow-scrolling: touch;
 }
 </style>

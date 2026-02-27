@@ -9,29 +9,20 @@ const emit = defineEmits<{
   (e: "product-click", product: any): void;
 }>();
 
-// 🚀 Image optimization - inline functions
-const optimizeCloudinaryImage = (url: string, width: number, height: number, quality: number | "auto" = "auto") => {
-  if (!url || !url.includes("cloudinary.com")) {
-    return url;
-  }
-  const transformations = `w_${width},h_${height},c_fill,f_auto,q_${quality}`;
-  return url.replace("/upload/", `/upload/${transformations}/`);
-};
-
-const presets = {
-  card: (url: string) => optimizeCloudinaryImage(url, 600, 600, "auto"),
-};
+// 🚀 Image optimization via composable (hemat bandwidth Cloudinary free tier)
+const { presets, generateSrcSet } = useImageOptimization();
 
 // Optimize images untuk grid thumbnail
 const getOptimizedImage = (product: any) => {
   const imageUrl = product.thumbnail_image || product.images?.[0] || "/img/placeholder.jpg";
-
-  // Skip optimization untuk local images
-  if (!imageUrl.includes("cloudinary.com")) {
-    return imageUrl;
-  }
-
+  if (!imageUrl.includes("cloudinary.com")) return imageUrl;
   return presets.card(imageUrl);
+};
+
+const getSrcSet = (product: any) => {
+  const imageUrl = product.thumbnail_image || product.images?.[0];
+  if (!imageUrl || !imageUrl.includes("cloudinary.com")) return undefined;
+  return generateSrcSet(imageUrl, [200, 400]);
 };
 
 // Format price
@@ -51,7 +42,9 @@ const handleClick = (product: any) => {
 </script>
 
 <template>
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5 lg:gap-6">
+  <div
+    class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4 lg:gap-4 xl:gap-5"
+  >
     <article v-for="product in products" :key="product.id" class="group cursor-pointer" @click="handleClick(product)">
       <div
         class="relative bg-white/95 backdrop-blur rounded-1xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 border border-gray-100"
@@ -60,6 +53,8 @@ const handleClick = (product: any) => {
         <div class="relative aspect-[4/5] overflow-hidden bg-gray-100">
           <img
             :src="getOptimizedImage(product)"
+            :srcset="getSrcSet(product)"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
             :alt="product.name || product.title"
             class="w-full h-full object-cover transition-transform duration-700"
             loading="lazy"
@@ -90,7 +85,8 @@ const handleClick = (product: any) => {
         <div class="p-1 md:p-2 lg:p-3 space-y-1">
           <!-- Product Name -->
           <h3
-            class="font-semibold text-maroon text-sm md:text-base lg:text-lg leading-tight group-hover:text-maroon transition-colors duration-300 text-center mt-2"
+            class="font-semibold text-maroon text-sm md:text-base lg:text-lg leading-tight group-hover:text-maroon transition-colors duration-300 text-center mt-2 truncate px-1"
+            :title="product.name || product.title"
           >
             {{ product.name || product.title }}
           </h3>

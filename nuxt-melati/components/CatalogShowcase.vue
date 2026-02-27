@@ -22,9 +22,12 @@ const slideCount = computed(() => categories.value.length);
 const touchStartX = ref(0);
 const touchStartY = ref(0);
 const touchCurrentX = ref(0);
+const touchCurrentY = ref(0);
 const touchDragging = ref(false);
 const touchStartOffset = ref(0);
+const isHorizontalSwipe = ref(false); // Track if current gesture is horizontal
 const SWIPE_THRESHOLD = 20; // Minimum pixels to detect as swipe
+const DIRECTION_THRESHOLD = 10; // Minimum pixels to detect scroll direction
 
 // Create display array with clones for infinite loop
 // Clone 6 cards (max visible on ultra-wide desktop) at each end to prevent empty spaces
@@ -163,7 +166,7 @@ function next() {
   goTo(activeIndex.value + 1);
 }
 
-// Touch swipe handlers for mobile
+// Touch swipe handlers for mobile with scroll direction detection
 function onTouchStart(e: TouchEvent) {
   if (categories.value.length <= 1) return; // No swipe if only 1 category
 
@@ -171,8 +174,10 @@ function onTouchStart(e: TouchEvent) {
   touchStartX.value = touch.clientX;
   touchStartY.value = touch.clientY;
   touchCurrentX.value = touch.clientX;
+  touchCurrentY.value = touch.clientY;
   touchDragging.value = true;
   touchStartOffset.value = offsetPx.value;
+  isHorizontalSwipe.value = false; // Reset direction flag
   transitionEnabled.value = false;
 }
 
@@ -181,11 +186,34 @@ function onTouchMove(e: TouchEvent) {
 
   const touch = e.touches[0];
   touchCurrentX.value = touch.clientX;
+  touchCurrentY.value = touch.clientY;
 
-  // Calculate current offset based on touch position
-  const deltaX = touchCurrentX.value - touchStartX.value;
-  const newOffset = Math.max(0, touchStartOffset.value - deltaX);
-  offsetPx.value = newOffset;
+  // Calculate deltas
+  const deltaX = Math.abs(touchCurrentX.value - touchStartX.value);
+  const deltaY = Math.abs(touchCurrentY.value - touchStartY.value);
+
+  // Detect scroll direction on first significant movement
+  if (!isHorizontalSwipe.value && (deltaX > DIRECTION_THRESHOLD || deltaY > DIRECTION_THRESHOLD)) {
+    // Determine if this is horizontal or vertical gesture
+    isHorizontalSwipe.value = deltaX > deltaY;
+  }
+
+  // Only handle horizontal swipe and prevent page scroll
+  if (isHorizontalSwipe.value) {
+    // Prevent default to stop page scroll
+    e.preventDefault();
+
+    // Calculate current offset based on touch position
+    const deltaXSigned = touchCurrentX.value - touchStartX.value;
+    const newOffset = Math.max(0, touchStartOffset.value - deltaXSigned);
+    offsetPx.value = newOffset;
+  } else if (deltaY > DIRECTION_THRESHOLD) {
+    // Vertical scroll detected - allow page scroll by canceling carousel drag
+    touchDragging.value = false;
+    transitionEnabled.value = true;
+    // Reset to original position
+    goTo(activeIndex.value, true);
+  }
 }
 
 function onTouchEnd() {
@@ -194,23 +222,32 @@ function onTouchEnd() {
   touchDragging.value = false;
   transitionEnabled.value = true;
 
-  const deltaX = touchCurrentX.value - touchStartX.value;
-  const absDelta = Math.abs(deltaX);
+  // Only process if it was a horizontal swipe
+  if (isHorizontalSwipe.value) {
+    const deltaX = touchCurrentX.value - touchStartX.value;
+    const absDelta = Math.abs(deltaX);
 
-  // Only trigger swipe if threshold is met
-  if (absDelta >= SWIPE_THRESHOLD) {
-    // Determine swipe direction
-    if (deltaX > 0) {
-      // Swiped right = prev
-      prev();
+    // Only trigger swipe if threshold is met
+    if (absDelta >= SWIPE_THRESHOLD) {
+      // Determine swipe direction
+      if (deltaX > 0) {
+        // Swiped right = prev
+        prev();
+      } else {
+        // Swiped left = next
+        next();
+      }
     } else {
-      // Swiped left = next
-      next();
+      // Snap back to current position
+      goTo(activeIndex.value);
     }
   } else {
-    // Snap back to current position
-    goTo(activeIndex.value);
+    // Was vertical scroll, just reset position
+    goTo(activeIndex.value, true);
   }
+
+  // Reset flags
+  isHorizontalSwipe.value = false;
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -294,12 +331,12 @@ onMounted(() => {
             <!-- TranslateX-based viewport & track (no manual scroll) -->
             <div
               ref="viewport"
-              class="overflow-hidden"
+              class="overflow-hidden touch-pan-y"
               tabindex="0"
               @keydown="onKeydown"
-              @touchstart="onTouchStart"
+              @touchstart.passive="onTouchStart"
               @touchmove="onTouchMove"
-              @touchend="onTouchEnd"
+              @touchend.passive="onTouchEnd"
             >
               <div
                 ref="track"
@@ -418,5 +455,11 @@ onMounted(() => {
 
 .card-shadow-hover {
   box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.25);
+}
+
+/* Better touch handling for mobile carousel */
+.touch-pan-y {
+  touch-action: pan-y pinch-zoom;
+  -webkit-overflow-scrolling: touch;
 }
 </style>

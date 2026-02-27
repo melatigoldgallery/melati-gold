@@ -2,18 +2,8 @@
 // Fetch featured products from database
 const { getProducts } = useCatalogManager();
 
-// 🚀 Image optimization - inline functions
-const optimizeCloudinaryImage = (url: string, width: number, height: number, quality: number | "auto" = "auto") => {
-  if (!url || !url.includes("cloudinary.com")) {
-    return url;
-  }
-  const transformations = `w_${width},h_${height},c_fill,f_auto,q_${quality}`;
-  return url.replace("/upload/", `/upload/${transformations}/`);
-};
-
-const presets = {
-  thumbnail: (url: string) => optimizeCloudinaryImage(url, 400, 400, "auto"),
-};
+// 🚀 Image optimization via composable (hemat bandwidth Cloudinary free tier)
+const { presets, generateSrcSet } = useImageOptimization();
 
 // State
 const products = ref<any[]>([]);
@@ -39,7 +29,12 @@ const getOptimizedImage = (imageUrl: string) => {
   if (!imageUrl || !imageUrl.includes("cloudinary.com")) {
     return imageUrl || "/img/placeholder.jpg";
   }
-  return presets.thumbnail(imageUrl);
+  return presets.card(imageUrl);
+};
+
+const getSrcSet = (imageUrl: string) => {
+  if (!imageUrl || !imageUrl.includes("cloudinary.com")) return undefined;
+  return generateSrcSet(imageUrl, [200, 400]);
 };
 
 // Format price to Indonesian Rupiah
@@ -90,9 +85,11 @@ onMounted(() => {
         class="glass overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant reveal-up"
       >
         <div class="relative">
-          <!-- ✨ Optimized image with lazy loading -->
+          <!-- ✨ Optimized image with lazy loading & responsive srcset -->
           <img
             :src="getOptimizedImage(p.thumbnail_image)"
+            :srcset="getSrcSet(p.thumbnail_image)"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
             :alt="p.title || p.name"
             loading="lazy"
             decoding="async"
@@ -107,7 +104,10 @@ onMounted(() => {
         </div>
         <div class="px-3 md:px-3 py-2.5 md:py-2 flex flex-col gap-2 md:gap-1.5">
           <!-- Product name -->
-          <h3 class="font-medium text-maroon leading-tight text-md md:text-base lg:text-lg line-clamp-2">
+          <h3
+            class="font-medium text-maroon leading-tight text-md md:text-base lg:text-lg truncate"
+            :title="p.title || p.name"
+          >
             {{ p.title || p.name }}
           </h3>
           <!-- Price info -->

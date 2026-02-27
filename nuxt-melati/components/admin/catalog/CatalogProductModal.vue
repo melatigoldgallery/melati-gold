@@ -437,8 +437,12 @@ onMounted(async () => {
       videoUrls.value = [props.product.video_url];
     }
 
-    // Snapshot all media URLs at load time for later diffing
-    originalMediaUrls.value = [...(props.product.images || []), props.product.video_url].filter(Boolean);
+    // Snapshot all media URLs at load time for later diffing (include thumbnail)
+    originalMediaUrls.value = [
+      ...new Set(
+        [props.product.thumbnail_image, ...(props.product.images || []), props.product.video_url].filter(Boolean),
+      ),
+    ];
 
     // Parse existing weight if numeric not set
     if (!form.value.weight_grams && form.value.weight) {

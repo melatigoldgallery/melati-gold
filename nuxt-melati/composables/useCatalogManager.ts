@@ -36,7 +36,7 @@ export const useCatalogManager = () => {
             if (error) throw error;
             return { success: true, data: data || [] };
           },
-          { ttl: 10 * 60 * 1000 }, // Cache for 10 minutes
+          { ttl: 60 * 60 * 1000 }, // Cache for 60 minutes
         );
       }
 
@@ -126,7 +126,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchSubcategoriesFromDB();
           },
-          { ttl: 10 * 60 * 1000 }, // Cache for 10 minutes
+          { ttl: 60 * 60 * 1000 }, // Cache for 60 minutes
         );
       }
 
@@ -257,7 +257,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchProductsFromDB();
           },
-          { ttl: 5 * 60 * 1000 }, // Cache for 5 minutes
+          { ttl: 30 * 60 * 1000 }, // Cache for 30 minutes
         );
       }
 
@@ -424,13 +424,18 @@ export const useCatalogManager = () => {
       cache.clearPrefix("v_featured_products");
       cache.clearPrefix("v_best_sellers");
 
-      // Delete removed media from Cloudinary (best-effort)
+      // Delete removed media from Cloudinary (best-effort, parallel)
       if (oldMediaUrls && oldMediaUrls.length > 0) {
-        const newUrls = new Set([...(productData.images || []), productData.video_url].filter(Boolean));
-        for (const url of oldMediaUrls) {
-          if (!newUrls.has(url)) {
-            await deleteFileByUrl(url).catch((e) => console.warn("[Cloudinary] Failed to delete:", url, e));
-          }
+        const newUrls = new Set(
+          [productData.thumbnail_image, ...(productData.images || []), productData.video_url].filter(Boolean),
+        );
+        const removedUrls = oldMediaUrls.filter((url) => !newUrls.has(url));
+        if (removedUrls.length > 0) {
+          await Promise.allSettled(
+            removedUrls.map((url) =>
+              deleteFileByUrl(url).catch((e) => console.warn("[Cloudinary] Failed to delete:", url, e)),
+            ),
+          );
         }
       }
 
@@ -459,16 +464,17 @@ export const useCatalogManager = () => {
       cache.clearPrefix("v_featured_products");
       cache.clearPrefix("v_best_sellers");
 
-      // Delete all media from Cloudinary (best-effort, after DB delete)
+      // Delete all media from Cloudinary (best-effort, parallel, after DB delete)
       if (product) {
         const urls = [product.thumbnail_image, ...(product.images || []), product.video_url].filter(
           Boolean,
         ) as string[];
-
         const uniqueUrls = [...new Set(urls)];
-        for (const url of uniqueUrls) {
-          await deleteFileByUrl(url).catch((e) => console.warn("[Cloudinary] Failed to delete:", url, e));
-        }
+        await Promise.allSettled(
+          uniqueUrls.map((url) =>
+            deleteFileByUrl(url).catch((e) => console.warn("[Cloudinary] Failed to delete:", url, e)),
+          ),
+        );
       }
 
       return { success: true };
@@ -530,7 +536,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchServicesFromDB();
           },
-          { ttl: 10 * 60 * 1000 }, // Cache for 10 minutes
+          { ttl: 60 * 60 * 1000 }, // Cache for 60 minutes
         );
       }
 
@@ -665,7 +671,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchBestSellersFromDB();
           },
-          { ttl: 5 * 60 * 1000 }, // Cache for 5 minutes
+          { ttl: 30 * 60 * 1000 }, // Cache for 30 minutes
         );
       }
 
@@ -699,7 +705,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchFeaturedFromDB();
           },
-          { ttl: 5 * 60 * 1000 }, // Cache for 5 minutes
+          { ttl: 30 * 60 * 1000 }, // Cache for 30 minutes
         );
       }
 
@@ -792,7 +798,7 @@ export const useCatalogManager = () => {
 
           return { success: true, data };
         },
-        { ttl: 10 * 60 * 1000 }, // Cache for 10 minutes
+        { ttl: 60 * 60 * 1000 }, // Cache for 60 minutes
       );
     } catch (error) {
       console.error("[useCatalogManager] Error fetching category by slug:", error);
