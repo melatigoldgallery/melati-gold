@@ -336,28 +336,6 @@ export const useCatalogManager = () => {
     const RETRY_DELAYS = [500, 1000, 2000]; // Faster retries for read operations
 
     try {
-      // ✅ SESSION VALIDATION & REFRESH (prevent mid-fetch token expiry)
-      const { data: sessionData } = await $supabase.auth.getSession();
-      if (!sessionData?.session) {
-        console.error("[getProductById] ❌ No active session!");
-        return {
-          success: false,
-          error: "Session expired. Please refresh the page and login again.",
-        };
-      }
-
-      const session = sessionData.session;
-      const expiresAt = session.expires_at || 0;
-      const expiresIn = expiresAt - Date.now() / 1000;
-
-      // Refresh session if expires in < 60 seconds
-      if (expiresIn < 60) {
-        const { error: refreshError } = await $supabase.auth.refreshSession();
-        if (refreshError) {
-          console.warn("[getProductById] Session refresh failed:", refreshError.message);
-        }
-      }
-
       // 15-second timeout for read operations (faster than create/update)
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(

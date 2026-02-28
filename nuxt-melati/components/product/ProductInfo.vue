@@ -75,7 +75,7 @@ const specs = computed(() => {
       <div class="text-xl sm:text-2xl lg:text-xl font-bold text-maroon">Mulai dari {{ formatPrice(product?.price) }}</div>
       <p v-if="product?.price" class="text-xs sm:text-sm text-gray-600 mt-1.5 flex items-center gap-1">
         <InformationCircleIcon class="w-4 h-4" />
-        <span>Harga disesuaikan mengikuti berat yang tersedia dan harga emas terbaru</span>
+        <span>Harga menyesuaikan dengan berat yang tersedia dan harga emas terbaru</span>
       </p>
     </div>
 

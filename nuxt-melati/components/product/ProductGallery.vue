@@ -81,6 +81,12 @@ const getThumbnailSrcSet = (url: string) => {
   return generateSrcSet(url, [80, 160, 200]);
 };
 
+// Error handler for broken images
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement;
+  img.src = "/img/placeholder.jpg";
+};
+
 // Navigation
 const goToSlide = (index: number) => {
   currentSlide.value = index;
@@ -201,6 +207,7 @@ const onTouchEnd = () => {
         loading="eager"
         decoding="async"
         @click="openLightbox"
+        @error="handleImageError"
       />
 
       <!-- Navigation Arrows (if multiple images) -->
@@ -270,6 +277,7 @@ const onTouchEnd = () => {
           class="w-full h-full object-cover"
           loading="lazy"
           decoding="async"
+          @error="handleImageError"
         />
       </button>
     </div>

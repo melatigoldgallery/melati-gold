@@ -37,6 +37,12 @@ const getSrcSet = (imageUrl: string) => {
   return generateSrcSet(imageUrl, [200, 400]);
 };
 
+// Error handler for broken images
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement;
+  img.src = "/img/placeholder.jpg";
+};
+
 // Format price to Indonesian Rupiah
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat("id-ID", {
@@ -79,7 +85,7 @@ onMounted(() => {
         :to="`/product/${p.id}`"
         class="glass overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant reveal-up block"
       >
-        <div class="relative">
+        <div class="relative aspect-[3/4] overflow-hidden">
           <!-- ✨ Optimized image with lazy loading & responsive srcset -->
           <img
             :src="getOptimizedImage(p.thumbnail_image)"
@@ -88,7 +94,8 @@ onMounted(() => {
             :alt="p.title || p.name"
             loading="lazy"
             decoding="async"
-            class="h-60 md:h-72 w-full object-cover"
+            class="w-full h-full object-cover"
+            @error="handleImageError"
           />
           <span
             v-if="p.is_best_seller"

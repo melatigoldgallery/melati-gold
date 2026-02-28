@@ -8,6 +8,27 @@ const { getCustomServices } = useCatalogManager();
 const services = ref<any[]>([]);
 const loading = ref(true);
 
+// 🚀 Image optimization via composable (hemat bandwidth Cloudinary free tier)
+const { presets, generateSrcSet } = useImageOptimization();
+
+const getOptimizedImage = (imageUrl: string) => {
+  if (!imageUrl || !imageUrl.includes("cloudinary.com")) {
+    return imageUrl || "/img/placeholder.jpg";
+  }
+  return presets.card(imageUrl);
+};
+
+const getSrcSet = (imageUrl: string) => {
+  if (!imageUrl || !imageUrl.includes("cloudinary.com")) return undefined;
+  return generateSrcSet(imageUrl, [200, 400]);
+};
+
+// Error handler for broken images
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement;
+  img.src = "/img/placeholder.jpg";
+};
+
 // Carousel refs and state (Clone Technique for infinite loop)
 const viewport = ref<HTMLElement | null>(null);
 const track = ref<HTMLElement | null>(null);
@@ -352,10 +373,13 @@ onMounted(() => {
                   >
                     <img
                       v-if="service.image_url"
-                      :src="service.image_url"
+                      :src="getOptimizedImage(service.image_url)"
+                      :srcset="getSrcSet(service.image_url)"
+                      sizes="(max-width: 640px) 50vw, 33vw"
                       :alt="service.title"
                       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
+                      @error="handleImageError"
                     />
                     <div
                       v-else

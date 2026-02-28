@@ -25,6 +25,12 @@ const getSrcSet = (product: any) => {
   return generateSrcSet(imageUrl, [200, 400]);
 };
 
+// Error handler for broken images
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement;
+  img.src = "/img/placeholder.jpg";
+};
+
 // Format price
 const formatPrice = (price: number) => {
   if (!price) return "Hubungi Kami";
@@ -59,6 +65,7 @@ const handleClick = (product: any) => {
             class="w-full h-full object-cover transition-transform duration-700"
             loading="lazy"
             decoding="async"
+            @error="handleImageError"
           />
 
           <!-- Hover Overlay with Text -->

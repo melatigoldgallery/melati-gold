@@ -10,7 +10,6 @@ import {
   ExclamationTriangleIcon,
   ArrowLeftIcon,
   InboxIcon,
-  PhoneIcon,
 } from "@heroicons/vue/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/vue/24/solid";
 
@@ -23,8 +22,6 @@ const route = useRoute();
 const serviceId = computed(() => route.params.id as string);
 
 const { getServiceWithProducts } = useCatalogManager();
-
-const whatsappNumber = "6281234567890";
 
 // useAsyncData tanpa await: halaman render langsung dengan loading state
 // watch: [serviceId] otomatis re-fetch saat navigasi antar layanan
@@ -56,11 +53,6 @@ const error = computed(() => fetchError.value?.message ?? null);
 
 const handleProductClick = (product: any) => {
   navigateTo(`/product/${product.id}`);
-};
-
-const contactWhatsApp = () => {
-  const text = `Halo, saya ingin konsultasi tentang layanan ${service.value?.title}`;
-  window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`, "_blank");
 };
 
 // SEO Meta tags - reaktif mengikuti data layanan
@@ -157,17 +149,6 @@ useHead(
                 {{ service.price_info }}
               </span>
             </div>
-
-            <!-- WhatsApp CTA Button -->
-            <div class="mt-6">
-              <button
-                @click="contactWhatsApp"
-                class="w-full md:w-auto px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-              >
-                <PhoneIcon class="w-5 h-5" />
-                <span>Konsultasi via WhatsApp</span>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -187,18 +168,11 @@ useHead(
         <!-- Empty Products State -->
         <div v-else class="mt-12 text-center py-16 bg-white rounded-xl shadow-md">
           <InboxIcon class="w-16 h-16 text-gray-400 mx-auto" />
-          <p class="mt-4 text-gray-600 mb-6">
+          <p class="mt-4 text-gray-600">
             Belum ada contoh produk untuk layanan ini.
             <br />
-            Silakan hubungi kami untuk konsultasi lebih lanjut.
+            Silakan cek produk kami untuk informasi lebih lanjut dan opsi kontak.
           </p>
-          <button
-            @click="contactWhatsApp"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
-          >
-            <PhoneIcon class="w-5 h-5" />
-            <span>Konsultasi via WhatsApp</span>
-          </button>
         </div>
 
         <!-- Back Button -->

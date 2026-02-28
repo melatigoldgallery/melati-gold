@@ -46,8 +46,8 @@
             </p>
             <p class="flex items-center gap-2">
               <i class="bi bi-whatsapp text-gold"></i>
-              <a href="https://wa.me/6281237846320" target="_blank" class="hover:text-gold transition-colors">
-                +62 812-3784-6320
+              <a href="https://wa.me/628135988340" target="_blank" class="hover:text-gold transition-colors">
+                +62 813-5988-340
               </a>
             </p>
           </div>
@@ -86,7 +86,7 @@
               <i class="bi bi-facebook text-gold group-hover:text-white transition-colors"></i>
             </a> -->
             <a
-              href="https://wa.me/6281237846320"
+              href="https://wa.me/628135988340"
               target="_blank"
               aria-label="WhatsApp"
               class="group w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/30 hover:from-gold hover:to-yellow-600 transition-all duration-300"

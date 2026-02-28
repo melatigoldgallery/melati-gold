@@ -58,6 +58,12 @@ const formatPrice = (price: number) => {
 const handleClick = (product: any) => {
   emit("product-click", product);
 };
+
+// Error handler for broken images
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement;
+  img.src = "/img/placeholder.jpg";
+};
 </script>
 
 <template>
@@ -81,18 +87,17 @@ const handleClick = (product: any) => {
               class="w-full h-full object-cover transition-transform duration-500"
               loading="lazy"
               decoding="async"
+              @error="handleImageError"
             />
             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
           </div>
 
           <!-- Info -->
           <div class="p-1.5 text-center">
-            <h3 class="font-semibold text-gray-900 text-base line-clamp-2 mb-0.5">
+            <h3 class="font-semibold text-gray-900 text-base truncate mb-0.5">
               {{ product.title || product.name }}
             </h3>
-            <p class="text-maroon font-bold text-sm">
-              Mulai dari {{ formatPrice(product.price) }}
-            </p>
+            <p class="text-maroon font-bold text-sm whitespace-nowrap">Mulai dari {{ formatPrice(product.price) }}</p>
           </div>
         </div>
       </article>
@@ -117,13 +122,14 @@ const handleClick = (product: any) => {
                 class="w-full h-full object-cover"
                 loading="lazy"
                 decoding="async"
+                @error="handleImageError"
               />
             </div>
             <div class="p-2 text-center">
-              <h3 class="font-semibold text-gray-900 text-xs line-clamp-2 mb-1">
+              <h3 class="font-semibold text-gray-900 text-xs truncate mb-1">
                 {{ product.title || product.name }}
               </h3>
-              <p class="text-maroon font-bold text-[10px]">
+              <p class="text-maroon font-bold text-[10px] whitespace-nowrap">
                 Mulai dari {{ formatPrice(product.price) }}
               </p>
             </div>
