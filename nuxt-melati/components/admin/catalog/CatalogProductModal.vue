@@ -158,7 +158,7 @@
               @uploaded="handleImagesUpload"
               folder="products"
               :single="false"
-              :maxFiles="8"
+              :maxFiles="30"
               :maxSize="5"
               :showUrls="false"
             />

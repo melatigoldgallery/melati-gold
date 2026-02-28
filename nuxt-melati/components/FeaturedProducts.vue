@@ -97,7 +97,7 @@ onMounted(() => {
             Best Seller
           </span>
         </div>
-        <div class="px-3 md:px-3 py-2.5 md:py-2 flex flex-col gap-2 md:gap-1.5">
+        <div class="px-3 md:px-3 py-2.5 md:py-2 flex flex-col gap-2 md:gap-1.5 text-center">
           <!-- Product name -->
           <h3
             class="font-medium text-maroon leading-tight text-md md:text-base lg:text-lg truncate"
