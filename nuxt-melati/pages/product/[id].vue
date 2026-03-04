@@ -11,33 +11,51 @@ definePageMeta({
 });
 
 const route = useRoute();
-const productId = computed(() => route.params.id as string);
+const productParam = computed(() => route.params.id as string);
 
-const { getProductById, getRelatedProducts } = useCatalogManager();
+// Deteksi apakah param adalah UUID atau slug
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const isUUID = computed(() => UUID_REGEX.test(productParam.value));
+
+const { getProductById, getProductBySlug, getRelatedProducts } = useCatalogManager();
 
 // useAsyncData tanpa await: halaman baru langsung render dengan loading state
-// watch: [productId] otomatis re-fetch saat navigasi antar produk
+// watch: [productParam] otomatis re-fetch saat navigasi antar produk
 const {
   data: pageData,
   status,
   error: fetchError,
 } = useAsyncData(
-  () => `product-${productId.value}`,
+  () => `product-${productParam.value}`,
   async () => {
-    const result = await getProductById(productId.value);
+    let result: any;
 
-    if (!result.success || !result.data) {
+    if (isUUID.value) {
+      // Fetch by UUID
+      result = await getProductById(productParam.value);
+
+      // Jika produk punya slug, redirect ke URL slug (SEO, backward-compatible)
+      if (result.success && result.data?.slug) {
+        await navigateTo(`/product/${result.data.slug}`, { replace: true, redirectCode: 301 });
+        return null;
+      }
+    } else {
+      // Fetch by slug
+      result = await getProductBySlug(productParam.value);
+    }
+
+    if (!result || !result.success || !result.data) {
       throw createError({ statusCode: 404, message: "Produk tidak ditemukan" });
     }
 
-    const relatedResult = await getRelatedProducts(productId.value, 6);
+    const relatedResult = await getRelatedProducts(result.data.id, 6);
 
     return {
       product: result.data,
       relatedProducts: relatedResult.success ? relatedResult.data : [],
     };
   },
-  { watch: [productId] },
+  { watch: [productParam] },
 );
 
 const product = computed(() => pageData.value?.product ?? null);
@@ -46,7 +64,7 @@ const loading = computed(() => status.value === "pending");
 const error = computed(() => fetchError.value?.message ?? null);
 
 const handleRelatedProductClick = (relatedProduct: any) => {
-  navigateTo(`/product/${relatedProduct.id}`);
+  navigateTo(`/product/${relatedProduct.slug || relatedProduct.id}`);
 };
 
 // SEO Meta tags - reaktif mengikuti data produk
@@ -65,7 +83,12 @@ useHead(
       { property: "product:price:amount", content: product.value?.price || 0 },
       { property: "product:price:currency", content: "IDR" },
     ],
-    link: [{ rel: "canonical", href: `https://melatigoldshop.com/product/${productId.value}` }],
+    link: [
+      {
+        rel: "canonical",
+        href: `https://melatigoldshop.com/product/${product.value?.slug || productParam.value}`,
+      },
+    ],
   })),
 );
 </script>

@@ -192,7 +192,7 @@ const handleItemsPerPageChange = async (limit: number) => {
 
 // Handle product click
 const handleProductClick = (product: any) => {
-  navigateTo(`/product/${product.id}`);
+  navigateTo(`/product/${product.slug || product.id}`);
 };
 
 // Watch route.query untuk sinkronisasi filter dari URL

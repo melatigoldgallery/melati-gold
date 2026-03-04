@@ -151,7 +151,7 @@ const getContactUrls = async (product: any) => {
 
 // Generate WhatsApp message from template
 const generateWhatsAppMessage = (config: any, product: any): string => {
-  const productUrl = `${window.location.origin}/product/${product.id}`;
+  const productUrl = `${window.location.origin}/product/${product.slug || product.id}`;
   let message = config.whatsapp_message_template || "Halo, saya tertarik dengan {product_name}";
 
   message = message.replace("{product_name}", product.title || product.name);

@@ -8,19 +8,14 @@ const { getCustomServices } = useCatalogManager();
 const services = ref<any[]>([]);
 const loading = ref(true);
 
-// 🚀 Image optimization via composable (hemat bandwidth Cloudinary free tier)
-const { presets, generateSrcSet } = useImageOptimization();
+// 🚀 Image optimization — eager CDN 3:4 portrait (w_400,h_533)
+const { presets } = useImageOptimization();
 
 const getOptimizedImage = (imageUrl: string) => {
   if (!imageUrl || !imageUrl.includes("cloudinary.com")) {
     return imageUrl || "/img/placeholder.jpg";
   }
   return presets.card(imageUrl);
-};
-
-const getSrcSet = (imageUrl: string) => {
-  if (!imageUrl || !imageUrl.includes("cloudinary.com")) return undefined;
-  return generateSrcSet(imageUrl, [200, 400]);
 };
 
 // Error handler for broken images
@@ -374,11 +369,10 @@ onMounted(() => {
                     <img
                       v-if="service.image_url"
                       :src="getOptimizedImage(service.image_url)"
-                      :srcset="getSrcSet(service.image_url)"
-                      sizes="(max-width: 640px) 50vw, 33vw"
                       :alt="service.title"
                       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
+                      decoding="async"
                       @error="handleImageError"
                     />
                     <div

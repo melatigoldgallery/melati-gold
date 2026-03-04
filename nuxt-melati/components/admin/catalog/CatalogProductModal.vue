@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50"
-    @click.self="$emit('close')"
-  >
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50">
     <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
       <div class="p-4 sm:p-6">
         <!-- Header -->

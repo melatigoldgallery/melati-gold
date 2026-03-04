@@ -15,6 +15,36 @@ export const useCatalogManager = () => {
     return String(error);
   };
 
+  /**
+   * Generate URL-friendly slug dari nama produk.
+   * Contoh: "Cincin Emas 18K & Berlian" → "cincin-emas-18k-berlian"
+   */
+  const generateProductSlug = (name: string): string => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "") // hapus karakter special
+      .trim()
+      .replace(/\s+/g, "-") // spasi → hyphen
+      .replace(/-+/g, "-"); // hapus double-hyphen
+  };
+
+  /**
+   * Pastikan slug unik. Jika sudah ada, tambah suffix -2, -3, dst.
+   */
+  const ensureUniqueProductSlug = async (baseSlug: string, excludeId?: string): Promise<string> => {
+    let slug = baseSlug;
+    let counter = 2;
+    while (true) {
+      let query = $supabase.from("catalog_products").select("id").eq("slug", slug);
+      if (excludeId) query = query.neq("id", excludeId);
+      const { data } = await query.maybeSingle();
+      if (!data) break; // slug tersedia
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    return slug;
+  };
+
   // ============================================
   // CATEGORIES MANAGEMENT (with caching)
   // ============================================
@@ -36,7 +66,7 @@ export const useCatalogManager = () => {
             if (error) throw error;
             return { success: true, data: data || [] };
           },
-          { ttl: 60 * 60 * 1000 }, // Cache for 60 minutes
+          { ttl: 24 * 60 * 60 * 1000 }, // Cache for 24 hours (kategori jarang berubah)
         );
       }
 
@@ -126,7 +156,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchSubcategoriesFromDB();
           },
-          { ttl: 60 * 60 * 1000 }, // Cache for 60 minutes
+          { ttl: 24 * 60 * 60 * 1000 }, // Cache for 24 hours (subkategori jarang berubah)
         );
       }
 
@@ -331,9 +361,59 @@ export const useCatalogManager = () => {
     }
   };
 
+  /**
+   * Fetch produk by slug (SEO-friendly URL).
+   * Digunakan di pages/product/[id].vue saat param bukan UUID.
+   */
+  const getProductBySlug = async (slug: string) => {
+    const cacheKey = cache.generateKey("catalog_product_slug", { slug });
+    const cached = cache.get<{ success: boolean; data: any }>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const { data, error } = await $supabase
+        .from("catalog_products")
+        .select(
+          `*,
+          category:catalog_categories(id, name, slug),
+          subcategory:catalog_subcategories(id, name, slug)`,
+        )
+        .eq("slug", slug)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const flattenedData = {
+          ...data,
+          category_id: data.category?.id || data.category_id,
+          category_name: data.category?.name || null,
+          category_slug: data.category?.slug || null,
+          subcategory_id: data.subcategory?.id || data.subcategory_id,
+          subcategory_name: data.subcategory?.name || null,
+          subcategory_slug: data.subcategory?.slug || null,
+        };
+        const result = { success: true, data: flattenedData };
+        cache.set(cacheKey, result, { ttl: 30 * 60 * 1000 });
+        return result;
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      return { success: false, error: getErrorMessage(error) };
+    }
+  };
+
   const getProductById = async (id: string, retryAttempt: number = 0) => {
     const MAX_RETRIES = 3;
     const RETRY_DELAYS = [500, 1000, 2000]; // Faster retries for read operations
+
+    // Cache check — hanya pada attempt pertama, biarkan retry berjalan jika ada error
+    const cacheKey = cache.generateKey("catalog_product", { id });
+    if (retryAttempt === 0) {
+      const cached = cache.get<{ success: boolean; data: any }>(cacheKey);
+      if (cached) return cached;
+    }
 
     try {
       // 15-second timeout for read operations (faster than create/update)
@@ -389,7 +469,10 @@ export const useCatalogManager = () => {
           subcategory_name: data.subcategory?.name || null,
           subcategory_slug: data.subcategory?.slug || null,
         };
-        return { success: true, data: flattenedData };
+        const result = { success: true, data: flattenedData };
+        // Simpan ke cache setelah fetch sukses (30 menit)
+        cache.set(cacheKey, result, { ttl: 30 * 60 * 1000 });
+        return result;
       }
 
       return { success: true, data };
@@ -472,6 +555,12 @@ export const useCatalogManager = () => {
         ),
       );
 
+      // Auto-generate slug jika belum ada
+      if (!cleanData.slug && (cleanData.title || cleanData.name)) {
+        const base = generateProductSlug(cleanData.title || cleanData.name);
+        cleanData.slug = await ensureUniqueProductSlug(base);
+      }
+
       const insertPromise = $supabase.from("catalog_products").insert([cleanData]).select().single();
 
       const { data, error } = (await Promise.race([insertPromise, timeoutPromise])) as Awaited<typeof insertPromise>;
@@ -533,6 +622,7 @@ export const useCatalogManager = () => {
 
       // Invalidate products cache after update
       cache.clearPrefix("catalog_products");
+      cache.clearPrefix("catalog_product"); // single product cache
       cache.clearPrefix("v_featured_products");
       cache.clearPrefix("v_best_sellers");
 
@@ -573,6 +663,7 @@ export const useCatalogManager = () => {
 
       // Invalidate products cache after delete
       cache.clearPrefix("catalog_products");
+      cache.clearPrefix("catalog_product"); // single product cache
       cache.clearPrefix("v_featured_products");
       cache.clearPrefix("v_best_sellers");
 
@@ -648,7 +739,7 @@ export const useCatalogManager = () => {
           async () => {
             return await fetchServicesFromDB();
           },
-          { ttl: 60 * 60 * 1000 }, // Cache for 60 minutes
+          { ttl: 24 * 60 * 60 * 1000 }, // Cache for 24 hours (services jarang berubah)
         );
       }
 
@@ -1052,6 +1143,7 @@ export const useCatalogManager = () => {
     // Products
     getProducts,
     getProductById,
+    getProductBySlug,
     getRelatedProducts, // NEW
     createProduct,
     updateProduct,

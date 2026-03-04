@@ -12,8 +12,8 @@ const emit = defineEmits<{
 // Carousel state (for mobile)
 const scrollContainer = ref<HTMLElement | null>(null);
 
-// 🚀 Image optimization via composable (hemat bandwidth Cloudinary free tier)
-const { presets, generateSrcSet } = useImageOptimization();
+// 🚀 Image optimization — eager CDN portrait (3:4 desktop, 4:5 mobile)
+const { presets } = useImageOptimization();
 
 const getRawImageUrl = (product: any): string => {
   let imageUrl = product.thumbnail_image;
@@ -32,16 +32,18 @@ const getRawImageUrl = (product: any): string => {
   return imageUrl || "/img/placeholder.jpg";
 };
 
+// Desktop grid: aspect-[3/4] → presets.card (w_400,h_533)
 const getProductImage = (product: any) => {
   const url = getRawImageUrl(product);
   if (!url.includes("cloudinary.com")) return url;
   return presets.card(url);
 };
 
-const getProductSrcSet = (product: any) => {
+// Mobile carousel: aspect-[4/5] → presets.cardCatalog (w_400,h_500)
+const getProductImageMobile = (product: any) => {
   const url = getRawImageUrl(product);
-  if (!url || !url.includes("cloudinary.com")) return undefined;
-  return generateSrcSet(url, [200, 400]);
+  if (!url.includes("cloudinary.com")) return url;
+  return presets.cardCatalog(url);
 };
 
 // Format price
@@ -76,13 +78,11 @@ const handleImageError = (event: Event) => {
     <!-- Desktop Grid -->
     <div class="hidden md:grid md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
       <article v-for="product in products" :key="product.id" class="group cursor-pointer" @click="handleClick(product)">
-        <div class="bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+        <div class="bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl">
           <!-- Image -->
           <div class="relative w-50 aspect-[3/4] overflow-hidden bg-gray-100">
             <img
               :src="getProductImage(product)"
-              :srcset="getProductSrcSet(product)"
-              sizes="(max-width: 640px) 16vw, (max-width: 1024px) 25vw, 16vw"
               :alt="product.title || product.name"
               class="w-full h-full object-cover transition-transform duration-500"
               loading="lazy"
@@ -112,12 +112,10 @@ const handleImageError = (event: Event) => {
           class="flex-shrink-0 w-[160px] snap-start cursor-pointer"
           @click="handleClick(product)"
         >
-          <div class="bg-white rounded-xl overflow-hidden shadow-sm">
+          <div class="bg-white rounded-2xl overflow-hidden shadow-sm">
             <div class="relative aspect-[4/5] overflow-hidden bg-gray-100">
               <img
-                :src="getProductImage(product)"
-                :srcset="getProductSrcSet(product)"
-                sizes="(max-width: 640px) 42vw, 33vw"
+                :src="getProductImageMobile(product)"
                 :alt="product.title || product.name"
                 class="w-full h-full object-cover"
                 loading="lazy"

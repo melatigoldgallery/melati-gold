@@ -52,7 +52,7 @@ const loading = computed(() => status.value === "pending");
 const error = computed(() => fetchError.value?.message ?? null);
 
 const handleProductClick = (product: any) => {
-  navigateTo(`/product/${product.id}`);
+  navigateTo(`/product/${product.slug || product.id}`);
 };
 
 // SEO Meta tags - reaktif mengikuti data layanan

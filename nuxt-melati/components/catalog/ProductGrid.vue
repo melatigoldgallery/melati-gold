@@ -9,20 +9,14 @@ const emit = defineEmits<{
   (e: "product-click", product: any): void;
 }>();
 
-// 🚀 Image optimization via composable (hemat bandwidth Cloudinary free tier)
-const { presets, generateSrcSet } = useImageOptimization();
+// 🚀 Image optimization — eager CDN 4:5 portrait (w_400,h_500)
+const { presets } = useImageOptimization();
 
-// Optimize images untuk grid thumbnail
+// Optimize images untuk grid thumbnail (4:5 sesuai aspect-[4/5])
 const getOptimizedImage = (product: any) => {
   const imageUrl = product.thumbnail_image || product.images?.[0] || "/img/placeholder.jpg";
   if (!imageUrl.includes("cloudinary.com")) return imageUrl;
-  return presets.card(imageUrl);
-};
-
-const getSrcSet = (product: any) => {
-  const imageUrl = product.thumbnail_image || product.images?.[0];
-  if (!imageUrl || !imageUrl.includes("cloudinary.com")) return undefined;
-  return generateSrcSet(imageUrl, [200, 400]);
+  return presets.cardCatalog(imageUrl);
 };
 
 // Error handler for broken images
@@ -53,14 +47,12 @@ const handleClick = (product: any) => {
   >
     <article v-for="product in products" :key="product.id" class="group cursor-pointer" @click="handleClick(product)">
       <div
-        class="relative bg-white/95 backdrop-blur rounded-1xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 border border-gray-100"
+        class="relative bg-white/95 backdrop-blur rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 border border-gray-100"
       >
         <!-- Product Image -->
         <div class="relative aspect-[4/5] overflow-hidden bg-gray-100">
           <img
             :src="getOptimizedImage(product)"
-            :srcset="getSrcSet(product)"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
             :alt="product.name || product.title"
             class="w-full h-full object-cover transition-transform duration-700"
             loading="lazy"

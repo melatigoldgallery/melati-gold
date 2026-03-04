@@ -44,87 +44,127 @@ export const useImageOptimization = () => {
   };
 
   /**
-   * Preset transformations untuk berbagai use cases
-   * Dioptimasi untuk Cloudinary Free Tier - hemat bandwidth mobile
+   * Preset transformations — diselaraskan dengan Cloudinary Eager Transforms
+   * Eager: w_400,h_533 | w_400,h_500 | w_800,h_1067
+   * Semua dengan c_fill,f_auto,q_auto,g_auto
+   * Setiap request akan langsung hit CDN cache tanpa transform kredit baru.
+   *
+   * thumbnail → alias card (w_400): browser scale down ke 80-120px tampil
+   * detail    → alias gallery (w_800): cukup untuk lightbox bahkan di Retina
    */
   const presets = {
-    // Thumbnail kecil untuk strip/grid (max display ~80-160px)
+    // Alias → card (w_400,h_533): browser scale down jadi ~80-160px tampil, cukup tajam
+    // Tidak perlu eager terpisah, hemat 1 upload credit per gambar
     thumbnail: (url: string) =>
       getOptimizedUrl(url, {
-        width: 150,
-        height: 200,
+        width: 400,
+        height: 533,
         quality: "auto",
         format: "auto",
         crop: "fill",
         gravity: "auto",
       }),
 
-    // Card image untuk product grid (max display ~390px di mobile, ~300px di desktop)
+    // 3:4 portrait card — CatalogShowcase, FeaturedProducts, CustomServices, RelatedProducts (desktop)
+    // Eager: w_400,h_533,c_fill,f_auto,q_auto,g_auto
     card: (url: string) =>
       getOptimizedUrl(url, {
-        width: 300,
-        height: 400,
+        width: 400,
+        height: 533,
         quality: "auto",
         format: "auto",
         crop: "fill",
         gravity: "auto",
       }),
 
-    // Hero/banner image
-    hero: (url: string) =>
+    // 4:5 portrait card — catalog/ProductGrid.vue, RelatedProducts (mobile)
+    // Eager: w_400,h_500,c_fill,f_auto,q_auto,g_auto
+    cardCatalog: (url: string) =>
       getOptimizedUrl(url, {
-        width: 1200,
-        height: 600,
-        quality: "auto",
-        format: "auto",
-        crop: "fill",
-      }),
-
-    // Detail/lightbox (q_auto lebih cerdas dari q_90 fixed)
-    detail: (url: string) =>
-      getOptimizedUrl(url, {
-        width: 600,
-        height: 800,
+        width: 400,
+        height: 500,
         quality: "auto",
         format: "auto",
         crop: "fill",
         gravity: "auto",
       }),
 
-    // Gallery carousel (main slide - mobile ~390px, desktop ~500px)
+    // 3:4 portrait gallery main — ProductGallery main slide (~400-500px tampil)
+    // Eager: w_800,h_1067,c_fill,f_auto,q_auto,g_auto
     gallery: (url: string) =>
       getOptimizedUrl(url, {
-        width: 450,
-        height: 600,
+        width: 800,
+        height: 1067,
         quality: "auto",
         format: "auto",
         crop: "fill",
         gravity: "auto",
       }),
 
-    // Logo/icon
-    icon: (url: string) =>
+    // Alias → gallery (w_800,h_1067): cukup untuk lightbox fullscreen bahkan di Retina
+    // Tidak perlu eager terpisah, hemat 1 upload credit per gambar
+    detail: (url: string) =>
       getOptimizedUrl(url, {
-        width: 200,
-        height: 200,
+        width: 800,
+        height: 1067,
         quality: "auto",
         format: "auto",
+        crop: "fill",
+        gravity: "auto",
+      }),
+
+    // Hero — file lokal (/img/bg.png), bukan Cloudinary → tidak melewati getOptimizedUrl
+    // Fallback jika dipakai ke Cloudinary hero image
+    hero: (url: string) =>
+      getOptimizedUrl(url, {
+        width: 800,
+        height: 1067,
+        quality: "auto",
+        format: "auto",
+        crop: "fill",
+        gravity: "auto",
+      }),
+
+    // Icon/logo kecil — admin preview, alias → card (w_400): browser scale turun
+    icon: (url: string) =>
+      getOptimizedUrl(url, {
+        width: 400,
+        height: 533,
+        quality: "auto",
+        format: "auto",
+        crop: "fill",
+        gravity: "auto",
       }),
   };
 
   /**
-   * Generate responsive srcset untuk <img>
-   * Untuk responsive images di berbagai device
+   * Mapping eager sizes: width → height yang cocok persis dengan Cloudinary eager config.
+   * HANYA gunakan ukuran ini agar setiap srcset URL = CDN cache hit, 0 transform kredit.
+   * 3 eager total: w_400,h_533 | w_400,h_500 | w_800,h_1067
    */
-  const generateSrcSet = (url: string, sizes: number[] = [400, 800, 1200]): string => {
-    return sizes
-      .map((size) => {
+  const EAGER_MAP: Record<number, number> = {
+    400: 533, // 3:4 (card)
+    800: 1067, // 3:4 (gallery)
+  };
+
+  /**
+   * Generate responsive srcset untuk <img> — hanya menggunakan eager sizes.
+   * Pastikan w, h, c_fill, g_auto cocok persis dengan eager agar CDN selalu hit.
+   */
+  const generateSrcSet = (url: string, sizes: number[] = [400, 800, 1000]): string => {
+    const validSizes = sizes.filter((s) => s in EAGER_MAP);
+    return validSizes
+      .map((w) => {
+        const h = EAGER_MAP[w];
         const optimizedUrl = getOptimizedUrl(url, {
-          width: size,
+          width: w,
+          height: h,
           quality: "auto",
           format: "auto",
+          crop: "fill",
+          gravity: "auto",
         });
-        return `${optimizedUrl} ${size}w`;
+        return `${optimizedUrl} ${w}w`;
       })
       .join(", ");
   };

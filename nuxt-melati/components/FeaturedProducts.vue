@@ -2,8 +2,8 @@
 // Fetch featured products from database
 const { getProducts } = useCatalogManager();
 
-// 🚀 Image optimization via composable (hemat bandwidth Cloudinary free tier)
-const { presets, generateSrcSet } = useImageOptimization();
+// 🚀 Image optimization — eager CDN 3:4 portrait (w_400,h_533)
+const { presets } = useImageOptimization();
 
 // State
 const products = ref<any[]>([]);
@@ -30,11 +30,6 @@ const getOptimizedImage = (imageUrl: string) => {
     return imageUrl || "/img/placeholder.jpg";
   }
   return presets.card(imageUrl);
-};
-
-const getSrcSet = (imageUrl: string) => {
-  if (!imageUrl || !imageUrl.includes("cloudinary.com")) return undefined;
-  return generateSrcSet(imageUrl, [200, 400]);
 };
 
 // Error handler for broken images
@@ -82,15 +77,13 @@ onMounted(() => {
       <NuxtLink
         v-for="p in products"
         :key="p.id"
-        :to="`/product/${p.id}`"
-        class="glass overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant reveal-up block"
+        :to="`/product/${p.slug || p.id}`"
+        class="glass overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant reveal-up block rounded-2xl"
       >
         <div class="relative aspect-[3/4] overflow-hidden">
-          <!-- ✨ Optimized image with lazy loading & responsive srcset -->
+          <!-- ✨ Optimized image — lazy load, CDN-cached eager transform (w_400,h_533,3:4) -->
           <img
             :src="getOptimizedImage(p.thumbnail_image)"
-            :srcset="getSrcSet(p.thumbnail_image)"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
             :alt="p.title || p.name"
             loading="lazy"
             decoding="async"

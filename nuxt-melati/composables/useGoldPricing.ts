@@ -99,6 +99,44 @@ export const useGoldPricing = () => {
     return { success: !error, count: count || 0, error: error?.message };
   };
 
+  // Add new gold price karat
+  const addGoldPrice = async (karat: string, pricePerGram: number) => {
+    // Check if karat already exists (even if inactive)
+    const { data: existing } = await $supabase
+      .from("gold_price_settings")
+      .select("id, is_active")
+      .eq("karat", karat.toUpperCase())
+      .single();
+
+    if (existing) {
+      if (existing.is_active) {
+        return { success: false, error: `Kadar ${karat.toUpperCase()} sudah ada.` };
+      }
+      // Re-activate if previously deactivated
+      const { error } = await $supabase
+        .from("gold_price_settings")
+        .update({ is_active: true, price_per_gram: pricePerGram, updated_at: new Date().toISOString() })
+        .eq("id", existing.id);
+      return { success: !error, error: error?.message };
+    }
+
+    const { error } = await $supabase
+      .from("gold_price_settings")
+      .insert({ karat: karat.toUpperCase(), price_per_gram: pricePerGram, is_active: true });
+
+    return { success: !error, error: error?.message };
+  };
+
+  // Soft-delete gold price karat (set is_active = false)
+  const deleteGoldPrice = async (karat: string) => {
+    const { error } = await $supabase
+      .from("gold_price_settings")
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .eq("karat", karat);
+
+    return { success: !error, error: error?.message };
+  };
+
   return {
     getGoldPrices,
     getPriceHistory,
@@ -106,5 +144,7 @@ export const useGoldPricing = () => {
     calculatePrice,
     recalculateAllPrices,
     getAffectedProductsCount,
+    addGoldPrice,
+    deleteGoldPrice,
   };
 };

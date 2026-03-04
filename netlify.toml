@@ -20,6 +20,25 @@
   # Node bundler untuk TypeScript support
   node_bundler = "esbuild"
 
+# Browser cache untuk asset statis lokal (logo, gambar bg hero) — 30 hari
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000, immutable"
+
+# Browser cache untuk JS/CSS hasil build Nuxt — 1 tahun
+# Aman karena Nuxt menggunakan content-hash di nama file
+[[headers]]
+  for = "/_nuxt/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML SPA entry point — jangan cache lama agar deploy terbaru selalu terambil
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
 # SPA fallback untuk client-side routing
 [[redirects]]
   from = "/*"

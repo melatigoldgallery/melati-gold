@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import {
   InformationCircleIcon,
   DocumentTextIcon,
   ClipboardDocumentCheckIcon,
   ShieldCheckIcon,
   CheckIcon,
+  ShareIcon,
 } from "@heroicons/vue/24/outline";
+
+const { addToast } = useToast();
 
 const props = defineProps<{
   product: any;
@@ -52,6 +55,34 @@ const specs = computed(() => {
 });
 
 // No longer need these handlers - handled by ProductContactButtons
+
+// Share / Copy link
+const copied = ref(false);
+
+const shareProduct = async () => {
+  const url = window.location.href;
+  const title = props.product?.title || props.product?.name || "Produk Melati Gold Shop";
+
+  // Gunakan native share sheet jika tersedia (mobile)
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, url });
+    } catch {
+      // User membatalkan share — tidak perlu toast
+    }
+    return;
+  }
+
+  // Fallback: copy ke clipboard (desktop)
+  try {
+    await navigator.clipboard.writeText(url);
+    copied.value = true;
+    addToast("Link berhasil disalin!", "success", 2500);
+    setTimeout(() => (copied.value = false), 2500);
+  } catch {
+    addToast("Gagal menyalin link.", "error");
+  }
+};
 </script>
 
 <template>
@@ -65,14 +96,33 @@ const specs = computed(() => {
         {{ product.category_name }}
         <span v-if="product?.subcategory_name" class="text-gold">/ {{ product.subcategory_name }}</span>
       </div>
-      <h1 class="font-bold text-xl sm:text-2xl lg:text-2xl font-serif text-gray-900 leading-tight">
-        {{ product?.title || product?.name || "Loading..." }}
-      </h1>
+      <div class="flex items-start justify-between gap-3">
+        <h1 class="font-bold text-xl sm:text-2xl lg:text-2xl font-serif text-gray-900 leading-tight">
+          {{ product?.title || product?.name || "Loading..." }}
+        </h1>
+        <!-- Tombol Share / Copy Link -->
+        <button
+          @click="shareProduct"
+          :title="copied ? 'Link disalin!' : 'Bagikan produk ini'"
+          class="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all duration-200 mt-0.5"
+          :class="
+            copied
+              ? 'border-green-400 bg-green-50 text-green-700'
+              : 'border-gray-300 bg-white text-gray-600 hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50'
+          "
+        >
+          <CheckIcon v-if="copied" class="w-3.5 h-3.5" />
+          <ShareIcon v-else class="w-3.5 h-3.5" />
+          <span class="hidden sm:inline">{{ copied ? "Disalin!" : "Bagikan" }}</span>
+        </button>
+      </div>
     </div>
 
     <!-- Price -->
     <div class="border-t border-b border-gray-200 py-3 md:py-4 bg-gradient-to-r from-amber-50/50 to-transparent">
-      <div class="text-xl sm:text-2xl lg:text-xl font-bold text-maroon">Mulai dari {{ formatPrice(product?.price) }}</div>
+      <div class="text-xl sm:text-2xl lg:text-xl font-bold text-maroon">
+        Mulai dari {{ formatPrice(product?.price) }}
+      </div>
       <p v-if="product?.price" class="text-xs sm:text-sm text-gray-600 mt-1.5 flex items-center gap-1">
         <InformationCircleIcon class="w-4 h-4" />
         <span>Harga menyesuaikan dengan berat yang tersedia dan harga emas terbaru</span>
