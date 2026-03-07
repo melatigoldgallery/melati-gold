@@ -12,8 +12,8 @@ const emit = defineEmits<{
 // Carousel state (for mobile)
 const scrollContainer = ref<HTMLElement | null>(null);
 
-// 🚀 Image optimization — eager CDN portrait (3:4 desktop, 4:5 mobile)
-const { presets } = useImageOptimization();
+// 🚀 Image optimization — eager CDN mobile-first (w_320, w_400)
+const { presets, generateSrcSet } = useImageOptimization();
 
 const getRawImageUrl = (product: any): string => {
   let imageUrl = product.thumbnail_image;
@@ -83,6 +83,8 @@ const handleImageError = (event: Event) => {
           <div class="relative w-50 aspect-[3/4] overflow-hidden bg-gray-100">
             <img
               :src="getProductImage(product)"
+              :srcset="generateSrcSet(getRawImageUrl(product), [320, 400])"
+              sizes="(max-width: 768px) 160px, (max-width: 1024px) 20vw, 16vw"
               :alt="product.title || product.name"
               class="w-full h-full object-cover transition-transform duration-500"
               loading="lazy"
@@ -116,6 +118,8 @@ const handleImageError = (event: Event) => {
             <div class="relative aspect-[4/5] overflow-hidden bg-gray-100">
               <img
                 :src="getProductImageMobile(product)"
+                :srcset="generateSrcSet(getRawImageUrl(product), [320])"
+                sizes="160px"
                 :alt="product.title || product.name"
                 class="w-full h-full object-cover"
                 loading="lazy"

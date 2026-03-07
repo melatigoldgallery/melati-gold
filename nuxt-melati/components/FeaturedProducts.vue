@@ -2,8 +2,8 @@
 // Fetch featured products from database
 const { getProducts } = useCatalogManager();
 
-// 🚀 Image optimization — eager CDN 3:4 portrait (w_400,h_533)
-const { presets } = useImageOptimization();
+// 🚀 Image optimization — eager CDN mobile-first (w_320, w_400, w_800)
+const { presets, generateSrcSet } = useImageOptimization();
 
 // State
 const products = ref<any[]>([]);
@@ -81,9 +81,11 @@ onMounted(() => {
         class="glass overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant reveal-up block rounded-2xl"
       >
         <div class="relative aspect-[3/4] overflow-hidden">
-          <!-- ✨ Optimized image — lazy load, CDN-cached eager transform (w_400,h_533,3:4) -->
+          <!-- ✨ Optimized image — lazy load, CDN-cached eager transform mobile-first -->
           <img
             :src="getOptimizedImage(p.thumbnail_image)"
+            :srcset="generateSrcSet(p.thumbnail_image, [320, 400])"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             :alt="p.title || p.name"
             loading="lazy"
             decoding="async"

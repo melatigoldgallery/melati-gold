@@ -31,9 +31,9 @@ export const useImageOptimization = () => {
     if (width) transformations.push(`w_${width}`);
     if (height) transformations.push(`h_${height}`);
     if (crop) transformations.push(`c_${crop}`);
-    if (gravity) transformations.push(`g_${gravity}`);
     transformations.push(`f_${format}`); // Auto format (WebP jika browser support)
     transformations.push(`q_${quality}`); // Auto quality optimization
+    if (gravity) transformations.push(`g_${gravity}`);
 
     const transformString = transformations.join(",");
 
@@ -45,20 +45,22 @@ export const useImageOptimization = () => {
 
   /**
    * Preset transformations — diselaraskan dengan Cloudinary Eager Transforms
-   * Eager: w_400,h_533 | w_400,h_500 | w_800,h_1067
+   * Eager: w_320,h_400 | w_400,h_533 | w_800,h_1067
    * Semua dengan c_fill,f_auto,q_auto,g_auto
    * Setiap request akan langsung hit CDN cache tanpa transform kredit baru.
    *
-   * thumbnail → alias card (w_400): browser scale down ke 80-120px tampil
-   * detail    → alias gallery (w_800): cukup untuk lightbox bahkan di Retina
+   * 3 eager optimal untuk 60% traffic mobile:
+   * - 320x400 (4:5): mobile card, hemat bandwidth
+   * - 400x533 (3:4): card umum desktop/tablet
+   * - 800x1067 (3:4): gallery/lightbox detail
    */
   const presets = {
-    // Alias → card (w_400,h_533): browser scale down jadi ~80-160px tampil, cukup tajam
-    // Tidak perlu eager terpisah, hemat 1 upload credit per gambar
+    // Mobile card small — thumbnail, mobile list (browser scale ~80-200px tampil)
+    // Eager: w_320,h_400,c_fill,f_auto,q_auto,g_auto
     thumbnail: (url: string) =>
       getOptimizedUrl(url, {
-        width: 400,
-        height: 533,
+        width: 320,
+        height: 400,
         quality: "auto",
         format: "auto",
         crop: "fill",
@@ -77,12 +79,12 @@ export const useImageOptimization = () => {
         gravity: "auto",
       }),
 
-    // 4:5 portrait card — catalog/ProductGrid.vue, RelatedProducts (mobile)
-    // Eager: w_400,h_500,c_fill,f_auto,q_auto,g_auto
+    // 4:5 portrait mobile card — catalog/ProductGrid.vue, RelatedProducts (mobile)
+    // Eager: w_320,h_400,c_fill,f_auto,q_auto,g_auto (mobile-first, hemat bandwidth)
     cardCatalog: (url: string) =>
       getOptimizedUrl(url, {
-        width: 400,
-        height: 500,
+        width: 320,
+        height: 400,
         quality: "auto",
         format: "auto",
         crop: "fill",
@@ -140,18 +142,23 @@ export const useImageOptimization = () => {
   /**
    * Mapping eager sizes: width → height yang cocok persis dengan Cloudinary eager config.
    * HANYA gunakan ukuran ini agar setiap srcset URL = CDN cache hit, 0 transform kredit.
-   * 3 eager total: w_400,h_533 | w_400,h_500 | w_800,h_1067
+   * 3 eager total (mobile-optimized untuk 60% traffic mobile):
+   * - w_320,h_400 (4:5 mobile card)
+   * - w_400,h_533 (3:4 card umum)
+   * - w_800,h_1067 (3:4 gallery/detail)
    */
   const EAGER_MAP: Record<number, number> = {
-    400: 533, // 3:4 (card)
-    800: 1067, // 3:4 (gallery)
+    320: 400, // 4:5 (mobile card, thumbnail)
+    400: 533, // 3:4 (card desktop)
+    800: 1067, // 3:4 (gallery, detail)
   };
 
   /**
    * Generate responsive srcset untuk <img> — hanya menggunakan eager sizes.
    * Pastikan w, h, c_fill, g_auto cocok persis dengan eager agar CDN selalu hit.
+   * Default mobile-first: [320, 400, 800]
    */
-  const generateSrcSet = (url: string, sizes: number[] = [400, 800, 1000]): string => {
+  const generateSrcSet = (url: string, sizes: number[] = [320, 400, 800]): string => {
     const validSizes = sizes.filter((s) => s in EAGER_MAP);
     return validSizes
       .map((w) => {

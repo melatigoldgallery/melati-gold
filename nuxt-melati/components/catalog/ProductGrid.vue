@@ -9,8 +9,8 @@ const emit = defineEmits<{
   (e: "product-click", product: any): void;
 }>();
 
-// 🚀 Image optimization — eager CDN 4:5 portrait (w_400,h_500)
-const { presets } = useImageOptimization();
+// 🚀 Image optimization — eager CDN mobile-first (w_320, w_400)
+const { presets, generateSrcSet } = useImageOptimization();
 
 // Optimize images untuk grid thumbnail (4:5 sesuai aspect-[4/5])
 const getOptimizedImage = (product: any) => {
@@ -53,6 +53,8 @@ const handleClick = (product: any) => {
         <div class="relative aspect-[4/5] overflow-hidden bg-gray-100">
           <img
             :src="getOptimizedImage(product)"
+            :srcset="generateSrcSet(product.thumbnail_image || product.images?.[0], [320, 400])"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
             :alt="product.name || product.title"
             class="w-full h-full object-cover transition-transform duration-700"
             loading="lazy"

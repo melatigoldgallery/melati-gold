@@ -152,20 +152,7 @@ const emit = defineEmits<{
 }>();
 
 const { uploadFile } = useCloudinary();
-
-// 🚀 Image optimization - inline functions
-const optimizeCloudinaryImage = (url: string, width: number, height: number, quality: number | "auto" = "auto") => {
-  if (!url || !url.includes("cloudinary.com")) {
-    return url;
-  }
-  const transformations = `w_${width},h_${height},c_fill,f_auto,q_${quality}`;
-  return url.replace("/upload/", `/upload/${transformations}/`);
-};
-
-const presets = {
-  thumbnail: (url: string) => optimizeCloudinaryImage(url, 400, 400, "auto"),
-  detail: (url: string) => optimizeCloudinaryImage(url, 1000, 1000, 90),
-};
+const { presets } = useImageOptimization();
 
 // State
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -197,7 +184,7 @@ const getOptimizedPreview = (url: string) => {
   if (!url || !url.includes("cloudinary.com")) {
     return url;
   }
-  return presets.thumbnail(url); // 400x400 for preview grid
+  return presets.thumbnail(url); // eager-aligned preview
 };
 
 // Optimize viewer image (detail size for modal)
@@ -205,7 +192,7 @@ const getOptimizedViewer = (url: string) => {
   if (!url || !url.includes("cloudinary.com")) {
     return url;
   }
-  return presets.detail(url); // 1000x1000 for viewer modal
+  return presets.detail(url); // eager-aligned viewer
 };
 
 // Initialize with existing URLs

@@ -8,8 +8,8 @@ const { getCategories } = useCatalogManager();
 const categories = ref<any[]>([]);
 const loading = ref(true);
 
-// 🚀 Image optimization — eager CDN 3:4 portrait (w_400,h_533)
-const { presets } = useImageOptimization();
+// 🚀 Image optimization — eager CDN mobile-first (w_320, w_400)
+const { presets, generateSrcSet } = useImageOptimization();
 
 const getOptimizedImage = (imageUrl: string) => {
   if (!imageUrl || !imageUrl.includes("cloudinary.com")) {
@@ -372,6 +372,8 @@ onMounted(() => {
                   >
                     <img
                       :src="getOptimizedImage(category.cover_image)"
+                      :srcset="generateSrcSet(category.cover_image, [320, 400])"
+                      sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 250px"
                       :alt="category.name"
                       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
