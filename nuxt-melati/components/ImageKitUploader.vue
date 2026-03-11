@@ -1,5 +1,5 @@
 <template>
-  <div class="cloudinary-uploader">
+  <div class="imagekit-uploader">
     <!-- Upload Area -->
     <div
       @drop.prevent="handleDrop"
@@ -56,7 +56,7 @@
             <i class="bi bi-play-circle-fill text-white text-4xl"></i>
           </div>
 
-          <!-- Image Preview (✨ Optimized thumbnail) -->
+          <!-- Image Preview (optimized thumbnail) -->
           <img
             v-else
             :src="getOptimizedPreview(url)"
@@ -117,7 +117,7 @@
       </p>
     </div>
 
-    <!-- ✨ Image Viewer Modal with optimized image -->
+    <!-- Image Viewer Modal with optimized image -->
     <div
       v-if="viewerUrl"
       class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-[60]"
@@ -136,13 +136,13 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  folder?: string; // Cloudinary folder name
-  single?: boolean; // Single file upload mode
-  maxFiles?: number; // Maximum number of files
-  maxSize?: number; // Max file size in MB
-  accept?: string; // Accepted file types
-  showUrls?: boolean; // Show URL list
-  modelValue?: string[]; // v-model support for URLs
+  folder?: string;
+  single?: boolean;
+  maxFiles?: number;
+  maxSize?: number;
+  accept?: string;
+  showUrls?: boolean;
+  modelValue?: string[];
 }>();
 
 const emit = defineEmits<{
@@ -151,20 +151,21 @@ const emit = defineEmits<{
   error: [message: string];
 }>();
 
-const { uploadFile } = useCloudinary();
+const { uploadFile } = useImageKit();
 
-// 🚀 Image optimization - inline functions
-const optimizeCloudinaryImage = (url: string, width: number, height: number, quality: number | "auto" = "auto") => {
-  if (!url || !url.includes("cloudinary.com")) {
+// Image optimization - inline functions for ImageKit
+const optimizeImageKitUrl = (url: string, width: number, height: number, quality: number | "auto" = "auto") => {
+  if (!url || !url.includes("ik.imagekit.io")) {
     return url;
   }
-  const transformations = `w_${width},h_${height},c_fill,f_auto,q_${quality}`;
-  return url.replace("/upload/", `/upload/${transformations}/`);
+  const transforms = `w-${width},h-${height},c-maintain_ratio,fo-auto,f-auto,q-${quality}`;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}tr=${transforms}`;
 };
 
 const presets = {
-  thumbnail: (url: string) => optimizeCloudinaryImage(url, 400, 400, "auto"),
-  detail: (url: string) => optimizeCloudinaryImage(url, 1000, 1000, 90),
+  thumbnail: (url: string) => optimizeImageKitUrl(url, 400, 400, "auto"),
+  detail: (url: string) => optimizeImageKitUrl(url, 1000, 1000, 90),
 };
 
 // State
@@ -180,7 +181,6 @@ const viewerUrl = ref<string | null>(null);
 const acceptText = computed(() => {
   const maxSizeMB = props.maxSize || 5;
 
-  // Check if accept prop includes video
   if (props.accept && props.accept.includes("video")) {
     return `Video files (MP4, WebM, MOV) up to ${maxSizeMB}MB`;
   }
@@ -194,18 +194,18 @@ const isVideoMode = computed(() => {
 
 // Optimize preview images (thumbnail size for grid)
 const getOptimizedPreview = (url: string) => {
-  if (!url || !url.includes("cloudinary.com")) {
+  if (!url || !url.includes("ik.imagekit.io")) {
     return url;
   }
-  return presets.thumbnail(url); // 400x400 for preview grid
+  return presets.thumbnail(url);
 };
 
 // Optimize viewer image (detail size for modal)
 const getOptimizedViewer = (url: string) => {
-  if (!url || !url.includes("cloudinary.com")) {
+  if (!url || !url.includes("ik.imagekit.io")) {
     return url;
   }
-  return presets.detail(url); // 1000x1000 for viewer modal
+  return presets.detail(url);
 };
 
 // Initialize with existing URLs
@@ -275,16 +275,14 @@ const handleFiles = async (files: File[]) => {
   let validTypes: string[];
 
   if (props.accept && props.accept.includes("video")) {
-    // Video mode - accept common video formats
     validTypes = [
       "video/mp4",
       "video/webm",
-      "video/quicktime", // .mov
-      "video/x-msvideo", // .avi
-      "video/x-matroska", // .mkv
+      "video/quicktime",
+      "video/x-msvideo",
+      "video/x-matroska",
     ];
   } else {
-    // Image mode (default)
     validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
   }
 
@@ -358,7 +356,6 @@ const viewImage = (url: string) => {
 const copyUrl = async (url: string) => {
   try {
     await navigator.clipboard.writeText(url);
-    // Could add a toast notification here
   } catch (error) {
     console.error("Failed to copy:", error);
   }
@@ -366,7 +363,7 @@ const copyUrl = async (url: string) => {
 </script>
 
 <style scoped>
-.cloudinary-uploader {
+.imagekit-uploader {
   width: 100%;
 }
 </style>

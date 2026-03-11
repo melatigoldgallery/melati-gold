@@ -15,7 +15,7 @@ const { presets } = useImageOptimization();
 // Optimize images untuk grid thumbnail (4:5 sesuai aspect-[4/5])
 const getOptimizedImage = (product: any) => {
   const imageUrl = product.thumbnail_image || product.images?.[0] || "/img/placeholder.jpg";
-  if (!imageUrl.includes("cloudinary.com")) return imageUrl;
+  if (!imageUrl.includes("ik.imagekit.io")) return imageUrl;
   return presets.cardCatalog(imageUrl);
 };
 

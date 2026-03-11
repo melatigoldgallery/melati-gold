@@ -1,168 +1,142 @@
 /**
- * Composable untuk Image Optimization dengan Cloudinary
+ * Composable untuk Image Optimization dengan ImageKit
  * Auto-transform images: compress, resize, format optimization
+ * ImageKit transformasi unlimited dan gratis — tidak perlu eager transforms.
  */
 
-interface CloudinaryTransformOptions {
+interface ImageKitTransformOptions {
   width?: number;
   height?: number;
   quality?: "auto" | number;
   format?: "auto" | "webp" | "jpg" | "png";
-  crop?: "fill" | "fit" | "scale" | "thumb";
-  gravity?: "auto" | "face" | "center";
+  crop?: "maintain_ratio" | "force" | "at_max" | "at_least";
+  focus?: "auto" | "face" | "center";
 }
 
 export const useImageOptimization = () => {
   /**
-   * Transform Cloudinary URL dengan optimization parameters
-   * Contoh: https://res.cloudinary.com/demo/image/upload/v1/sample.jpg
-   * Menjadi: https://res.cloudinary.com/demo/image/upload/w_400,h_400,f_auto,q_auto/v1/sample.jpg
+   * Transform ImageKit URL dengan optimization parameters
+   * Contoh: https://ik.imagekit.io/your_id/melati-gold/products/sample.jpg
+   * Menjadi: https://ik.imagekit.io/your_id/melati-gold/products/sample.jpg?tr=w-400,h-533,c-maintain_ratio,fo-auto,f-auto,q-auto
    */
-  const getOptimizedUrl = (originalUrl: string, options: CloudinaryTransformOptions = {}): string => {
-    if (!originalUrl || !originalUrl.includes("cloudinary.com")) {
-      return originalUrl; // Return original if not Cloudinary URL
+  const getOptimizedUrl = (originalUrl: string, options: ImageKitTransformOptions = {}): string => {
+    if (!originalUrl || !originalUrl.includes("ik.imagekit.io")) {
+      return originalUrl;
     }
 
-    const { width, height, quality = "auto", format = "auto", crop = "fill", gravity = "auto" } = options;
+    const {
+      width,
+      height,
+      quality = "auto",
+      format = "auto",
+      crop = "maintain_ratio",
+      focus = "auto",
+    } = options;
 
-    // Build transformation string
-    const transformations: string[] = [];
+    const transforms: string[] = [];
 
-    if (width) transformations.push(`w_${width}`);
-    if (height) transformations.push(`h_${height}`);
-    if (crop) transformations.push(`c_${crop}`);
-    if (gravity) transformations.push(`g_${gravity}`);
-    transformations.push(`f_${format}`); // Auto format (WebP jika browser support)
-    transformations.push(`q_${quality}`); // Auto quality optimization
+    if (width) transforms.push(`w-${width}`);
+    if (height) transforms.push(`h-${height}`);
+    if (crop) transforms.push(`c-${crop}`);
+    if (focus) transforms.push(`fo-${focus}`);
+    transforms.push(`f-${format}`);
+    transforms.push(`q-${quality}`);
 
-    const transformString = transformations.join(",");
-
-    // Insert transformation into Cloudinary URL
-    // Before: .../upload/v1/sample.jpg
-    // After: .../upload/w_400,h_400,f_auto,q_auto/v1/sample.jpg
-    return originalUrl.replace("/upload/", `/upload/${transformString}/`);
+    const transformString = transforms.join(",");
+    const separator = originalUrl.includes("?") ? "&" : "?";
+    return `${originalUrl}${separator}tr=${transformString}`;
   };
 
   /**
-   * Preset transformations — diselaraskan dengan Cloudinary Eager Transforms
-   * Eager: w_400,h_533 | w_400,h_500 | w_800,h_1067
-   * Semua dengan c_fill,f_auto,q_auto,g_auto
-   * Setiap request akan langsung hit CDN cache tanpa transform kredit baru.
-   *
-   * thumbnail → alias card (w_400): browser scale down ke 80-120px tampil
-   * detail    → alias gallery (w_800): cukup untuk lightbox bahkan di Retina
+   * Preset transformations untuk ImageKit
+   * Semua transformasi gratis dan on-the-fly — tidak perlu eager/CDN cache strategy.
    */
   const presets = {
-    // Alias → card (w_400,h_533): browser scale down jadi ~80-160px tampil, cukup tajam
-    // Tidak perlu eager terpisah, hemat 1 upload credit per gambar
+    // Thumbnail/Icon — grid preview, browser scale down ke 80-160px tampil
     thumbnail: (url: string) =>
       getOptimizedUrl(url, {
         width: 400,
         height: 533,
-        quality: "auto",
-        format: "auto",
-        crop: "fill",
-        gravity: "auto",
+        crop: "maintain_ratio",
+        focus: "auto",
       }),
 
     // 3:4 portrait card — CatalogShowcase, FeaturedProducts, CustomServices, RelatedProducts (desktop)
-    // Eager: w_400,h_533,c_fill,f_auto,q_auto,g_auto
     card: (url: string) =>
       getOptimizedUrl(url, {
         width: 400,
         height: 533,
-        quality: "auto",
-        format: "auto",
-        crop: "fill",
-        gravity: "auto",
+        crop: "maintain_ratio",
+        focus: "auto",
       }),
 
     // 4:5 portrait card — catalog/ProductGrid.vue, RelatedProducts (mobile)
-    // Eager: w_400,h_500,c_fill,f_auto,q_auto,g_auto
     cardCatalog: (url: string) =>
       getOptimizedUrl(url, {
         width: 400,
         height: 500,
-        quality: "auto",
-        format: "auto",
-        crop: "fill",
-        gravity: "auto",
+        crop: "maintain_ratio",
+        focus: "auto",
       }),
 
-    // 3:4 portrait gallery main — ProductGallery main slide (~400-500px tampil)
-    // Eager: w_800,h_1067,c_fill,f_auto,q_auto,g_auto
+    // 3:4 portrait gallery main — ProductGallery main slide
     gallery: (url: string) =>
       getOptimizedUrl(url, {
         width: 800,
         height: 1067,
-        quality: "auto",
-        format: "auto",
-        crop: "fill",
-        gravity: "auto",
+        crop: "maintain_ratio",
+        focus: "auto",
       }),
 
-    // Alias → gallery (w_800,h_1067): cukup untuk lightbox fullscreen bahkan di Retina
-    // Tidak perlu eager terpisah, hemat 1 upload credit per gambar
+    // Detail/Lightbox — sama dengan gallery, cukup untuk Retina
     detail: (url: string) =>
       getOptimizedUrl(url, {
         width: 800,
         height: 1067,
-        quality: "auto",
-        format: "auto",
-        crop: "fill",
-        gravity: "auto",
+        crop: "maintain_ratio",
+        focus: "auto",
       }),
 
-    // Hero — file lokal (/img/bg.png), bukan Cloudinary → tidak melewati getOptimizedUrl
-    // Fallback jika dipakai ke Cloudinary hero image
+    // Hero fallback
     hero: (url: string) =>
       getOptimizedUrl(url, {
         width: 800,
         height: 1067,
-        quality: "auto",
-        format: "auto",
-        crop: "fill",
-        gravity: "auto",
+        crop: "maintain_ratio",
+        focus: "auto",
       }),
 
-    // Icon/logo kecil — admin preview, alias → card (w_400): browser scale turun
+    // Icon/logo kecil — admin preview
     icon: (url: string) =>
       getOptimizedUrl(url, {
         width: 400,
         height: 533,
-        quality: "auto",
-        format: "auto",
-        crop: "fill",
-        gravity: "auto",
+        crop: "maintain_ratio",
+        focus: "auto",
       }),
   };
 
   /**
-   * Mapping eager sizes: width → height yang cocok persis dengan Cloudinary eager config.
-   * HANYA gunakan ukuran ini agar setiap srcset URL = CDN cache hit, 0 transform kredit.
-   * 3 eager total: w_400,h_533 | w_400,h_500 | w_800,h_1067
+   * Size mapping untuk srcset generation.
    */
-  const EAGER_MAP: Record<number, number> = {
-    400: 533, // 3:4 (card)
-    800: 1067, // 3:4 (gallery)
+  const SIZE_MAP: Record<number, number> = {
+    400: 533,
+    800: 1067,
   };
 
   /**
-   * Generate responsive srcset untuk <img> — hanya menggunakan eager sizes.
-   * Pastikan w, h, c_fill, g_auto cocok persis dengan eager agar CDN selalu hit.
+   * Generate responsive srcset untuk <img>
    */
-  const generateSrcSet = (url: string, sizes: number[] = [400, 800, 1000]): string => {
-    const validSizes = sizes.filter((s) => s in EAGER_MAP);
+  const generateSrcSet = (url: string, sizes: number[] = [400, 800]): string => {
+    const validSizes = sizes.filter((s) => s in SIZE_MAP);
     return validSizes
       .map((w) => {
-        const h = EAGER_MAP[w];
+        const h = SIZE_MAP[w];
         const optimizedUrl = getOptimizedUrl(url, {
           width: w,
           height: h,
-          quality: "auto",
-          format: "auto",
-          crop: "fill",
-          gravity: "auto",
+          crop: "maintain_ratio",
+          focus: "auto",
         });
         return `${optimizedUrl} ${w}w`;
       })

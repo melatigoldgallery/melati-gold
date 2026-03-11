@@ -41,8 +41,8 @@ useHead({
       href: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css",
       as: "style",
     },
-    { rel: "preconnect", href: "https://res.cloudinary.com", crossorigin: "" },
-    { rel: "dns-prefetch", href: "https://res.cloudinary.com" },
+    { rel: "preconnect", href: "https://ik.imagekit.io", crossorigin: "" },
+    { rel: "dns-prefetch", href: "https://ik.imagekit.io" },
   ],
 });
 </script>

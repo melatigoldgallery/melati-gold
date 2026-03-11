@@ -89,15 +89,14 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     // Server-only config (private)
-    cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
+    imagekitPrivateKey: process.env.IMAGEKIT_PRIVATE_KEY,
 
     public: {
       // Client-side config (public)
       supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL || "",
       supabaseAnonKey: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || "",
-      cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "",
-      cloudinaryApiKey: process.env.NUXT_PUBLIC_CLOUDINARY_API_KEY || "",
-      cloudinaryUploadPreset: process.env.NUXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "melati_gold_unsigned",
+      imagekitUrlEndpoint: process.env.NUXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || "",
+      imagekitPublicKey: process.env.NUXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || "",
     },
   },
 

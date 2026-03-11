@@ -90,7 +90,7 @@
         <div>
           <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Service Image</label>
           <p class="text-xs text-gray-500 mb-2">Upload an image to represent this service</p>
-          <CloudinaryUploader
+          <ImageKitUploader
             v-model="imageUrls"
             @uploaded="handleImageUpload"
             folder="services"
@@ -248,8 +248,8 @@
 </template>
 
 <script setup lang="ts">
-// Lazy load CloudinaryUploader
-const CloudinaryUploader = defineAsyncComponent(() => import("~/components/CloudinaryUploader.vue"));
+// Lazy load ImageKitUploader
+const ImageKitUploader = defineAsyncComponent(() => import("~/components/ImageKitUploader.vue"));
 
 const props = defineProps<{
   service?: any;
