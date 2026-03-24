@@ -1,16 +1,20 @@
 <script setup>
+const { presets } = useImageOptimization();
+
 // Hero slides data
 const heroSlides = [
   {
     id: 1,
-    image: "/img/bg.png",
+    image: presets.hero("https://ik.imagekit.io/melatigold/melati-gold/hero/bg.png"),
+    imageMobile: presets.heroMobile("https://ik.imagekit.io/melatigold/melati-gold/hero/bg.png"),
     title: "Welcome to Melati Gold Shop",
     subtitle: "Temukan koleksi perhiasan emas berkualitas dengan model terbaru di Melati Gold Shop.",
     buttonText: "Lihat Koleksi",
   },
   {
     id: 2,
-    image: "/img/bg2.png",
+    image: presets.hero("https://ik.imagekit.io/melatigold/melati-gold/hero/bg2.png"),
+    imageMobile: presets.heroMobile("https://ik.imagekit.io/melatigold/melati-gold/hero/bg2.png"),
     title: "Kilau Elegan, Pesona Abadi",
     subtitle:
       "Perhiasan emas stylish dengan desain kekinian. Percayakan kilauanmu pada koleksi terbaik dari Melati Gold Shop.",
@@ -119,13 +123,18 @@ const onImageError = () => {
         class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
         :class="{ 'opacity-100': index === currentSlideIndex, 'opacity-0': index !== currentSlideIndex }"
       >
-        <img
-          :src="slide.image"
-          :alt="`Hero Background ${index + 1}`"
-          class="absolute inset-0 w-full h-full object-cover hero-image-animated"
-          @load="onImageLoad"
-          @error="onImageError"
-        />
+        <picture>
+          <source media="(max-width: 767px)" :srcset="slide.imageMobile" />
+          <img
+            :src="slide.image"
+            :alt="`Hero Background ${index + 1}`"
+            class="absolute inset-0 w-full h-full object-cover hero-image-animated"
+            :fetchpriority="index === 0 ? 'high' : 'low'"
+            :loading="index === 0 ? 'eager' : 'lazy'"
+            @load="onImageLoad"
+            @error="onImageError"
+          />
+        </picture>
       </div>
 
       <!-- Overlay -->

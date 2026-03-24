@@ -17,9 +17,7 @@ export default defineEventHandler(async () => {
   }
 
   const imagekit = new ImageKit({
-    publicKey,
     privateKey,
-    urlEndpoint,
   });
 
   // v7 API: helper.getAuthenticationParameters()

@@ -27,9 +27,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const imagekit = new ImageKit({
-      publicKey,
       privateKey,
-      urlEndpoint,
     });
 
     // v7 API: files.delete(fileId)

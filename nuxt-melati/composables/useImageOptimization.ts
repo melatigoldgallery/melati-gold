@@ -24,14 +24,7 @@ export const useImageOptimization = () => {
       return originalUrl;
     }
 
-    const {
-      width,
-      height,
-      quality = "auto",
-      format = "auto",
-      crop = "maintain_ratio",
-      focus = "auto",
-    } = options;
+    const { width, height, quality = "auto", format = "auto", crop = "maintain_ratio", focus = "auto" } = options;
 
     const transforms: string[] = [];
 
@@ -97,12 +90,21 @@ export const useImageOptimization = () => {
         focus: "auto",
       }),
 
-    // Hero fallback
+    // Hero — landscape full-screen desktop (1920×1080)
     hero: (url: string) =>
       getOptimizedUrl(url, {
-        width: 800,
-        height: 1067,
-        crop: "maintain_ratio",
+        width: 1920,
+        height: 1080,
+        crop: "force",
+        focus: "auto",
+      }),
+
+    // Hero mobile (768×432)
+    heroMobile: (url: string) =>
+      getOptimizedUrl(url, {
+        width: 768,
+        height: 432,
+        crop: "force",
         focus: "auto",
       }),
 

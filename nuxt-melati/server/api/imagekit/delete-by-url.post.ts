@@ -27,16 +27,27 @@ export default defineEventHandler(async (event) => {
     }
 
     const imagekit = new ImageKit({
-      publicKey,
       privateKey,
-      urlEndpoint,
     });
 
-    // Extract filename from URL
+    // Extract filePath from URL: strip urlEndpoint prefix and query params
+    // e.g. https://ik.imagekit.io/melatigold/melati-gold/products/abc.jpg?tr=... → /melati-gold/products/abc.jpg
+    // Extract decoded filename and directory from URL
+    // URL example: https://ik.imagekit.io/melatigold/melati-gold/products/abc.jpg?tr=...
     let fileName: string;
+    let dirPath: string;
     try {
-      const urlPath = new URL(url).pathname;
-      fileName = urlPath.split("/").pop() || "";
+      const urlObj = new URL(url);
+      // Decode %20 etc., strip query string (transforms)
+      const decodedPathname = decodeURIComponent(urlObj.pathname);
+      // Strip the ImageKit account prefix: /melatigold/melati-gold/... → /melati-gold/...
+      const endpointPathname = new URL(urlEndpoint).pathname;
+      const filePath = decodedPathname.startsWith(endpointPathname)
+        ? decodedPathname.slice(endpointPathname.length)
+        : decodedPathname;
+      const lastSlash = filePath.lastIndexOf("/");
+      fileName = filePath.slice(lastSlash + 1);
+      dirPath = lastSlash > 0 ? filePath.slice(0, lastSlash) : "/";
     } catch {
       throw createError({
         statusCode: 400,
@@ -51,26 +62,32 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // v7 API: assets.list() for searching files
-    const result = await imagekit.assets.list({
-      searchQuery: `name="${fileName}"`,
+    // Search by name (supported field) within the specific directory (path param)
+    // to avoid false positives from same-named files in different folders
+    const results = await imagekit.assets.list({
+      path: dirPath,
+      searchQuery: `name = "${fileName}"`,
       limit: 1,
     });
 
-    const files = result?.data || [];
-    if (!files || files.length === 0) {
+    // assets.list returns array directly in v7; filter to File items (Folder has no fileId)
+    const files = Array.isArray(results) ? results : [];
+    const fileItem = files.find((f: unknown) => typeof f === "object" && f !== null && "fileId" in f) as
+      | { fileId: string }
+      | undefined;
+    if (!fileItem) {
       return {
         success: false,
-        message: `File not found in ImageKit: ${fileName}`,
+        message: `File not found in ImageKit: ${dirPath}/${fileName}`,
       };
     }
 
     // v7 API: files.delete(fileId)
-    await imagekit.files.delete(files[0].fileId);
+    await imagekit.files.delete(fileItem.fileId);
 
     return {
       success: true,
-      message: `Deleted ${fileName} (fileId: ${files[0].fileId})`,
+      message: `Deleted ${dirPath}/${fileName} (fileId: ${fileItem.fileId})`,
     };
   } catch (error: any) {
     console.error("ImageKit delete-by-url error:", error);

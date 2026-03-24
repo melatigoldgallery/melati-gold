@@ -361,7 +361,7 @@
               <!-- Modal Body -->
               <div class="overflow-y-auto max-h-[calc(90vh-80px)] p-1 md:p-2">
                 <img
-                  src="public/img/Tabel-cincin.jpg"
+                  src="https://ik.imagekit.io/melatigold/melati-gold/tabel/Tabel-cincin.jpg"
                   alt="Tabel Ukuran Cincin"
                   class="w-full h-auto rounded-lg shadow-md"
                   loading="lazy"
@@ -401,7 +401,7 @@
               <!-- Modal Body -->
               <div class="overflow-y-auto max-h-[calc(90vh-80px)] p-1 md:p-2">
                 <img
-                  src="public/img/Tabel-gelang.jpg"
+                  src="https://ik.imagekit.io/melatigold/melati-gold/tabel/Tabel-gelang.jpg"
                   alt="Tabel Ukuran Gelang"
                   class="w-full h-auto rounded-lg shadow-md"
                   loading="lazy"
