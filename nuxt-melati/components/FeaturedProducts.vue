@@ -26,7 +26,7 @@ const loadFeaturedProducts = async () => {
 
 // Optimize images
 const getOptimizedImage = (imageUrl: string) => {
-  if (!imageUrl || !imageUrl.includes("cloudinary.com")) {
+  if (!imageUrl || !imageUrl.includes("ik.imagekit.io")) {
     return imageUrl || "/img/placeholder.jpg";
   }
   return presets.card(imageUrl);

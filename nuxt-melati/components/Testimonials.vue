@@ -1,16 +1,18 @@
 <script setup lang="ts">
-// Use actual files found under /public/img
+const BASE = "https://ik.imagekit.io/melatigold/melati-gold/testimonials";
+const TR = "?tr=f-auto,q-auto";
+
 const screenshots = [
-  '/img/Screenshot (655).png',
-  '/img/Screenshot (656).png',
-  '/img/Screenshot (659).png',
-  '/img/Screenshot (660).png',
-  '/img/Screenshot (662).png',
-  '/img/Screenshot (664).png',
-  '/img/Screenshot (665).png',
-  '/img/Screenshot (666).png',
-  '/img/Screenshot (667).png',
-]
+  `${BASE}/Screenshot%20(655).png${TR}`,
+  `${BASE}/Screenshot%20(656).png${TR}`,
+  `${BASE}/Screenshot%20(659).png${TR}`,
+  `${BASE}/Screenshot%20(660).png${TR}`,
+  `${BASE}/Screenshot%20(662).png${TR}`,
+  `${BASE}/Screenshot%20(664).png${TR}`,
+  `${BASE}/Screenshot%20(665).png${TR}`,
+  `${BASE}/Screenshot%20(666).png${TR}`,
+  `${BASE}/Screenshot%20(667).png${TR}`,
+];
 </script>
 
 <template>

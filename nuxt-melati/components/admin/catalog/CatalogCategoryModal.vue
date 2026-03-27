@@ -54,7 +54,7 @@
           <!-- Cover Image -->
           <div>
             <label class="block text-sm font-medium mb-2">Gambar Sampul</label>
-            <CloudinaryUploader
+            <ImageKitUploader
               v-model="imageUrls"
               @uploaded="handleImageUpload"
               folder="categories"
@@ -122,8 +122,8 @@
 </template>
 
 <script setup lang="ts">
-// Lazy load CloudinaryUploader
-const CloudinaryUploader = defineAsyncComponent(() => import("~/components/CloudinaryUploader.vue"));
+// Lazy load ImageKitUploader
+const ImageKitUploader = defineAsyncComponent(() => import("~/components/ImageKitUploader.vue"));
 
 const props = defineProps<{
   category?: any;
@@ -169,7 +169,7 @@ watch(
         .replace(/\s+/g, "-")
         .replace(/[^a-z0-9-]/g, "");
     }
-  }
+  },
 );
 
 // Handle image upload

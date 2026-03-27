@@ -10,26 +10,15 @@
       </span>
     </div>
 
-    <!-- Info Card -->
-    <div class="mb-4 sm:mb-6 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-      <div class="flex items-start gap-2 sm:gap-3">
-        <i class="bi bi-info-circle text-blue-600 text-base sm:text-lg mt-0.5 flex-shrink-0"></i>
-        <ul class="text-xs sm:text-sm text-blue-800 space-y-0.5 sm:space-y-1">
-          <li>
-            • Buka tab
-            <strong>All Products</strong>
-            → toggle
-            <strong>Featured</strong>
-            untuk menambah produk
-          </li>
-          <li>
-            • Klik
-            <strong>Remove</strong>
-            pada card di bawah untuk menghapus dari featured
-          </li>
-        </ul>
-      </div>
-    </div>
+    <!-- Info Hint -->
+    <p class="mb-4 sm:mb-5 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+      <i class="bi bi-info-circle mr-1.5"></i>
+      Buka tab
+      <strong>All Products</strong>
+      → toggle
+      <strong>Featured</strong>
+      untuk menambah produk.
+    </p>
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
@@ -47,12 +36,12 @@
     <!-- Featured Products Grid -->
     <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
       <div
-        v-for="product in featuredProducts"
+        v-for="product in paginatedProducts"
         :key="product.id"
         class="group border rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-white flex flex-col"
       >
         <!-- Image -->
-        <div class="relative aspect-[3/4] bg-gray-100">
+        <div class="relative h-48 bg-gray-100">
           <img
             :src="product.thumbnail_image || product.images?.[0] || '/img/placeholder.jpg'"
             :alt="product.title"
@@ -75,17 +64,14 @@
         </div>
 
         <!-- Content -->
-        <div class="p-2 sm:p-3 flex flex-col flex-1">
-          <h3 class="font-semibold text-xs sm:text-sm line-clamp-2 leading-tight mb-1 text-gray-900">
+        <div class="p-2 sm:p-2.5 flex flex-col flex-1 gap-1">
+          <h3 class="font-semibold text-xs sm:text-sm truncate leading-tight text-gray-900">
             {{ product.title }}
           </h3>
-          <p class="text-xs text-gray-600 font-medium mb-1">{{ formatPrice(product.price) }}</p>
-          <p class="text-[10px] sm:text-xs text-gray-400 truncate mb-1.5">
+          <p class="text-xs text-gray-600 font-medium">{{ formatPrice(product.price) }}</p>
+          <p class="text-[10px] text-gray-400 truncate">
             {{ product.category?.name }}
             <span v-if="product.subcategory?.name">› {{ product.subcategory?.name }}</span>
-          </p>
-          <p class="text-[10px] sm:text-xs text-gray-400 line-clamp-2 mb-2 hidden sm:block">
-            {{ product.description || "" }}
           </p>
 
           <!-- Remove button -->
@@ -97,6 +83,50 @@
             <span>Remove</span>
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div
+      v-if="!loading && featuredProducts.length > 0"
+      class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4"
+    >
+      <div class="text-sm text-gray-600">
+        Menampilkan {{ (currentPage - 1) * itemsPerPage + 1 }}-{{
+          Math.min(currentPage * itemsPerPage, totalItems)
+        }}
+        dari {{ totalItems }} produk
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          @click="prevPage"
+          :disabled="currentPage === 1"
+          class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="flex gap-1">
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            @click="goToPage(page)"
+            class="w-10 h-10 flex items-center justify-center rounded-lg font-medium transition-colors"
+            :class="
+              page === currentPage
+                ? 'bg-yellow-600 text-white'
+                : 'bg-white border border-gray-300 hover:bg-gray-50 text-gray-700'
+            "
+          >
+            {{ page }}
+          </button>
+        </div>
+        <button
+          @click="nextPage"
+          :disabled="currentPage === totalPages"
+          class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <i class="bi bi-chevron-right"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -111,12 +141,54 @@ const { getFeaturedProducts, toggleProductFeatured } = useCatalogManager();
 const featuredProducts = ref<any[]>([]);
 const loading = ref(true);
 
+// Pagination
+const currentPage = ref(1);
+const itemsPerPage = ref(15);
+const totalItems = ref(0);
+
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
+
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  return featuredProducts.value.slice(start, start + itemsPerPage.value);
+});
+
+const visiblePages = computed(() => {
+  const pages: (number | string)[] = [];
+  const total = totalPages.value;
+  const current = currentPage.value;
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (current > 3) pages.push("...");
+    const start = Math.max(2, current - 1);
+    const end = Math.min(total - 1, current + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (current < total - 2) pages.push("...");
+    pages.push(total);
+  }
+  return pages;
+});
+
+const goToPage = (page: number | string) => {
+  if (typeof page === "string") return;
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+};
+const nextPage = () => goToPage(currentPage.value + 1);
+const prevPage = () => goToPage(currentPage.value - 1);
+
 // Load featured products
 const loadFeaturedProducts = async () => {
   loading.value = true;
   const result = await getFeaturedProducts();
   if (result.success) {
     featuredProducts.value = result.data;
+    totalItems.value = result.data.length;
+    currentPage.value = 1;
   } else {
     const errorMsg = "error" in result ? result.error : "Unknown error";
     emit("alert", "Failed to load featured products: " + errorMsg, "error");

@@ -35,14 +35,14 @@ const getRawImageUrl = (product: any): string => {
 // Desktop grid: aspect-[3/4] → presets.card (w_400,h_533)
 const getProductImage = (product: any) => {
   const url = getRawImageUrl(product);
-  if (!url.includes("cloudinary.com")) return url;
+  if (!url.includes("ik.imagekit.io")) return url;
   return presets.card(url);
 };
 
 // Mobile carousel: aspect-[4/5] → presets.cardCatalog (w_400,h_500)
 const getProductImageMobile = (product: any) => {
   const url = getRawImageUrl(product);
-  if (!url.includes("cloudinary.com")) return url;
+  if (!url.includes("ik.imagekit.io")) return url;
   return presets.cardCatalog(url);
 };
 

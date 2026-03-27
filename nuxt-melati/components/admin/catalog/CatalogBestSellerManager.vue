@@ -31,12 +31,12 @@
       class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4"
     >
       <div
-        v-for="product in bestSellers"
+        v-for="product in paginatedBestSellers"
         :key="product.id"
         class="group border rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-white flex flex-col"
       >
         <!-- Image with badges -->
-        <div class="relative aspect-[3/4] bg-gray-100">
+        <div class="relative h-48 bg-gray-100">
           <img
             :src="product.thumbnail_image || '/img/placeholder.jpg'"
             :alt="product.title"
@@ -58,18 +58,14 @@
         </div>
 
         <!-- Info -->
-        <div class="p-2 sm:p-3 flex flex-col flex-1">
-          <h3 class="font-semibold text-xs sm:text-sm line-clamp-2 leading-tight mb-1 text-gray-900">
+        <div class="p-2 sm:p-2.5 flex flex-col flex-1 gap-1">
+          <h3 class="font-semibold text-xs sm:text-sm truncate leading-tight text-gray-900">
             {{ product.title }}
           </h3>
-          <p class="text-xs text-gray-600 font-medium mb-1">
+          <p class="text-xs text-gray-600 font-medium">
             {{ product.price ? `Rp ${Number(product.price).toLocaleString("id-ID")}` : "-" }}
           </p>
-          <p class="text-[10px] sm:text-xs text-gray-400 truncate mb-1.5">{{ product.category_name }}</p>
-          <p v-if="product.view_count" class="text-[10px] sm:text-xs text-gray-400 mb-2">
-            <i class="bi bi-eye mr-0.5"></i>
-            {{ product.view_count }} views
-          </p>
+          <p class="text-[10px] text-gray-400 truncate">{{ product.category_name }}</p>
 
           <!-- Remove button -->
           <button
@@ -80,6 +76,50 @@
             <span>Remove</span>
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div
+      v-if="!loading && bestSellers.length > 0"
+      class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4"
+    >
+      <div class="text-sm text-gray-600">
+        Menampilkan {{ (currentPage - 1) * itemsPerPage + 1 }}-{{
+          Math.min(currentPage * itemsPerPage, totalItems)
+        }}
+        dari {{ totalItems }} produk
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          @click="prevPage"
+          :disabled="currentPage === 1"
+          class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="flex gap-1">
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            @click="goToPage(page)"
+            class="w-10 h-10 flex items-center justify-center rounded-lg font-medium transition-colors"
+            :class="
+              page === currentPage
+                ? 'bg-yellow-600 text-white'
+                : 'bg-white border border-gray-300 hover:bg-gray-50 text-gray-700'
+            "
+          >
+            {{ page }}
+          </button>
+        </div>
+        <button
+          @click="nextPage"
+          :disabled="currentPage === totalPages"
+          class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <i class="bi bi-chevron-right"></i>
+        </button>
       </div>
     </div>
 
@@ -107,12 +147,54 @@ const { getBestSellers, toggleProductBestSeller } = useCatalogManager();
 const bestSellers = ref<any[]>([]);
 const loading = ref(true);
 
+// Pagination
+const currentPage = ref(1);
+const itemsPerPage = ref(15);
+const totalItems = ref(0);
+
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
+
+const paginatedBestSellers = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  return bestSellers.value.slice(start, start + itemsPerPage.value);
+});
+
+const visiblePages = computed(() => {
+  const pages: (number | string)[] = [];
+  const total = totalPages.value;
+  const current = currentPage.value;
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (current > 3) pages.push("...");
+    const start = Math.max(2, current - 1);
+    const end = Math.min(total - 1, current + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (current < total - 2) pages.push("...");
+    pages.push(total);
+  }
+  return pages;
+});
+
+const goToPage = (page: number | string) => {
+  if (typeof page === "string") return;
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+};
+const nextPage = () => goToPage(currentPage.value + 1);
+const prevPage = () => goToPage(currentPage.value - 1);
+
 // Load best sellers
 const loadBestSellers = async () => {
   loading.value = true;
   const result = await getBestSellers();
   if (result.success) {
     bestSellers.value = result.data;
+    totalItems.value = result.data.length;
+    currentPage.value = 1;
   } else {
     const errorMsg = "error" in result ? result.error : "Unknown error";
     emit("alert", "Failed to load best sellers: " + errorMsg, "error");

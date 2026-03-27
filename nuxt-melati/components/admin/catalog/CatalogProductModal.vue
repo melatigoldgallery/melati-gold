@@ -149,7 +149,7 @@
             <p class="text-xs text-gray-500 mb-2 sm:mb-3">
               Gambar pertama akan digunakan sebagai thumbnail. Anda dapat mengupload beberapa gambar untuk galeri.
             </p>
-            <CloudinaryUploader
+            <ImageKitUploader
               :key="product?.id || 'new'"
               v-model="imageUrls"
               @uploaded="handleImagesUpload"
@@ -194,7 +194,7 @@
 
             <!-- Upload Video -->
             <div v-else>
-              <CloudinaryUploader
+              <ImageKitUploader
                 :key="'video-' + (product?.id || 'new')"
                 v-model="videoUrls"
                 @uploaded="handleVideoUpload"
@@ -294,8 +294,8 @@
 </template>
 
 <script setup lang="ts">
-// Lazy load CloudinaryUploader - only loads when modal is opened
-const CloudinaryUploader = defineAsyncComponent(() => import("~/components/CloudinaryUploader.vue"));
+// Lazy load ImageKitUploader - only loads when modal is opened
+const ImageKitUploader = defineAsyncComponent(() => import("~/components/ImageKitUploader.vue"));
 
 const props = defineProps<{
   product?: any;

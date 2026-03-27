@@ -245,7 +245,7 @@ const filters = ref({
 
 // Pagination
 const currentPage = ref(1);
-const itemsPerPage = ref(12);
+const itemsPerPage = ref(15);
 const totalItems = ref(0);
 
 // Computed
@@ -352,10 +352,10 @@ const openModal = async (product?: any) => {
     try {
       const result = await getProductById(product.id);
 
-      if (result.success) {
+      if (result.success && "data" in result) {
         selectedProduct.value = result.data;
         showModal.value = true; // Only open modal if fetch succeeded
-      } else {
+      } else if ("error" in result) {
         emit("alert", "Failed to load product: " + (result.error || "Unknown error"), "error");
       }
     } catch (error: any) {

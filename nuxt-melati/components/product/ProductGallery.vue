@@ -63,22 +63,22 @@ const currentItem = computed(() => displayImages.value[currentSlide.value]);
 const currentImage = computed(() => currentItem.value?.url || "");
 const isVideo = computed(() => currentItem.value?.type === "video");
 
-// Image optimization via composable (hemat bandwidth Cloudinary free tier)
+// Image optimization via composable
 const { presets, generateSrcSet } = useImageOptimization();
 
 const optimizeImage = (url: string, size: "large" | "thumbnail" = "large") => {
-  if (!url || !url.includes("cloudinary.com")) return url;
+  if (!url || !url.includes("ik.imagekit.io")) return url;
   return size === "large" ? presets.gallery(url) : presets.thumbnail(url);
 };
 
 const getMainImageSrcSet = (url: string) => {
-  if (!url || !url.includes("cloudinary.com")) return undefined;
-  return generateSrcSet(url, [320, 400, 800]); // mobile-first: small to large
+  if (!url || !url.includes("ik.imagekit.io")) return undefined;
+  return generateSrcSet(url, [400, 700, 1000]);
 };
 
 const getThumbnailSrcSet = (url: string) => {
-  if (!url || !url.includes("cloudinary.com")) return undefined;
-  return generateSrcSet(url, [320]); // thumbnail strip pakai eager terkecil
+  if (!url || !url.includes("ik.imagekit.io")) return undefined;
+  return generateSrcSet(url, [80, 160, 200]);
 };
 
 // Error handler for broken images

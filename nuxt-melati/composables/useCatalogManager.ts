@@ -3,7 +3,7 @@ export const useCatalogManager = () => {
   const { $supabase } = useNuxtApp();
   const cache = useCacheManager();
   // Harus dipanggil di top-level (synchronous context) agar useRuntimeConfig bekerja
-  const { deleteFileByUrl } = useCloudinary();
+  const { deleteFileByUrl } = useImageKit();
 
   if (!$supabase) {
     throw new Error("Supabase client is not available");
@@ -626,7 +626,7 @@ export const useCatalogManager = () => {
       cache.clearPrefix("v_featured_products");
       cache.clearPrefix("v_best_sellers");
 
-      // Delete removed media from Cloudinary (best-effort, parallel)
+      // Delete removed media from ImageKit (best-effort, parallel)
       if (oldMediaUrls && oldMediaUrls.length > 0) {
         const newUrls = new Set(
           [productData.thumbnail_image, ...(productData.images || []), productData.video_url].filter(Boolean),
@@ -635,7 +635,7 @@ export const useCatalogManager = () => {
         if (removedUrls.length > 0) {
           await Promise.allSettled(
             removedUrls.map((url) =>
-              deleteFileByUrl(url).catch((e) => console.warn("[Cloudinary] Failed to delete:", url, e)),
+              deleteFileByUrl(url).catch((e: unknown) => console.warn("[ImageKit] Failed to delete:", url, e)),
             ),
           );
         }
@@ -667,7 +667,7 @@ export const useCatalogManager = () => {
       cache.clearPrefix("v_featured_products");
       cache.clearPrefix("v_best_sellers");
 
-      // Delete all media from Cloudinary (best-effort, parallel, after DB delete)
+      // Delete all media from ImageKit (best-effort, parallel, after DB delete)
       if (product) {
         const urls = [product.thumbnail_image, ...(product.images || []), product.video_url].filter(
           Boolean,
@@ -675,7 +675,7 @@ export const useCatalogManager = () => {
         const uniqueUrls = [...new Set(urls)];
         await Promise.allSettled(
           uniqueUrls.map((url) =>
-            deleteFileByUrl(url).catch((e) => console.warn("[Cloudinary] Failed to delete:", url, e)),
+            deleteFileByUrl(url).catch((e) => console.warn("[ImageKit] Failed to delete:", url, e)),
           ),
         );
       }
