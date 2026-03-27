@@ -10,26 +10,15 @@
       </span>
     </div>
 
-    <!-- Info Card -->
-    <div class="mb-4 sm:mb-6 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-      <div class="flex items-start gap-2 sm:gap-3">
-        <i class="bi bi-info-circle text-blue-600 text-base sm:text-lg mt-0.5 flex-shrink-0"></i>
-        <ul class="text-xs sm:text-sm text-blue-800 space-y-0.5 sm:space-y-1">
-          <li>
-            • Buka tab
-            <strong>All Products</strong>
-            → toggle
-            <strong>Featured</strong>
-            untuk menambah produk
-          </li>
-          <li>
-            • Klik
-            <strong>Remove</strong>
-            pada card di bawah untuk menghapus dari featured
-          </li>
-        </ul>
-      </div>
-    </div>
+    <!-- Info Hint -->
+    <p class="mb-4 sm:mb-5 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+      <i class="bi bi-info-circle mr-1.5"></i>
+      Buka tab
+      <strong>All Products</strong>
+      → toggle
+      <strong>Featured</strong>
+      untuk menambah produk.
+    </p>
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
@@ -52,7 +41,7 @@
         class="group border rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-white flex flex-col"
       >
         <!-- Image -->
-        <div class="relative aspect-[3/4] bg-gray-100">
+        <div class="relative aspect-square bg-gray-100">
           <img
             :src="product.thumbnail_image || product.images?.[0] || '/img/placeholder.jpg'"
             :alt="product.title"
@@ -75,17 +64,14 @@
         </div>
 
         <!-- Content -->
-        <div class="p-2 sm:p-3 flex flex-col flex-1">
-          <h3 class="font-semibold text-xs sm:text-sm line-clamp-2 leading-tight mb-1 text-gray-900">
+        <div class="p-2 sm:p-2.5 flex flex-col flex-1 gap-1">
+          <h3 class="font-semibold text-xs sm:text-sm truncate leading-tight text-gray-900">
             {{ product.title }}
           </h3>
-          <p class="text-xs text-gray-600 font-medium mb-1">{{ formatPrice(product.price) }}</p>
-          <p class="text-[10px] sm:text-xs text-gray-400 truncate mb-1.5">
+          <p class="text-xs text-gray-600 font-medium">{{ formatPrice(product.price) }}</p>
+          <p class="text-[10px] text-gray-400 truncate">
             {{ product.category?.name }}
             <span v-if="product.subcategory?.name">› {{ product.subcategory?.name }}</span>
-          </p>
-          <p class="text-[10px] sm:text-xs text-gray-400 line-clamp-2 mb-2 hidden sm:block">
-            {{ product.description || "" }}
           </p>
 
           <!-- Remove button -->

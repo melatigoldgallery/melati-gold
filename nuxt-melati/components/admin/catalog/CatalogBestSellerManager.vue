@@ -36,7 +36,7 @@
         class="group border rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-white flex flex-col"
       >
         <!-- Image with badges -->
-        <div class="relative aspect-[3/4] bg-gray-100">
+        <div class="relative aspect-square bg-gray-100">
           <img
             :src="product.thumbnail_image || '/img/placeholder.jpg'"
             :alt="product.title"
@@ -58,18 +58,14 @@
         </div>
 
         <!-- Info -->
-        <div class="p-2 sm:p-3 flex flex-col flex-1">
-          <h3 class="font-semibold text-xs sm:text-sm line-clamp-2 leading-tight mb-1 text-gray-900">
+        <div class="p-2 sm:p-2.5 flex flex-col flex-1 gap-1">
+          <h3 class="font-semibold text-xs sm:text-sm truncate leading-tight text-gray-900">
             {{ product.title }}
           </h3>
-          <p class="text-xs text-gray-600 font-medium mb-1">
+          <p class="text-xs text-gray-600 font-medium">
             {{ product.price ? `Rp ${Number(product.price).toLocaleString("id-ID")}` : "-" }}
           </p>
-          <p class="text-[10px] sm:text-xs text-gray-400 truncate mb-1.5">{{ product.category_name }}</p>
-          <p v-if="product.view_count" class="text-[10px] sm:text-xs text-gray-400 mb-2">
-            <i class="bi bi-eye mr-0.5"></i>
-            {{ product.view_count }} views
-          </p>
+          <p class="text-[10px] text-gray-400 truncate">{{ product.category_name }}</p>
 
           <!-- Remove button -->
           <button

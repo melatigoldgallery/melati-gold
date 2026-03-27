@@ -103,9 +103,6 @@ export const useCatalogManager = () => {
 
   const updateCategory = async (id: string, categoryData: any) => {
     try {
-      // Fetch old cover_image before update for cleanup
-      const { data: old } = await $supabase.from("catalog_categories").select("cover_image").eq("id", id).single();
-
       // Remove any non-column fields before update
       const { ...cleanData } = categoryData;
 
@@ -121,13 +118,6 @@ export const useCatalogManager = () => {
       // Invalidate categories cache after update
       cache.clearPrefix("catalog_categories");
 
-      // Delete old cover_image from ImageKit if replaced
-      if (old?.cover_image && old.cover_image !== categoryData.cover_image) {
-        deleteFileByUrl(old.cover_image).catch((e) =>
-          console.warn("[ImageKit] Failed to delete old category image:", e),
-        );
-      }
-
       return { success: true, data };
     } catch (error) {
       console.error("Error updating category:", error);
@@ -137,22 +127,12 @@ export const useCatalogManager = () => {
 
   const deleteCategory = async (id: string) => {
     try {
-      // Fetch cover_image before deleting
-      const { data: category } = await $supabase.from("catalog_categories").select("cover_image").eq("id", id).single();
-
       const { error } = await $supabase.from("catalog_categories").delete().eq("id", id);
 
       if (error) throw error;
 
       // Invalidate categories cache after delete
       cache.clearPrefix("catalog_categories");
-
-      // Delete cover_image from ImageKit (best-effort)
-      if (category?.cover_image) {
-        deleteFileByUrl(category.cover_image).catch((e) =>
-          console.warn("[ImageKit] Failed to delete category image:", e),
-        );
-      }
 
       return { success: true };
     } catch (error) {
@@ -846,9 +826,6 @@ export const useCatalogManager = () => {
 
   const updateCustomService = async (id: string, serviceData: any) => {
     try {
-      // Fetch old image_url before update for cleanup
-      const { data: old } = await $supabase.from("custom_services").select("image_url").eq("id", id).single();
-
       // Remove any non-column fields before update
       const { ...cleanData } = serviceData;
 
@@ -859,11 +836,6 @@ export const useCatalogManager = () => {
       // Invalidate custom services cache after update
       cache.clearPrefix("custom_services");
 
-      // Delete old image_url from ImageKit if replaced
-      if (old?.image_url && old.image_url !== serviceData.image_url) {
-        deleteFileByUrl(old.image_url).catch((e) => console.warn("[ImageKit] Failed to delete old service image:", e));
-      }
-
       return { success: true, data };
     } catch (error) {
       console.error("Error updating service:", error);
@@ -873,20 +845,12 @@ export const useCatalogManager = () => {
 
   const deleteCustomService = async (id: string) => {
     try {
-      // Fetch image_url before deleting
-      const { data: service } = await $supabase.from("custom_services").select("image_url").eq("id", id).single();
-
       const { error } = await $supabase.from("custom_services").delete().eq("id", id);
 
       if (error) throw error;
 
       // Invalidate custom services cache after delete
       cache.clearPrefix("custom_services");
-
-      // Delete image_url from ImageKit (best-effort)
-      if (service?.image_url) {
-        deleteFileByUrl(service.image_url).catch((e) => console.warn("[ImageKit] Failed to delete service image:", e));
-      }
 
       return { success: true };
     } catch (error) {

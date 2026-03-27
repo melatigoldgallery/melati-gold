@@ -33,19 +33,20 @@ Proyek Melati Gold saat ini menggunakan **Cloudinary** sebagai media storage dan
 
 ### Cakupan Migrasi
 
-| Aspek | Jumlah |
-|-------|--------|
-| Composables yang berubah | 2 file |
-| Components yang berubah | 9 file |
-| Server API routes | 2 file (delete, usage) |
-| Config files | 2 file (nuxt.config.ts, .env) |
-| Total file terdampak | **15 file** |
+| Aspek                    | Jumlah                        |
+| ------------------------ | ----------------------------- |
+| Composables yang berubah | 2 file                        |
+| Components yang berubah  | 9 file                        |
+| Server API routes        | 2 file (delete, usage)        |
+| Config files             | 2 file (nuxt.config.ts, .env) |
+| Total file terdampak     | **15 file**                   |
 
 ---
 
 ## 2. Arsitektur Saat Ini (Cloudinary)
 
 ### Flow Upload
+
 ```
 Browser → Cloudinary Upload API (unsigned preset) → Cloudinary CDN
                                                         ↓
@@ -53,6 +54,7 @@ Browser → Cloudinary Upload API (unsigned preset) → Cloudinary CDN
 ```
 
 ### Flow Display
+
 ```
 Supabase DB → URL Cloudinary (original)
                   ↓
@@ -62,37 +64,39 @@ Supabase DB → URL Cloudinary (original)
 ```
 
 ### Flow Delete
+
 ```
 Browser → /api/cloudinary/delete (server route) → Cloudinary Admin API (signed)
 ```
 
 ### File & Tanggung Jawab
 
-| File | Fungsi |
-|------|--------|
-| `composables/useCloudinary.ts` | Upload (client-side unsigned), delete (via server), URL extraction, transformasi, usage |
-| `composables/useImageOptimization.ts` | Preset transformasi (thumbnail, card, cardCatalog, gallery, detail, hero, icon), srcset generator |
-| `components/CloudinaryUploader.vue` | Drag-and-drop uploader, preview, viewer modal |
-| `server/api/cloudinary/delete.post.ts` | Server-side delete via Cloudinary SDK (signed) |
-| `server/api/cloudinary/usage.get.ts` | Server-side usage query via Cloudinary SDK |
-| `composables/useCatalogManager.ts` | CRUD produk — auto-delete media saat update/delete produk |
-| `nuxt.config.ts` | Runtime config: cloudName, apiKey, uploadPreset, apiSecret |
+| File                                   | Fungsi                                                                                            |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `composables/useCloudinary.ts`         | Upload (client-side unsigned), delete (via server), URL extraction, transformasi, usage           |
+| `composables/useImageOptimization.ts`  | Preset transformasi (thumbnail, card, cardCatalog, gallery, detail, hero, icon), srcset generator |
+| `components/CloudinaryUploader.vue`    | Drag-and-drop uploader, preview, viewer modal                                                     |
+| `server/api/cloudinary/delete.post.ts` | Server-side delete via Cloudinary SDK (signed)                                                    |
+| `server/api/cloudinary/usage.get.ts`   | Server-side usage query via Cloudinary SDK                                                        |
+| `composables/useCatalogManager.ts`     | CRUD produk — auto-delete media saat update/delete produk                                         |
+| `nuxt.config.ts`                       | Runtime config: cloudName, apiKey, uploadPreset, apiSecret                                        |
 
 ### Komponen yang Mengonsumsi Media
 
-| Component | Jenis Optimasi |
-|-----------|---------------|
-| `FeaturedProducts.vue` | `presets.card` (w_400,h_533) |
-| `CatalogShowcase.vue` | `presets.card` (w_400,h_533) |
-| `CustomServices.vue` | `presets.card` (w_400,h_533) |
-| `catalog/ProductGrid.vue` | `presets.cardCatalog` (w_400,h_500) |
-| `product/ProductGallery.vue` | `presets.gallery` (w_800,h_1067), `presets.thumbnail`, srcset |
-| `product/RelatedProducts.vue` | `presets.card`, `presets.cardCatalog` (responsive) |
-| `admin/catalog/CatalogProductModal.vue` | CloudinaryUploader untuk images (max 30) dan video (max 50MB) |
-| `admin/catalog/CatalogCategoryModal.vue` | CloudinaryUploader untuk cover image |
-| `admin/catalog/CatalogServiceModal.vue` | CloudinaryUploader untuk service image |
+| Component                                | Jenis Optimasi                                                |
+| ---------------------------------------- | ------------------------------------------------------------- |
+| `FeaturedProducts.vue`                   | `presets.card` (w_400,h_533)                                  |
+| `CatalogShowcase.vue`                    | `presets.card` (w_400,h_533)                                  |
+| `CustomServices.vue`                     | `presets.card` (w_400,h_533)                                  |
+| `catalog/ProductGrid.vue`                | `presets.cardCatalog` (w_400,h_500)                           |
+| `product/ProductGallery.vue`             | `presets.gallery` (w_800,h_1067), `presets.thumbnail`, srcset |
+| `product/RelatedProducts.vue`            | `presets.card`, `presets.cardCatalog` (responsive)            |
+| `admin/catalog/CatalogProductModal.vue`  | CloudinaryUploader untuk images (max 30) dan video (max 50MB) |
+| `admin/catalog/CatalogCategoryModal.vue` | CloudinaryUploader untuk cover image                          |
+| `admin/catalog/CatalogServiceModal.vue`  | CloudinaryUploader untuk service image                        |
 
 ### Pola URL Cloudinary Saat Ini
+
 ```
 Original:
 https://res.cloudinary.com/{cloud_name}/image/upload/v{version}/melati-gold/{folder}/{public_id}.{ext}
@@ -109,6 +113,7 @@ https://res.cloudinary.com/{cloud_name}/video/upload/v{version}/melati-gold/{fol
 ## 3. Arsitektur Target (ImageKit)
 
 ### Flow Upload (Baru)
+
 ```
 Browser → Server Route /api/imagekit/auth (get auth params)
        → ImageKit Upload API (signed/client-side) → ImageKit CDN
@@ -117,6 +122,7 @@ Browser → Server Route /api/imagekit/auth (get auth params)
 ```
 
 ### Flow Display (Baru)
+
 ```
 Supabase DB → URL ImageKit (original)
                   ↓
@@ -126,11 +132,13 @@ Supabase DB → URL ImageKit (original)
 ```
 
 ### Flow Delete (Baru)
+
 ```
 Browser → /api/imagekit/delete (server route) → ImageKit Server API (private key)
 ```
 
 ### Pola URL ImageKit
+
 ```
 Original:
 https://ik.imagekit.io/{imagekit_id}/melati-gold/{folder}/{filename}
@@ -146,34 +154,34 @@ https://ik.imagekit.io/{imagekit_id}/tr:w-400,h-533,fo-auto,f-auto,q-auto/melati
 
 ## 4. Perbandingan Cloudinary vs ImageKit
 
-| Fitur | Cloudinary (Free) | ImageKit (Free) |
-|-------|-------------------|-----------------|
-| Storage | 25 GB | 20 GB |
-| Bandwidth | 25 GB/bulan | 20 GB/bulan |
-| Transformasi | 25 kredit/bulan (terbatas) | **Unlimited** |
-| Video processing | Terbatas kredit | Terbatas di free |
-| URL Delivery | `res.cloudinary.com` | `ik.imagekit.io` |
-| Real-time transform | Ya (pakai kredit) | **Ya (gratis)** |
-| Auto format (WebP/AVIF) | `f_auto` | `f-auto` |
-| Auto quality | `q_auto` | `q-auto` |
-| Face detection | `g_face` | `fo-face` |
-| Smart crop | `c_fill,g_auto` | `c-maintain_ratio,fo-auto` |
-| Upload method | Unsigned preset | Client-side auth (signature) |
-| SDK | `cloudinary` npm | `imagekitio-vue` / `imagekit-javascript` |
+| Fitur                   | Cloudinary (Free)          | ImageKit (Free)                          |
+| ----------------------- | -------------------------- | ---------------------------------------- |
+| Storage                 | 25 GB                      | 20 GB                                    |
+| Bandwidth               | 25 GB/bulan                | 20 GB/bulan                              |
+| Transformasi            | 25 kredit/bulan (terbatas) | **Unlimited**                            |
+| Video processing        | Terbatas kredit            | Terbatas di free                         |
+| URL Delivery            | `res.cloudinary.com`       | `ik.imagekit.io`                         |
+| Real-time transform     | Ya (pakai kredit)          | **Ya (gratis)**                          |
+| Auto format (WebP/AVIF) | `f_auto`                   | `f-auto`                                 |
+| Auto quality            | `q_auto`                   | `q-auto`                                 |
+| Face detection          | `g_face`                   | `fo-face`                                |
+| Smart crop              | `c_fill,g_auto`            | `c-maintain_ratio,fo-auto`               |
+| Upload method           | Unsigned preset            | Client-side auth (signature)             |
+| SDK                     | `cloudinary` npm           | `imagekitio-vue` / `imagekit-javascript` |
 
 ### Mapping Transformasi Cloudinary → ImageKit
 
-| Cloudinary | ImageKit | Keterangan |
-|------------|----------|------------|
-| `w_400` | `w-400` | Width |
-| `h_533` | `h-533` | Height |
-| `c_fill` | `c-maintain_ratio` atau `cm-extract` | Crop mode |
-| `g_auto` | `fo-auto` | Focus / gravity |
-| `f_auto` | `f-auto` | Format otomatis |
-| `q_auto` | `q-auto` | Quality otomatis |
-| `c_fit` | `c-at_max` | Fit mode |
-| `c_scale` | `c-force` | Scale mode |
-| `g_face` | `fo-face` | Face detection |
+| Cloudinary | ImageKit                             | Keterangan       |
+| ---------- | ------------------------------------ | ---------------- |
+| `w_400`    | `w-400`                              | Width            |
+| `h_533`    | `h-533`                              | Height           |
+| `c_fill`   | `c-maintain_ratio` atau `cm-extract` | Crop mode        |
+| `g_auto`   | `fo-auto`                            | Focus / gravity  |
+| `f_auto`   | `f-auto`                             | Format otomatis  |
+| `q_auto`   | `q-auto`                             | Quality otomatis |
+| `c_fit`    | `c-at_max`                           | Fit mode         |
+| `c_scale`  | `c-force`                            | Scale mode       |
+| `g_face`   | `fo-face`                            | Face detection   |
 
 ---
 
@@ -181,41 +189,41 @@ https://ik.imagekit.io/{imagekit_id}/tr:w-400,h-533,fo-auto,f-auto,q-auto/melati
 
 ### Kategori A: Core — Harus Diubah Total
 
-| # | File | Aksi |
-|---|------|------|
-| 1 | `composables/useCloudinary.ts` | **Rename → `useImageKit.ts`**, rewrite upload/delete/transform logic |
-| 2 | `composables/useImageOptimization.ts` | Rewrite transformasi URL dari Cloudinary format ke ImageKit format |
-| 3 | `components/CloudinaryUploader.vue` | **Rename → `ImageKitUploader.vue`**, rewrite upload logic |
-| 4 | `server/api/cloudinary/delete.post.ts` | **Pindah → `server/api/imagekit/delete.post.ts`**, gunakan ImageKit SDK |
-| 5 | `server/api/cloudinary/usage.get.ts` | **Pindah → `server/api/imagekit/usage.get.ts`**, gunakan ImageKit SDK |
+| #   | File                                   | Aksi                                                                    |
+| --- | -------------------------------------- | ----------------------------------------------------------------------- |
+| 1   | `composables/useCloudinary.ts`         | **Rename → `useImageKit.ts`**, rewrite upload/delete/transform logic    |
+| 2   | `composables/useImageOptimization.ts`  | Rewrite transformasi URL dari Cloudinary format ke ImageKit format      |
+| 3   | `components/CloudinaryUploader.vue`    | **Rename → `ImageKitUploader.vue`**, rewrite upload logic               |
+| 4   | `server/api/cloudinary/delete.post.ts` | **Pindah → `server/api/imagekit/delete.post.ts`**, gunakan ImageKit SDK |
+| 5   | `server/api/cloudinary/usage.get.ts`   | **Pindah → `server/api/imagekit/usage.get.ts`**, gunakan ImageKit SDK   |
 
 ### Kategori B: Config — Update Credentials
 
-| # | File | Aksi |
-|---|------|------|
-| 6 | `nuxt.config.ts` | Ganti runtimeConfig dari Cloudinary → ImageKit keys |
-| 7 | `.env` / `.env.example` | Ganti env vars: `IMAGEKIT_*` |
-| 8 | `package.json` | Hapus `cloudinary`, tambah `imagekit` |
+| #   | File                    | Aksi                                                |
+| --- | ----------------------- | --------------------------------------------------- |
+| 6   | `nuxt.config.ts`        | Ganti runtimeConfig dari Cloudinary → ImageKit keys |
+| 7   | `.env` / `.env.example` | Ganti env vars: `IMAGEKIT_*`                        |
+| 8   | `package.json`          | Hapus `cloudinary`, tambah `imagekit`               |
 
 ### Kategori C: Konsumen Media — Update Import & URL Check
 
-| # | File | Perubahan |
-|---|------|-----------|
-| 9 | `components/FeaturedProducts.vue` | Ganti check `cloudinary.com` → `ik.imagekit.io` |
-| 10 | `components/CatalogShowcase.vue` | Ganti check `cloudinary.com` → `ik.imagekit.io` |
-| 11 | `components/CustomServices.vue` | Ganti check `cloudinary.com` → `ik.imagekit.io` |
-| 12 | `components/catalog/ProductGrid.vue` | Ganti check `cloudinary.com` → `ik.imagekit.io` |
-| 13 | `components/product/ProductGallery.vue` | Ganti check `cloudinary.com` → `ik.imagekit.io` |
-| 14 | `components/product/RelatedProducts.vue` | Ganti check `cloudinary.com` → `ik.imagekit.io` |
-| 15 | `admin/catalog/CatalogProductModal.vue` | Ganti `CloudinaryUploader` → `ImageKitUploader` |
-| 16 | `admin/catalog/CatalogCategoryModal.vue` | Ganti `CloudinaryUploader` → `ImageKitUploader` |
-| 17 | `admin/catalog/CatalogServiceModal.vue` | Ganti `CloudinaryUploader` → `ImageKitUploader` |
+| #   | File                                     | Perubahan                                       |
+| --- | ---------------------------------------- | ----------------------------------------------- |
+| 9   | `components/FeaturedProducts.vue`        | Ganti check `cloudinary.com` → `ik.imagekit.io` |
+| 10  | `components/CatalogShowcase.vue`         | Ganti check `cloudinary.com` → `ik.imagekit.io` |
+| 11  | `components/CustomServices.vue`          | Ganti check `cloudinary.com` → `ik.imagekit.io` |
+| 12  | `components/catalog/ProductGrid.vue`     | Ganti check `cloudinary.com` → `ik.imagekit.io` |
+| 13  | `components/product/ProductGallery.vue`  | Ganti check `cloudinary.com` → `ik.imagekit.io` |
+| 14  | `components/product/RelatedProducts.vue` | Ganti check `cloudinary.com` → `ik.imagekit.io` |
+| 15  | `admin/catalog/CatalogProductModal.vue`  | Ganti `CloudinaryUploader` → `ImageKitUploader` |
+| 16  | `admin/catalog/CatalogCategoryModal.vue` | Ganti `CloudinaryUploader` → `ImageKitUploader` |
+| 17  | `admin/catalog/CatalogServiceModal.vue`  | Ganti `CloudinaryUploader` → `ImageKitUploader` |
 
 ### Kategori D: Indirect — Auto-delete Logic
 
-| # | File | Perubahan |
-|---|------|-----------|
-| 18 | `composables/useCatalogManager.ts` | Ganti `useCloudinary()` → `useImageKit()`, update `deleteFileByUrl` |
+| #   | File                               | Perubahan                                                           |
+| --- | ---------------------------------- | ------------------------------------------------------------------- |
+| 18  | `composables/useCatalogManager.ts` | Ganti `useCloudinary()` → `useImageKit()`, update `deleteFileByUrl` |
 
 ---
 
@@ -224,10 +232,12 @@ https://ik.imagekit.io/{imagekit_id}/tr:w-400,h-533,fo-auto,f-auto,q-auto/melati
 ### Fase 1: Setup ImageKit Account & Konfigurasi
 
 **1.1. Buat akun ImageKit**
+
 - Daftar di https://imagekit.io
 - Catat: `URL Endpoint`, `Public Key`, `Private Key`
 
 **1.2. Buat folder structure**
+
 - Buat folder `melati-gold/` di dashboard ImageKit
 - Sub-folder: `products/`, `categories/`, `services/`, `general/`
 
@@ -281,7 +291,7 @@ ImageKit client-side upload membutuhkan signature dari server (berbeda dari Clou
 
 ```ts
 // server/api/imagekit/auth.get.ts
-import ImageKit from 'imagekit';
+import ImageKit from "imagekit";
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
@@ -301,14 +311,14 @@ export default defineEventHandler(async (event) => {
 
 ```ts
 // server/api/imagekit/delete.post.ts
-import ImageKit from 'imagekit';
+import ImageKit from "imagekit";
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
   const { fileId } = await readBody(event);
 
   if (!fileId) {
-    throw createError({ statusCode: 400, statusMessage: 'File ID is required' });
+    throw createError({ statusCode: 400, statusMessage: "File ID is required" });
   }
 
   const imagekit = new ImageKit({
@@ -341,45 +351,45 @@ export const useImageKit = () => {
   const uploading = ref(false);
 
   // Upload single file (client-side dengan server auth)
-  const uploadFile = async (file: File, folder = 'general') => {
+  const uploadFile = async (file: File, folder = "general") => {
     uploading.value = true;
     try {
       const urlEndpoint = config.public.imagekitUrlEndpoint;
       const publicKey = config.public.imagekitPublicKey;
 
       if (!urlEndpoint || !publicKey) {
-        throw new Error('ImageKit not configured');
+        throw new Error("ImageKit not configured");
       }
 
       // 1. Dapatkan auth params dari server
-      const authParams = await $fetch('/api/imagekit/auth');
+      const authParams = await $fetch("/api/imagekit/auth");
 
       // 2. Upload ke ImageKit
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('publicKey', publicKey);
-      formData.append('signature', authParams.signature);
-      formData.append('expire', String(authParams.expire));
-      formData.append('token', authParams.token);
-      formData.append('fileName', `${folder}_${Date.now()}_${file.name}`);
-      formData.append('folder', `/melati-gold/${folder}`);
+      formData.append("file", file);
+      formData.append("publicKey", publicKey);
+      formData.append("signature", authParams.signature);
+      formData.append("expire", String(authParams.expire));
+      formData.append("token", authParams.token);
+      formData.append("fileName", `${folder}_${Date.now()}_${file.name}`);
+      formData.append("folder", `/melati-gold/${folder}`);
 
-      const response = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
-        method: 'POST',
+      const response = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
+        method: "POST",
         body: formData,
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Upload failed');
+        throw new Error(result.message || "Upload failed");
       }
 
       return {
         success: true,
         data: {
           url: result.url,
-          fileId: result.fileId,       // Penting untuk delete
+          fileId: result.fileId, // Penting untuk delete
           thumbnailUrl: result.thumbnailUrl,
           width: result.width,
           height: result.height,
@@ -388,8 +398,8 @@ export const useImageKit = () => {
         },
       };
     } catch (error: any) {
-      console.error('ImageKit upload error:', error);
-      return { success: false, error: error.message || 'Upload failed' };
+      console.error("ImageKit upload error:", error);
+      return { success: false, error: error.message || "Upload failed" };
     } finally {
       uploading.value = false;
     }
@@ -400,46 +410,46 @@ export const useImageKit = () => {
   // Catatan: fileId tidak bisa di-extract dari URL, perlu disimpan di DB.
   // Alternatif: gunakan ImageKit list API dengan path search.
   const extractFileInfo = (url: string) => {
-    if (!url || !url.includes('ik.imagekit.io')) return null;
+    if (!url || !url.includes("ik.imagekit.io")) return null;
     // Extract path setelah endpoint
     const endpoint = config.public.imagekitUrlEndpoint;
-    const path = url.replace(endpoint, '').split('?')[0];
+    const path = url.replace(endpoint, "").split("?")[0];
     return { path, isImageKit: true };
   };
 
   // Delete file dari ImageKit by fileId
   const deleteFile = async (fileId: string) => {
     try {
-      const response = await $fetch('/api/imagekit/delete', {
-        method: 'POST',
+      const response = await $fetch("/api/imagekit/delete", {
+        method: "POST",
         body: { fileId },
       });
       return { success: true, data: response };
     } catch (error: any) {
-      console.error('ImageKit delete error:', error);
-      return { success: false, error: error.message || 'Delete failed' };
+      console.error("ImageKit delete error:", error);
+      return { success: false, error: error.message || "Delete failed" };
     }
   };
 
   // Delete file by URL (perlu search API karena ImageKit butuh fileId)
   const deleteFileByUrl = async (url: string) => {
     try {
-      const response = await $fetch('/api/imagekit/delete-by-url', {
-        method: 'POST',
+      const response = await $fetch("/api/imagekit/delete-by-url", {
+        method: "POST",
         body: { url },
       });
       return { success: true, data: response };
     } catch (error: any) {
-      console.error('ImageKit delete by URL error:', error);
-      return { success: false, error: error.message || 'Delete failed' };
+      console.error("ImageKit delete by URL error:", error);
+      return { success: false, error: error.message || "Delete failed" };
     }
   };
 
   // Transform image URL dengan ImageKit transformations
   const transformImage = (url: string, transformations: string) => {
-    if (!url || !url.includes('ik.imagekit.io')) return url;
+    if (!url || !url.includes("ik.imagekit.io")) return url;
     // Gunakan query parameter approach
-    const separator = url.includes('?') ? '&' : '?';
+    const separator = url.includes("?") ? "&" : "?";
     return `${url}${separator}tr=${transformations}`;
   };
 
@@ -461,10 +471,10 @@ export const useImageKit = () => {
     if (options.format) transforms.push(`f-${options.format}`);
 
     // Auto format dan quality jika tidak ditentukan
-    if (!options.format) transforms.push('f-auto');
-    if (!options.quality) transforms.push('q-auto');
+    if (!options.format) transforms.push("f-auto");
+    if (!options.quality) transforms.push("q-auto");
 
-    return transformImage(url, transforms.join(','));
+    return transformImage(url, transforms.join(","));
   };
 
   return {
@@ -487,25 +497,19 @@ export const useImageKit = () => {
 interface ImageKitTransformOptions {
   width?: number;
   height?: number;
-  quality?: 'auto' | number;
-  format?: 'auto' | 'webp' | 'jpg' | 'png';
-  crop?: 'maintain_ratio' | 'force' | 'at_max' | 'at_least';
-  focus?: 'auto' | 'face' | 'center';
+  quality?: "auto" | number;
+  format?: "auto" | "webp" | "jpg" | "png";
+  crop?: "maintain_ratio" | "force" | "at_max" | "at_least";
+  focus?: "auto" | "face" | "center";
 }
 
 export const useImageOptimization = () => {
   const getOptimizedUrl = (originalUrl: string, options: ImageKitTransformOptions = {}): string => {
-    if (!originalUrl || !originalUrl.includes('ik.imagekit.io')) {
+    if (!originalUrl || !originalUrl.includes("ik.imagekit.io")) {
       return originalUrl;
     }
 
-    const {
-      width, height,
-      quality = 'auto',
-      format = 'auto',
-      crop = 'maintain_ratio',
-      focus = 'auto',
-    } = options;
+    const { width, height, quality = "auto", format = "auto", crop = "maintain_ratio", focus = "auto" } = options;
 
     const transforms: string[] = [];
     if (width) transforms.push(`w-${width}`);
@@ -515,32 +519,27 @@ export const useImageOptimization = () => {
     transforms.push(`f-${format}`);
     transforms.push(`q-${quality}`);
 
-    const transformString = transforms.join(',');
-    const separator = originalUrl.includes('?') ? '&' : '?';
+    const transformString = transforms.join(",");
+    const separator = originalUrl.includes("?") ? "&" : "?";
     return `${originalUrl}${separator}tr=${transformString}`;
   };
 
   const presets = {
     thumbnail: (url: string) =>
-      getOptimizedUrl(url, { width: 400, height: 533, crop: 'maintain_ratio', focus: 'auto' }),
+      getOptimizedUrl(url, { width: 400, height: 533, crop: "maintain_ratio", focus: "auto" }),
 
-    card: (url: string) =>
-      getOptimizedUrl(url, { width: 400, height: 533, crop: 'maintain_ratio', focus: 'auto' }),
+    card: (url: string) => getOptimizedUrl(url, { width: 400, height: 533, crop: "maintain_ratio", focus: "auto" }),
 
     cardCatalog: (url: string) =>
-      getOptimizedUrl(url, { width: 400, height: 500, crop: 'maintain_ratio', focus: 'auto' }),
+      getOptimizedUrl(url, { width: 400, height: 500, crop: "maintain_ratio", focus: "auto" }),
 
-    gallery: (url: string) =>
-      getOptimizedUrl(url, { width: 800, height: 1067, crop: 'maintain_ratio', focus: 'auto' }),
+    gallery: (url: string) => getOptimizedUrl(url, { width: 800, height: 1067, crop: "maintain_ratio", focus: "auto" }),
 
-    detail: (url: string) =>
-      getOptimizedUrl(url, { width: 800, height: 1067, crop: 'maintain_ratio', focus: 'auto' }),
+    detail: (url: string) => getOptimizedUrl(url, { width: 800, height: 1067, crop: "maintain_ratio", focus: "auto" }),
 
-    hero: (url: string) =>
-      getOptimizedUrl(url, { width: 800, height: 1067, crop: 'maintain_ratio', focus: 'auto' }),
+    hero: (url: string) => getOptimizedUrl(url, { width: 800, height: 1067, crop: "maintain_ratio", focus: "auto" }),
 
-    icon: (url: string) =>
-      getOptimizedUrl(url, { width: 400, height: 533, crop: 'maintain_ratio', focus: 'auto' }),
+    icon: (url: string) => getOptimizedUrl(url, { width: 400, height: 533, crop: "maintain_ratio", focus: "auto" }),
   };
 
   const generateSrcSet = (url: string, sizes: number[] = [400, 800]): string => {
@@ -549,10 +548,10 @@ export const useImageOptimization = () => {
       .filter((s) => s in RATIO_MAP)
       .map((w) => {
         const h = RATIO_MAP[w];
-        const optimized = getOptimizedUrl(url, { width: w, height: h, crop: 'maintain_ratio', focus: 'auto' });
+        const optimized = getOptimizedUrl(url, { width: w, height: h, crop: "maintain_ratio", focus: "auto" });
         return `${optimized} ${w}w`;
       })
-      .join(', ');
+      .join(", ");
   };
 
   return { getOptimizedUrl, presets, generateSrcSet };
@@ -566,6 +565,7 @@ export const useImageOptimization = () => {
 **4.1. Rename dan rewrite `CloudinaryUploader.vue` → `ImageKitUploader.vue`**
 
 Perubahan utama:
+
 - Import `useImageKit` instead of `useCloudinary`
 - Upload logic menggunakan ImageKit auth + upload endpoint
 - Inline optimization check: `ik.imagekit.io` instead of `cloudinary.com`
@@ -587,6 +587,7 @@ GANTI:   useImageKit
 ```
 
 File yang perlu diubah:
+
 - `FeaturedProducts.vue` — ganti `cloudinary.com` check
 - `CatalogShowcase.vue` — ganti `cloudinary.com` check
 - `CustomServices.vue` — ganti `cloudinary.com` check
@@ -614,11 +615,13 @@ const { deleteFileByUrl } = useImageKit();
 **Perhatian khusus:** Cloudinary menggunakan `publicId` untuk delete yang bisa di-extract dari URL. ImageKit menggunakan `fileId` yang **tidak ada di URL**. Ada dua pendekatan:
 
 **Opsi A (Rekomendasi): Simpan fileId di database**
+
 - Tambah kolom `media_file_ids` (jsonb) di tabel `catalog_products`
 - Saat upload, simpan mapping `{ url: fileId }` ke kolom ini
 - Saat delete, ambil fileId dari kolom ini
 
 **Opsi B: Search by filePath via ImageKit API**
+
 - Buat server route `server/api/imagekit/delete-by-url.post.ts`
 - Extract path dari URL, lalu gunakan `imagekit.listFiles({ searchQuery: 'name="filename"' })`
 - Dapat fileId, lalu delete
@@ -626,7 +629,7 @@ const { deleteFileByUrl } = useImageKit();
 
 ```ts
 // server/api/imagekit/delete-by-url.post.ts — Opsi B
-import ImageKit from 'imagekit';
+import ImageKit from "imagekit";
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
@@ -640,10 +643,10 @@ export default defineEventHandler(async (event) => {
 
   // Extract filename dari URL
   const urlPath = new URL(url).pathname;
-  const fileName = urlPath.split('/').pop();
+  const fileName = urlPath.split("/").pop();
 
   if (!fileName) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid URL' });
+    throw createError({ statusCode: 400, statusMessage: "Invalid URL" });
   }
 
   // Search file di ImageKit
@@ -653,7 +656,7 @@ export default defineEventHandler(async (event) => {
   });
 
   if (!files || files.length === 0) {
-    return { success: false, message: 'File not found in ImageKit' };
+    return { success: false, message: "File not found in ImageKit" };
   }
 
   // Delete by fileId
@@ -721,21 +724,21 @@ Lihat [Bagian 8](#8-migrasi-aset-existing) untuk detail lengkap.
 
 ### 7.4. File Baru yang Perlu Dibuat
 
-| File | Fungsi |
-|------|--------|
-| `server/api/imagekit/auth.get.ts` | Auth endpoint untuk client-side upload |
-| `server/api/imagekit/delete.post.ts` | Delete file by fileId |
-| `server/api/imagekit/delete-by-url.post.ts` | Delete file by URL (search + delete) |
-| `composables/useImageKit.ts` | Core composable (ganti useCloudinary) |
+| File                                        | Fungsi                                 |
+| ------------------------------------------- | -------------------------------------- |
+| `server/api/imagekit/auth.get.ts`           | Auth endpoint untuk client-side upload |
+| `server/api/imagekit/delete.post.ts`        | Delete file by fileId                  |
+| `server/api/imagekit/delete-by-url.post.ts` | Delete file by URL (search + delete)   |
+| `composables/useImageKit.ts`                | Core composable (ganti useCloudinary)  |
 
 ### 7.5. File yang Dihapus
 
-| File | Alasan |
-|------|--------|
-| `server/api/cloudinary/delete.post.ts` | Diganti ImageKit endpoint |
-| `server/api/cloudinary/usage.get.ts` | Diganti ImageKit endpoint |
-| `composables/useCloudinary.ts` | Diganti `useImageKit.ts` |
-| `components/CloudinaryUploader.vue` | Diganti `ImageKitUploader.vue` |
+| File                                   | Alasan                         |
+| -------------------------------------- | ------------------------------ |
+| `server/api/cloudinary/delete.post.ts` | Diganti ImageKit endpoint      |
+| `server/api/cloudinary/usage.get.ts`   | Diganti ImageKit endpoint      |
+| `composables/useCloudinary.ts`         | Diganti `useImageKit.ts`       |
+| `components/CloudinaryUploader.vue`    | Diganti `ImageKitUploader.vue` |
 
 ---
 
@@ -775,6 +778,7 @@ Semua URL gambar/video yang tersimpan di Supabase database mengarah ke domain `r
 ```
 
 SQL migration yang dibutuhkan (jika pakai Opsi A dari Fase 5):
+
 ```sql
 -- Tambah kolom untuk menyimpan ImageKit fileIds
 ALTER TABLE catalog_products
@@ -789,7 +793,7 @@ Ubah function `isImageKitUrl` di composables untuk mendukung kedua domain:
 
 ```ts
 const isMediaUrl = (url: string): boolean => {
-  return url.includes('ik.imagekit.io') || url.includes('cloudinary.com');
+  return url.includes("ik.imagekit.io") || url.includes("cloudinary.com");
 };
 ```
 
@@ -834,12 +838,14 @@ ImageKit mendukung **external storage** yang bisa mem-proxy Cloudinary URLs mela
 ## 10. Checklist Final
 
 ### Pre-Migrasi
+
 - [ ] Buat akun ImageKit dan catat credentials
 - [ ] Backup database Supabase
 - [ ] Pastikan branch `migrasi` up-to-date dengan `main`
 - [ ] Verifikasi semua aset Cloudinary bisa di-download
 
 ### Implementasi
+
 - [ ] Update `.env` dan `.env.example`
 - [ ] Update `nuxt.config.ts`
 - [ ] Update `package.json` (uninstall cloudinary, install imagekit)
@@ -856,6 +862,7 @@ ImageKit mendukung **external storage** yang bisa mem-proxy Cloudinary URLs mela
 - [ ] Update URLs di Supabase database
 
 ### Post-Migrasi
+
 - [ ] Test upload gambar baru (produk, kategori, service)
 - [ ] Test upload video baru
 - [ ] Test delete gambar/video
@@ -894,13 +901,13 @@ ImageKit mendukung **external storage** yang bisa mem-proxy Cloudinary URLs mela
 
 ### ImageKit Upload berbeda dari Cloudinary
 
-| Aspek | Cloudinary | ImageKit |
-|-------|-----------|----------|
-| Client upload | Unsigned preset (no server needed) | **Wajib auth dari server** (signature) |
-| Delete | Bisa via publicId dari URL | **Perlu fileId** (tidak ada di URL) |
-| Folder structure | `folder` param saat upload | `folder` param saat upload |
-| Auto-format | `f_auto` | `f-auto` |
-| Eager transform | Ya (pre-generate saat upload) | Tidak perlu (transform gratis) |
+| Aspek            | Cloudinary                         | ImageKit                               |
+| ---------------- | ---------------------------------- | -------------------------------------- |
+| Client upload    | Unsigned preset (no server needed) | **Wajib auth dari server** (signature) |
+| Delete           | Bisa via publicId dari URL         | **Perlu fileId** (tidak ada di URL)    |
+| Folder structure | `folder` param saat upload         | `folder` param saat upload             |
+| Auto-format      | `f_auto`                           | `f-auto`                               |
+| Eager transform  | Ya (pre-generate saat upload)      | Tidak perlu (transform gratis)         |
 
 ### Keuntungan setelah migrasi
 

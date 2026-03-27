@@ -301,7 +301,7 @@ const filteredProducts = computed(() => {
     (p) =>
       p.title?.toLowerCase().includes(search) ||
       p.subtitle?.toLowerCase().includes(search) ||
-      p.description?.toLowerCase().includes(search)
+      p.description?.toLowerCase().includes(search),
   );
 });
 

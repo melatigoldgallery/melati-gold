@@ -275,13 +275,7 @@ const handleFiles = async (files: File[]) => {
   let validTypes: string[];
 
   if (props.accept && props.accept.includes("video")) {
-    validTypes = [
-      "video/mp4",
-      "video/webm",
-      "video/quicktime",
-      "video/x-msvideo",
-      "video/x-matroska",
-    ];
+    validTypes = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo", "video/x-matroska"];
   } else {
     validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
   }

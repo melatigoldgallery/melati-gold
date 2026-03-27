@@ -90,21 +90,12 @@ export const useImageOptimization = () => {
         focus: "auto",
       }),
 
-    // Hero — landscape full-screen desktop (1920×1080)
+    // Hero fallback
     hero: (url: string) =>
       getOptimizedUrl(url, {
-        width: 1920,
-        height: 1080,
-        crop: "force",
-        focus: "auto",
-      }),
-
-    // Hero mobile (768×432)
-    heroMobile: (url: string) =>
-      getOptimizedUrl(url, {
-        width: 768,
-        height: 432,
-        crop: "force",
+        width: 800,
+        height: 1067,
+        crop: "maintain_ratio",
         focus: "auto",
       }),
 
