@@ -36,12 +36,12 @@
     <!-- Featured Products Grid -->
     <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
       <div
-        v-for="product in featuredProducts"
+        v-for="product in paginatedProducts"
         :key="product.id"
         class="group border rounded-lg overflow-hidden hover:shadow-md transition-shadow bg-white flex flex-col"
       >
         <!-- Image -->
-        <div class="relative aspect-square bg-gray-100">
+        <div class="relative h-48 bg-gray-100">
           <img
             :src="product.thumbnail_image || product.images?.[0] || '/img/placeholder.jpg'"
             :alt="product.title"
@@ -85,6 +85,50 @@
         </div>
       </div>
     </div>
+
+    <!-- Pagination -->
+    <div
+      v-if="!loading && featuredProducts.length > 0"
+      class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4"
+    >
+      <div class="text-sm text-gray-600">
+        Menampilkan {{ (currentPage - 1) * itemsPerPage + 1 }}-{{
+          Math.min(currentPage * itemsPerPage, totalItems)
+        }}
+        dari {{ totalItems }} produk
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          @click="prevPage"
+          :disabled="currentPage === 1"
+          class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="flex gap-1">
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            @click="goToPage(page)"
+            class="w-10 h-10 flex items-center justify-center rounded-lg font-medium transition-colors"
+            :class="
+              page === currentPage
+                ? 'bg-yellow-600 text-white'
+                : 'bg-white border border-gray-300 hover:bg-gray-50 text-gray-700'
+            "
+          >
+            {{ page }}
+          </button>
+        </div>
+        <button
+          @click="nextPage"
+          :disabled="currentPage === totalPages"
+          class="px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -97,12 +141,54 @@ const { getFeaturedProducts, toggleProductFeatured } = useCatalogManager();
 const featuredProducts = ref<any[]>([]);
 const loading = ref(true);
 
+// Pagination
+const currentPage = ref(1);
+const itemsPerPage = ref(15);
+const totalItems = ref(0);
+
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
+
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  return featuredProducts.value.slice(start, start + itemsPerPage.value);
+});
+
+const visiblePages = computed(() => {
+  const pages: (number | string)[] = [];
+  const total = totalPages.value;
+  const current = currentPage.value;
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (current > 3) pages.push("...");
+    const start = Math.max(2, current - 1);
+    const end = Math.min(total - 1, current + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (current < total - 2) pages.push("...");
+    pages.push(total);
+  }
+  return pages;
+});
+
+const goToPage = (page: number | string) => {
+  if (typeof page === "string") return;
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+};
+const nextPage = () => goToPage(currentPage.value + 1);
+const prevPage = () => goToPage(currentPage.value - 1);
+
 // Load featured products
 const loadFeaturedProducts = async () => {
   loading.value = true;
   const result = await getFeaturedProducts();
   if (result.success) {
     featuredProducts.value = result.data;
+    totalItems.value = result.data.length;
+    currentPage.value = 1;
   } else {
     const errorMsg = "error" in result ? result.error : "Unknown error";
     emit("alert", "Failed to load featured products: " + errorMsg, "error");
