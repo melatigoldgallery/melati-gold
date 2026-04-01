@@ -6,7 +6,7 @@ export const useGoldPricing = () => {
   // Get all active gold prices
   const getGoldPrices = async () => {
     const { data, error } = await $supabase
-      .from("gold_price_settings")
+      .from(TABLES.GOLD_PRICE_SETTINGS)
       .select("*")
       .eq("is_active", true)
       .order("karat");
@@ -17,7 +17,7 @@ export const useGoldPricing = () => {
   // Get price history
   const getPriceHistory = async (karat?: string, limit = 50) => {
     let query = $supabase
-      .from("gold_price_history")
+      .from(TABLES.GOLD_PRICE_HISTORY)
       .select("*, admin_users!changed_by(full_name)")
       .order("changed_at", { ascending: false })
       .limit(limit);
@@ -31,7 +31,7 @@ export const useGoldPricing = () => {
   // Update gold price (with history logging via trigger)
   const updateGoldPrice = async (karat: string, pricePerGram: number, userId?: string) => {
     const { error } = await $supabase
-      .from("gold_price_settings")
+      .from(TABLES.GOLD_PRICE_SETTINGS)
       .update({
         price_per_gram: pricePerGram,
         updated_at: new Date().toISOString(),
@@ -58,7 +58,7 @@ export const useGoldPricing = () => {
 
       // Get products that need recalculation
       const { data: products, error: productsError } = await $supabase
-        .from("catalog_products")
+        .from(TABLES.PRODUCTS)
         .select("id, karat, weight_grams")
         .eq("price_override", false)
         .not("weight_grams", "is", null);
@@ -70,7 +70,7 @@ export const useGoldPricing = () => {
         const newPrice = calculatePrice(product.weight_grams, product.karat, pricesResult.data);
 
         return $supabase
-          .from("catalog_products")
+          .from(TABLES.PRODUCTS)
           .update({
             price: newPrice,
             base_price: newPrice,
@@ -90,7 +90,7 @@ export const useGoldPricing = () => {
   // Get affected products count by karat
   const getAffectedProductsCount = async (karat: string) => {
     const { count, error } = await $supabase
-      .from("catalog_products")
+      .from(TABLES.PRODUCTS)
       .select("*", { count: "exact", head: true })
       .eq("karat", karat)
       .eq("price_override", false)
@@ -103,7 +103,7 @@ export const useGoldPricing = () => {
   const addGoldPrice = async (karat: string, pricePerGram: number) => {
     // Check if karat already exists (even if inactive)
     const { data: existing } = await $supabase
-      .from("gold_price_settings")
+      .from(TABLES.GOLD_PRICE_SETTINGS)
       .select("id, is_active")
       .eq("karat", karat.toUpperCase())
       .single();
@@ -114,14 +114,14 @@ export const useGoldPricing = () => {
       }
       // Re-activate if previously deactivated
       const { error } = await $supabase
-        .from("gold_price_settings")
+        .from(TABLES.GOLD_PRICE_SETTINGS)
         .update({ is_active: true, price_per_gram: pricePerGram, updated_at: new Date().toISOString() })
         .eq("id", existing.id);
       return { success: !error, error: error?.message };
     }
 
     const { error } = await $supabase
-      .from("gold_price_settings")
+      .from(TABLES.GOLD_PRICE_SETTINGS)
       .insert({ karat: karat.toUpperCase(), price_per_gram: pricePerGram, is_active: true });
 
     return { success: !error, error: error?.message };
@@ -130,7 +130,7 @@ export const useGoldPricing = () => {
   // Soft-delete gold price karat (set is_active = false)
   const deleteGoldPrice = async (karat: string) => {
     const { error } = await $supabase
-      .from("gold_price_settings")
+      .from(TABLES.GOLD_PRICE_SETTINGS)
       .update({ is_active: false, updated_at: new Date().toISOString() })
       .eq("karat", karat);
 

@@ -2,7 +2,7 @@
 import { ref, computed, watch } from "vue";
 import CatalogFilterSidebar from "~/components/catalog/FilterSidebar.vue";
 import CatalogProductGrid from "~/components/catalog/ProductGrid.vue";
-import CatalogPaginationControls from "~/components/catalog/PaginationControls.vue";
+import CatalogPaginationControls from "~/components/ui/AppPagination.vue";
 import { HomeIcon, ChevronRightIcon, ExclamationTriangleIcon } from "@heroicons/vue/24/outline";
 
 // Disable default layout (which includes SiteHeader)
@@ -41,7 +41,7 @@ const {
   data: categoryResult,
   status: categoryStatus,
   error: categoryFetchError,
-} = useAsyncData(
+} = useAsyncData<{ success: boolean; data: any; error?: string }>(
   () => `category-${categorySlug.value}`,
   () => getCategoryBySlug(categorySlug.value),
   { watch: [categorySlug] },

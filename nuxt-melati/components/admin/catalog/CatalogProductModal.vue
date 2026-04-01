@@ -295,7 +295,7 @@
 
 <script setup lang="ts">
 // Lazy load ImageKitUploader - only loads when modal is opened
-const ImageKitUploader = defineAsyncComponent(() => import("~/components/ImageKitUploader.vue"));
+const ImageKitUploader = defineAsyncComponent(() => import("~/components/ui/ImageKitUploader.vue"));
 
 const props = defineProps<{
   product?: any;

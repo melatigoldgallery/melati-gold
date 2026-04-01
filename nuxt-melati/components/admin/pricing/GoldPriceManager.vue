@@ -7,6 +7,22 @@
         <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Kelola harga per gram untuk setiap kadar emas</p>
       </div>
       <div class="flex items-center gap-2">
+        <!-- Save All button — only visible when there are unsaved changes -->
+        <Transition name="slide-down">
+          <button
+            v-if="hasChanges && !showHistory"
+            @click="saveAllPrices"
+            :disabled="saving"
+            class="flex items-center gap-1.5 px-3 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg transition-colors text-sm font-medium shadow-sm"
+          >
+            <span
+              v-if="saving"
+              class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"
+            ></span>
+            <i v-else class="bi bi-check-all text-xs"></i>
+            <span>{{ saving ? "Menyimpan..." : `Simpan (${dirtyKarats.length})` }}</span>
+          </button>
+        </Transition>
         <button
           @click="showAddForm = !showAddForm"
           class="flex items-center gap-1.5 px-3 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors text-sm font-medium shadow-sm"
@@ -123,7 +139,10 @@
           <div
             v-for="price in goldPrices"
             :key="price.id"
-            class="group bg-white border border-gray-200 rounded-xl p-4 hover:border-yellow-300 hover:shadow-md transition-all duration-200"
+            :class="[
+              'group bg-white border rounded-xl p-4 hover:shadow-md transition-all duration-200',
+              isDirty(price) ? 'border-green-400 bg-green-50/30' : 'border-gray-200 hover:border-yellow-300',
+            ]"
           >
             <!-- Card Header -->
             <div class="flex items-center justify-between mb-3">
@@ -167,18 +186,8 @@
                 />
               </div>
               <span class="text-xs text-gray-400 whitespace-nowrap shrink-0">/gram</span>
-              <button
-                @click="updatePrice(price)"
-                :disabled="saving === price.karat"
-                class="shrink-0 flex items-center gap-1 px-3 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 text-white rounded-lg transition-colors text-xs font-medium"
-              >
-                <span
-                  v-if="saving === price.karat"
-                  class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"
-                ></span>
-                <i v-else class="bi bi-check-lg"></i>
-                {{ saving === price.karat ? "..." : "Simpan" }}
-              </button>
+              <!-- Dirty indicator -->
+              <span v-if="isDirty(price)" class="text-[10px] text-green-600 font-medium shrink-0">● diubah</span>
             </div>
 
             <!-- Last Update -->
@@ -226,100 +235,80 @@
 
       <!-- Price History -->
       <div v-else>
+        <!-- History Table -->
         <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
           <div class="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
             <span class="text-sm font-medium text-gray-700 flex items-center gap-1.5">
               <i class="bi bi-clock-history text-gray-400"></i>
-              Riwayat Perubahan Harga
+              Riwayat Perubahan
             </span>
-            <span class="text-xs text-gray-400">{{ priceHistory.length }} entri terbaru</span>
+            <span class="text-xs text-gray-400">{{ priceHistory.length }} entri dimuat</span>
           </div>
 
-          <!-- Table (desktop) -->
-          <div class="hidden sm:block overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-100">
-              <thead class="bg-gray-50">
+          <!-- Scrollable table — single implementation for all screen sizes -->
+          <div class="overflow-x-auto max-h-72 overflow-y-auto">
+            <table class="min-w-full divide-y divide-gray-100 text-sm">
+              <thead class="bg-gray-50 sticky top-0 z-10">
                 <tr>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Kadar</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    Harga Lama
+                  <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Kadar
                   </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    Harga Baru
+                  <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Lama
                   </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Baru
+                  </th>
+                  <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
                     Selisih
                   </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Waktu</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Oleh</th>
+                  <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Waktu
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-50">
-                <tr v-for="record in priceHistory" :key="record.id" class="hover:bg-gray-50 transition-colors">
-                  <td class="px-4 py-3">
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800"
-                    >
+                <tr v-for="record in visibleHistory" :key="record.id" class="hover:bg-gray-50 transition-colors">
+                  <td class="px-4 py-2.5">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
                       {{ record.karat }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-sm text-gray-500">{{ formatPrice(record.old_price) }}</td>
-                  <td class="px-4 py-3 text-sm font-semibold text-gray-900">{{ formatPrice(record.new_price) }}</td>
-                  <td class="px-4 py-3">
+                  <td class="px-4 py-2.5 text-right text-gray-400 tabular-nums">{{ formatPrice(record.old_price) }}</td>
+                  <td class="px-4 py-2.5 text-right font-semibold text-gray-900 tabular-nums">
+                    {{ formatPrice(record.new_price) }}
+                  </td>
+                  <td class="px-4 py-2.5 text-center">
                     <span
                       :class="[
-                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
+                        'inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs font-medium',
                         record.new_price > record.old_price ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
                       ]"
                     >
                       <i
                         :class="record.new_price > record.old_price ? 'bi-arrow-up' : 'bi-arrow-down'"
-                        class="text-[10px]"
+                        class="text-[9px]"
                       ></i>
                       {{ formatPrice(Math.abs(record.new_price - record.old_price)) }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-xs text-gray-500">{{ formatDate(record.changed_at) }}</td>
-                  <td class="px-4 py-3 text-xs text-gray-500">{{ record.admin_users?.full_name || "-" }}</td>
+                  <td class="px-4 py-2.5 text-xs text-gray-400 whitespace-nowrap">
+                    {{ formatDate(record.changed_at) }}
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <!-- Cards (mobile) -->
-          <div class="sm:hidden divide-y divide-gray-100">
-            <div v-for="record in priceHistory" :key="record.id" class="p-4">
-              <div class="flex items-center justify-between mb-2">
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800"
-                >
-                  {{ record.karat }}
-                </span>
-                <span
-                  :class="[
-                    'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
-                    record.new_price > record.old_price ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
-                  ]"
-                >
-                  <i
-                    :class="record.new_price > record.old_price ? 'bi-arrow-up' : 'bi-arrow-down'"
-                    class="text-[10px]"
-                  ></i>
-                  {{ formatPrice(Math.abs(record.new_price - record.old_price)) }}
-                </span>
-              </div>
-              <div class="grid grid-cols-2 gap-1 text-xs text-gray-500">
-                <span>
-                  Lama:
-                  <span class="text-gray-700">{{ formatPrice(record.old_price) }}</span>
-                </span>
-                <span>
-                  Baru:
-                  <span class="font-semibold text-gray-900">{{ formatPrice(record.new_price) }}</span>
-                </span>
-                <span class="col-span-2">{{ formatDate(record.changed_at) }}</span>
-              </div>
-            </div>
+          <!-- Load More -->
+          <div
+            v-if="historyPage * HISTORY_PAGE_SIZE < priceHistory.length"
+            class="px-4 py-3 border-t border-gray-100 text-center"
+          >
+            <button @click="historyPage++" class="text-xs text-yellow-700 hover:text-yellow-900 font-medium">
+              Muat {{ Math.min(HISTORY_PAGE_SIZE, priceHistory.length - historyPage * HISTORY_PAGE_SIZE) }} entri lagi
+              <span class="text-gray-400">({{ priceHistory.length - historyPage * HISTORY_PAGE_SIZE }} tersisa)</span>
+            </button>
           </div>
 
           <!-- Empty -->
@@ -348,10 +337,11 @@ const emit = defineEmits<{ (e: "alert", message: string, type: "success" | "erro
 
 // State
 const goldPrices = ref<any[]>([]);
+const originalPrices = ref<Record<string, number>>({});
 const priceHistory = ref<any[]>([]);
 const affectedCounts = ref<Record<string, number>>({});
 const loading = ref(true);
-const saving = ref<string | null>(null);
+const saving = ref(false);
 const deleting = ref<string | null>(null);
 const adding = ref(false);
 const recalculating = ref(false);
@@ -369,6 +359,14 @@ const minPrice = computed(() =>
 const maxPrice = computed(() =>
   goldPrices.value.length ? Math.max(...goldPrices.value.map((p) => p.price_per_gram)) : 0,
 );
+const isDirty = (price: any) => price.price_per_gram !== originalPrices.value[price.karat];
+const dirtyKarats = computed(() => goldPrices.value.filter(isDirty));
+const hasChanges = computed(() => dirtyKarats.value.length > 0);
+
+// History paging
+const HISTORY_PAGE_SIZE = 15;
+const historyPage = ref(1);
+const visibleHistory = computed(() => priceHistory.value.slice(0, historyPage.value * HISTORY_PAGE_SIZE));
 
 // Load data
 const loadGoldPrices = async () => {
@@ -376,6 +374,8 @@ const loadGoldPrices = async () => {
   const result = await getGoldPrices();
   if (result.success) {
     goldPrices.value = result.data;
+    // Snapshot original values for dirty tracking
+    originalPrices.value = Object.fromEntries(result.data.map((p: any) => [p.karat, p.price_per_gram]));
     for (const price of result.data) {
       const countResult = await getAffectedProductsCount(price.karat);
       if (countResult.success) affectedCounts.value[price.karat] = countResult.count;
@@ -386,7 +386,10 @@ const loadGoldPrices = async () => {
 
 const loadPriceHistory = async () => {
   const result = await getPriceHistory();
-  if (result.success) priceHistory.value = result.data;
+  if (result.success) {
+    priceHistory.value = result.data;
+    historyPage.value = 1;
+  }
 };
 
 const toggleHistory = () => {
@@ -394,22 +397,25 @@ const toggleHistory = () => {
   if (showHistory.value) loadPriceHistory();
 };
 
-// Update single price
-const updatePrice = async (price: any) => {
-  if (!price.price_per_gram || price.price_per_gram <= 0) {
-    emit("alert", "Harga tidak valid.", "error");
+// Save all modified prices at once
+const saveAllPrices = async () => {
+  const toSave = dirtyKarats.value;
+  if (!toSave.length) return;
+  if (toSave.some((p) => !p.price_per_gram || p.price_per_gram <= 0)) {
+    emit("alert", "Terdapat harga yang tidak valid (harus lebih dari 0).", "error");
     return;
   }
-  saving.value = price.karat;
-  const result = await updateGoldPrice(price.karat, price.price_per_gram);
-  if (result.success) {
-    emit("alert", `Harga ${price.karat} berhasil diperbarui!`, "success");
-    await loadGoldPrices();
-    if (showHistory.value) await loadPriceHistory();
+  saving.value = true;
+  const results = await Promise.all(toSave.map((p) => updateGoldPrice(p.karat, p.price_per_gram)));
+  const failed = results.filter((r) => !r.success);
+  if (failed.length === 0) {
+    emit("alert", `${toSave.length} kadar berhasil diperbarui!`, "success");
   } else {
-    emit("alert", "Gagal update harga: " + result.error, "error");
+    emit("alert", `${toSave.length - failed.length} berhasil, ${failed.length} gagal diperbarui.`, "error");
   }
-  saving.value = null;
+  await loadGoldPrices();
+  if (showHistory.value) await loadPriceHistory();
+  saving.value = false;
 };
 
 // Add new karat

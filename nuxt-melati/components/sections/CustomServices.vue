@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, nextTick } from "vue";
 
-// No longer need to emit - we'll navigate to page instead
+// Fetch custom services from database
+const { getCustomServices } = useCatalogManager();
 
-// Fetch categories from database
-const { getCategories } = useCatalogManager();
-const categories = ref<any[]>([]);
+// State data
+const services = ref<any[]>([]);
 const loading = ref(true);
 
 // 🚀 Image optimization — eager CDN mobile-first (w_320, w_400)
@@ -32,7 +32,7 @@ const offsetPx = ref(0);
 const slideWidthPx = ref(0);
 const transitionEnabled = ref(true);
 
-const slideCount = computed(() => categories.value.length);
+const slideCount = computed(() => services.value.length);
 
 // Touch swipe support for mobile
 const touchStartX = ref(0);
@@ -49,24 +49,24 @@ const DIRECTION_THRESHOLD = 10; // Minimum pixels to detect scroll direction
 // Clone 6 cards (max visible on ultra-wide desktop) at each end to prevent empty spaces
 // Structure: [Last 6 cloned, ...RealSlides, First 6 cloned]
 const CLONE_COUNT = 6;
-const displayCategories = computed(() => {
-  if (categories.value.length === 0) return [];
+const displayServices = computed(() => {
+  if (services.value.length === 0) return [];
 
-  const len = categories.value.length;
+  const len = services.value.length;
   // Clone last N cards for start
   const clonesStart = [];
   for (let i = 0; i < CLONE_COUNT; i++) {
     const idx = (len - CLONE_COUNT + i) % len;
-    clonesStart.push({ ...categories.value[idx], _cloneId: `clone-start-${i}` });
+    clonesStart.push({ ...services.value[idx], _cloneId: `clone-start-${i}` });
   }
 
   // Clone first N cards for end
   const clonesEnd = [];
   for (let i = 0; i < CLONE_COUNT; i++) {
-    clonesEnd.push({ ...categories.value[i], _cloneId: `clone-end-${i}` });
+    clonesEnd.push({ ...services.value[i], _cloneId: `clone-end-${i}` });
   }
 
-  return [...clonesStart, ...categories.value, ...clonesEnd];
+  return [...clonesStart, ...services.value, ...clonesEnd];
 });
 
 function getSlides(): HTMLElement[] {
@@ -91,14 +91,12 @@ function getMetrics() {
       maxOffset: 0,
     };
   }
-  // Read current gap from computed styles for precise layout
   const styles = getComputedStyle(tr);
   const gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
   const paddingLeft = parseFloat(styles.paddingLeft || "0") || 0;
   const paddingRight = parseFloat(styles.paddingRight || "0") || 0;
   const paddingX = paddingLeft + paddingRight;
   const slideWidth = slides[0].clientWidth;
-  // Derive visible count considering track paddings and gaps
   const visibleSpace = Math.max(0, vp.clientWidth - paddingX);
   const visibleCount = Math.max(1, Math.floor((visibleSpace + gap) / (slideWidth + gap)));
   const maxIndex = Math.max(0, slides.length - visibleCount);
@@ -110,7 +108,7 @@ function goTo(index: number, instant = false) {
   const { vp, slides, slideWidth, gap } = getMetrics();
   if (!vp || slides.length === 0) return;
 
-  const totalSlides = displayCategories.value.length;
+  const totalSlides = displayServices.value.length;
 
   // Calculate offset
   const calculatedOffset = index * (slideWidth + gap);
@@ -132,7 +130,7 @@ function goTo(index: number, instant = false) {
 
     // Check clone boundaries after transition completes
     setTimeout(() => {
-      const realCount = categories.value.length;
+      const realCount = services.value.length;
       const realStartIndex = CLONE_COUNT;
       const realEndIndex = CLONE_COUNT + realCount - 1;
 
@@ -170,7 +168,6 @@ function updateLayout() {
   const cols = getTargetCols();
   const width = Math.max(0, (vp.clientWidth - paddingX - gap * (cols - 1)) / cols);
   slideWidthPx.value = width;
-  // Re-align to current active index after layout change
   requestAnimationFrame(() => goTo(activeIndex.value));
 }
 
@@ -184,7 +181,7 @@ function next() {
 
 // Touch swipe handlers for mobile with scroll direction detection
 function onTouchStart(e: TouchEvent) {
-  if (categories.value.length <= 1) return; // No swipe if only 1 category
+  if (services.value.length <= 1) return; // No swipe if only 1 service
 
   const touch = e.touches[0];
   touchStartX.value = touch.clientX;
@@ -276,63 +273,62 @@ function onKeydown(e: KeyboardEvent) {
   }
 }
 
-// Looping enabled: arrows remain active
-
-const loadCategories = async () => {
+// Load services
+const loadServices = async () => {
   loading.value = true;
-  const result = await getCategories();
+  const result = await getCustomServices();
   if (result.success) {
-    // Filter only active categories and sort by display_order
-    categories.value = result.data
-      .filter((cat: any) => cat.is_active)
+    services.value = result.data
+      .filter((service: any) => service.is_active)
       .sort((a: any, b: any) => a.display_order - b.display_order);
   }
   loading.value = false;
-  // Ensure DOM renders carousel before measuring and positioning
+  // Ensure DOM renders before measuring and positioning
   await nextTick();
   requestAnimationFrame(() => {
     updateLayout();
-    // Start at index 6 (first real slide after 6 clones)
+    // Start at index 4 (first real slide after 4 clones)
     goTo(CLONE_COUNT, true);
   });
 };
 
+// Handle service card click - navigate to service detail page
+const openService = (service: any) => {
+  navigateTo(`/service/${service.id}`);
+};
+
 // Lifecycle
 onMounted(() => {
-  const onResize = () =>
-    requestAnimationFrame(() => {
-      updateLayout();
-    });
+  const onResize = () => requestAnimationFrame(() => updateLayout());
   window.addEventListener("resize", onResize);
-  loadCategories();
-  // Initialize layout after first render
+  loadServices();
   requestAnimationFrame(() => updateLayout());
   onUnmounted(() => window.removeEventListener("resize", onResize));
 });
 </script>
 
 <template>
-  <section id="produk" class="relative bg-gradient-to-b from-cream via-white to-cream py-10 md:py-20 overflow-hidden">
+  <section id="custom" class="bg-cream py-10 md:py-14">
     <div class="container mx-auto max-w-[1400px] 2xl:max-w-[1600px] px-4 2xl:px-8">
-      <div class="mb-10 text-center reveal-up">
-        <h2 class="section-title text-maroon">Katalog Produk</h2>
-        <p class="mt-4 text-lg text-neutral-600 max-w-2xl mx-auto">
-          Jelajahi koleksi perhiasan emas berkualitas dengan berbagai kategori pilihan terbaik
-        </p>
+      <div class="mb-8 text-center reveal-up">
+        <h2 class="section-title text-maroon">Layanan Custom</h2>
+        <p class="mt-3 text-neutral-600">Kami melayani pembuatan perhiasan sesuai keinginan Anda.</p>
       </div>
 
+      <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <div class="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-yellow-600"></div>
-        <p class="mt-4 text-gray-600">Memuat katalog...</p>
+        <div class="inline-block w-12 h-12 border-4 border-maroon border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-4 text-neutral-600">Memuat layanan...</p>
       </div>
 
-      <div v-else-if="categories.length === 0" class="text-center py-12">
-        <i class="bi bi-box-seam text-6xl text-gray-400"></i>
-        <p class="mt-4 text-gray-600">Belum ada kategori tersedia</p>
+      <!-- Empty State -->
+      <div v-else-if="!services.length" class="text-center py-12">
+        <p class="text-neutral-600">Belum ada layanan custom tersedia.</p>
       </div>
 
+      <!-- Cards -->
       <div v-else>
-        <div class="flex items-center gap-1 sm:gap-3" role="region" aria-label="Carousel katalog">
+        <div class="flex items-center gap-1 sm:gap-3" role="region" aria-label="Carousel layanan custom">
           <button
             v-if="slideCount > 1"
             type="button"
@@ -361,39 +357,55 @@ onMounted(() => {
                 :style="{ transform: `translateX(-${offsetPx}px)` }"
               >
                 <article
-                  v-for="(category, idx) in displayCategories"
-                  :key="category._cloneId || category.id"
+                  v-for="(service, idx) in displayServices"
+                  :key="service._cloneId || service.id"
                   class="relative flex-none"
                   :style="{ flex: `0 0 ${slideWidthPx}px` }"
                 >
                   <NuxtLink
-                    :to="`/catalog/${category.slug || category.name.toLowerCase()}`"
-                    class="group relative block w-full overflow-hidden rounded-1xl card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 aspect-[3/4]"
+                    :to="`/service/${service.id}`"
+                    class="group relative block w-full overflow-hidden rounded-xl bg-gray-900 transition-all duration-300 hover:-translate-y-1 aspect-[3/4]"
                   >
                     <img
-                      :src="getOptimizedImage(category.cover_image)"
-                      :srcset="generateSrcSet(category.cover_image, [320, 400])"
+                      v-if="service.image_url"
+                      :src="getOptimizedImage(service.image_url)"
+                      :srcset="generateSrcSet(service.image_url, [320, 400])"
                       sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 250px"
-                      :alt="category.name"
+                      :alt="service.title"
                       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                       decoding="async"
                       @error="handleImageError"
                     />
+                    <div
+                      v-else
+                      class="absolute inset-0 bg-gradient-to-br from-maroon to-gold flex items-center justify-center"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-16 w-16 text-white opacity-60"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                        />
+                      </svg>
+                    </div>
 
                     <div
                       class="absolute inset-0 bg-gradient-to-t from-black via-black/5 to-transparent opacity-95 transition-opacity duration-300 group-hover:opacity-100"
                     ></div>
-
-                    <div class="absolute inset-0 flex flex-col justify-end p-4 sm:p-5">
-                      <h3 class="font-serif text-white text-lg sm:text-xl drop-shadow-2xl">
-                        {{ category.name }}
-                      </h3>
-                      <p v-if="category.description" class="mt-2 text-sm text-white/90 line-clamp-2">
-                        {{ category.description }}
-                      </p>
-                      <div class="mt-4 flex items-center gap-2 text-sm font-semibold text-gold">
-                        <span>Lihat katalog</span>
+                    <div class="absolute inset-0 flex items-end p-4 sm:p-5">
+                      <div>
+                        <h3 class="font-serif text-white text-lg sm:text-xl drop-shadow-2xl">
+                          {{ service.title }}
+                        </h3>
+                        <span class="text-white/90 text-xs sm:text-sm">Lihat Contoh Produk</span>
                       </div>
                     </div>
                   </NuxtLink>
@@ -461,18 +473,6 @@ onMounted(() => {
     font-size: 0.875rem; /* text-sm */
     line-height: 1;
   }
-}
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.card-shadow-hover {
-  box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.25);
 }
 
 /* Better touch handling for mobile carousel */

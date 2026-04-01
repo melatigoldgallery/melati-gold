@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div>
     <!-- Header -->
     <header class="bg-white shadow-sm border-b">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -207,7 +207,7 @@
 // Disable default layout for dashboard page
 definePageMeta({
   middleware: "auth",
-  layout: false,
+  layout: "admin",
 });
 
 // Set page title
@@ -229,7 +229,7 @@ const auth = useAuth();
 // Handle logout
 const handleLogout = async () => {
   await auth.logout();
-  navigateTo("/login");
+  navigateTo(ROUTES.LOGIN);
 };
 
 // Note: Authentication is now handled by middleware

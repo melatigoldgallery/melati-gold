@@ -123,7 +123,7 @@
 
 <script setup lang="ts">
 // Lazy load ImageKitUploader
-const ImageKitUploader = defineAsyncComponent(() => import("~/components/ImageKitUploader.vue"));
+const ImageKitUploader = defineAsyncComponent(() => import("~/components/ui/ImageKitUploader.vue"));
 
 const props = defineProps<{
   category?: any;

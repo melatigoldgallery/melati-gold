@@ -9,11 +9,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   // Redirect to login if not authenticated
   if (!auth.isAuthenticated.value) {
-    return navigateTo("/login");
+    return navigateTo(ROUTES.LOGIN);
   }
 
   // Check if user is supervisor
   if (!auth.isSupervisor.value) {
-    return navigateTo("/dashboard");
+    return navigateTo(ROUTES.DASHBOARD);
   }
 });

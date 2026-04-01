@@ -129,7 +129,7 @@ const handleLogin = async () => {
 
     if (result.success) {
       // Redirect to dashboard
-      await navigateTo("/dashboard");
+      await navigateTo(ROUTES.DASHBOARD);
     } else {
       error.value = result.message || "Login gagal";
     }
@@ -145,7 +145,7 @@ const handleLogin = async () => {
 onMounted(async () => {
   const isAuthenticated = await auth.checkAuth();
   if (isAuthenticated) {
-    navigateTo("/dashboard");
+    navigateTo(ROUTES.DASHBOARD);
   }
 });
 </script>

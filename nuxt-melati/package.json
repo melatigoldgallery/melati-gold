@@ -8,7 +8,8 @@
     "start": "node .output/server/index.mjs",
     "preview": "nuxt preview",
     "prepare": "nuxt prepare",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "gen:types": "npx supabase gen types typescript --project-id pblbprozxlnetckixpqw > types/supabase.ts"
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-6 sm:py-8">
+  <div class="py-6 sm:py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="mb-6 sm:mb-8">
@@ -239,7 +239,7 @@
 
 <script setup>
 definePageMeta({
-  layout: false,
+  layout: "admin",
   middleware: ["auth", "supervisor-only"],
 });
 

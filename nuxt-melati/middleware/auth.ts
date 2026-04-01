@@ -3,6 +3,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   const isAuthenticated = await auth.checkAuth();
   if (!isAuthenticated) {
-    return navigateTo("/login");
+    return navigateTo(ROUTES.LOGIN);
   }
 });

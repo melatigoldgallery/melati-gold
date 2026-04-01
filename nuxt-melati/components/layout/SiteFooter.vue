@@ -70,7 +70,7 @@
               <i class="bi bi-instagram text-gold group-hover:text-white transition-colors"></i>
             </a>
             <a
-              href="https://tiktok.com/@flowshopbali"
+              href="https://www.tiktok.com/@melatigoldshop"
               target="_blank"
               aria-label="TikTok"
               class="group w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold/20 to-gold/10 border border-gold/30 hover:from-gold hover:to-yellow-600 transition-all duration-300"

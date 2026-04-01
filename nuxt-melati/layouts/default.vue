@@ -5,6 +5,6 @@
       <slot />
     </main>
     <!-- Toast Notifications -->
-    <ToastNotification />
+    <AppToast />
   </div>
 </template>

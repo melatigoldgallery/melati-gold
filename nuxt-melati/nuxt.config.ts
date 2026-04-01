@@ -34,6 +34,11 @@ export default defineNuxtConfig({
 
   modules: ["@nuxtjs/tailwindcss"],
 
+  // 🔧 Auto-import composables and constants from all subdirectories
+  imports: {
+    dirs: ["composables/**", "constants"],
+  },
+
   // 🔧 Configure component auto-import for nested folders
   components: [
     {

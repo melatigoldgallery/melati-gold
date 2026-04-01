@@ -1,63 +1,58 @@
--- ============================================
--- LINK EXISTING USERS TO SUPABASE AUTH
--- Run this AFTER creating users in Supabase Authentication
--- ============================================
+-- ============================================================
+-- MELATI GOLD — Link Admin Users ke Supabase Auth
+--
+-- Jalankan file ini SETELAH:
+--   1. schema.sql ✓
+--   2. seed.sql   ✓
+--   3. Membuat user di Supabase Dashboard (langkah di bawah)
+-- ============================================================
 
--- Step 1: Create users in Supabase Dashboard
--- Go to: Authentication > Users > Add User
--- Create:
---   1. Email: supervisor@melati.com | Password: [your-password]
---   2. Email: admin@melati.com | Password: [your-password]
--- Copy the UUID for each user
 
--- Step 2: Update admin_users table with auth_uid
--- Replace [SUPERVISOR-UUID] and [ADMIN-UUID] with actual UUIDs from Step 1
+-- ============================================================
+-- LANGKAH 1: Buat user di Supabase Dashboard
+-- ============================================================
+-- Buka: Authentication > Users > Add User
+--
+-- Buat 2 user berikut (email harus sama persis dengan yang
+-- ada di fungsi is_admin_user() di schema.sql):
+--
+--   Email: fattahula98@gmail.com     → role: supervisor
+--   Email: melatigoldshopid@gmail.com → role: admin
+--
+-- Catat UUID masing-masing user setelah dibuat.
 
--- IMPORTANT: If you get "duplicate key" error, first clear existing links:
+
+-- ============================================================
+-- LANGKAH 2: Tautkan UUID ke tabel admin_users
+-- Ganti [SUPERVISOR-UUID] dan [ADMIN-UUID] dengan UUID asli.
+-- ============================================================
+
+-- Jika perlu reset link lama:
 -- UPDATE admin_users SET auth_uid = NULL WHERE username IN ('supervisor', 'admin');
 
--- Link Supervisor
-UPDATE admin_users 
-SET 
-  auth_uid = '[SUPERVISOR-UUID]',  -- Replace with actual UUID
-  role = 'supervisor',
-  email = 'supervisor@melati.com'
+UPDATE admin_users
+SET auth_uid = '[SUPERVISOR-UUID]',   -- ganti dengan UUID asli
+    email    = 'fattahula98@gmail.com',
+    role     = 'supervisor'
 WHERE username = 'supervisor';
 
--- Link Admin
-UPDATE admin_users 
-SET 
-  auth_uid = '[ADMIN-UUID]',  -- Replace with actual UUID
-  role = 'admin',
-  email = 'admin@melati.com'
+UPDATE admin_users
+SET auth_uid = '[ADMIN-UUID]',        -- ganti dengan UUID asli
+    email    = 'melatigoldshopid@gmail.com',
+    role     = 'admin'
 WHERE username = 'admin';
 
--- Step 3: Verify linkage
-SELECT 
-  id,
-  username,
-  email,
-  role,
-  auth_uid,
-  is_active
+
+-- ============================================================
+-- LANGKAH 3: Verifikasi
+-- ============================================================
+
+SELECT id, username, email, role, auth_uid, is_active
 FROM admin_users
 WHERE username IN ('supervisor', 'admin')
 ORDER BY role DESC;
 
--- Expected result:
--- Both users should have auth_uid filled
--- supervisor should have role = 'supervisor'
--- admin should have role = 'admin'
-
--- ============================================
--- TROUBLESHOOTING
--- ============================================
-
--- If admin_users doesn't have supervisor/admin yet, create them:
-INSERT INTO admin_users (username, email, role, password_hash, full_name, is_active)
-VALUES 
-  ('supervisor', 'supervisor@melati.com', 'supervisor', 'temp_hash', 'Supervisor', true),
-  ('admin', 'admin@melati.com', 'admin', 'temp_hash', 'Admin', true)
-ON CONFLICT (username) DO NOTHING;
-
--- Then run the UPDATE commands from Step 2 above
+-- Hasil yang diharapkan:
+-- Kedua baris memiliki auth_uid terisi
+-- supervisor → role = 'supervisor'
+-- admin      → role = 'admin'

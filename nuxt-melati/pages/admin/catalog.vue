@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-4 sm:py-6">
+  <div class="py-4 sm:py-6">
     <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
       <!-- Header -->
       <div class="mb-4 sm:mb-6">
@@ -92,9 +92,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Toast Notifications -->
-    <ToastNotification />
   </div>
 </template>
 
@@ -124,13 +121,13 @@ const CatalogServiceManager = defineAsyncComponent(
   () => import("~/components/admin/catalog/CatalogServiceManager.vue"),
 );
 
-const GoldPriceManager = defineAsyncComponent(() => import("~/components/admin/GoldPriceManager.vue"));
+const GoldPriceManager = defineAsyncComponent(() => import("~/components/admin/pricing/GoldPriceManager.vue"));
 
-const KaratConfigManager = defineAsyncComponent(() => import("~/components/admin/KaratConfigManager.vue"));
+const KaratConfigManager = defineAsyncComponent(() => import("~/components/admin/pricing/KaratConfigManager.vue"));
 
 definePageMeta({
   middleware: "auth",
-  layout: false,
+  layout: "admin",
 });
 
 useHead({

@@ -8,6 +8,7 @@ const { presets, generateSrcSet } = useImageOptimization();
 // State
 const products = ref<any[]>([]);
 const loading = ref(true);
+const hasMore = ref(false);
 
 // Load featured products
 const loadFeaturedProducts = async () => {
@@ -15,13 +16,21 @@ const loadFeaturedProducts = async () => {
 
   const result = await getProducts({
     isFeatured: true,
+    limit: 10,
   });
 
   if (result.success) {
     products.value = result.data;
+    hasMore.value = result.pagination?.hasMore ?? false;
   }
 
   loading.value = false;
+};
+
+// Scroll ke section CatalogShowcase
+const scrollToKatalog = () => {
+  const el = document.getElementById("produk");
+  el?.scrollIntoView({ behavior: "smooth" });
 };
 
 // Optimize images
@@ -57,7 +66,7 @@ onMounted(() => {
   <section id="best-produk" class="container py-10 md:py-20">
     <div class="mx-auto mb-6 text-center max-w-2xl reveal-in">
       <h2 class="section-title">Produk Pilihan</h2>
-      <p class="mt-2 text-neutral-600">Koleksi favorit pilihan pelanggan, siap memancarkan pesonamu.</p>
+      <p class="mt-2 text-neutral-600">Koleksi logam mulia, aksesori, dan perhiasan best seller siap memancarkan pesonamu.</p>
     </div>
 
     <!-- Loading State -->
@@ -73,12 +82,16 @@ onMounted(() => {
     </div>
 
     <!-- Products Grid -->
-    <div v-else class="grid gap-4 md:gap-5 lg:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <!-- grid: 2 col mobile, 4 col md, 5 col xl — item ke-9/10 hidden di bawah xl -->
+    <div v-else class="grid gap-4 md:gap-5 lg:gap-6 grid-cols-2 md:grid-cols-4 xl:grid-cols-5">
       <NuxtLink
-        v-for="p in products"
+        v-for="(p, index) in products"
         :key="p.id"
         :to="`/product/${p.slug || p.id}`"
-        class="glass overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant reveal-up block rounded-2xl"
+        :class="[
+          'glass overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant reveal-up block rounded-2xl',
+          index >= 8 ? 'hidden xl:block' : '',
+        ]"
       >
         <div class="relative aspect-[3/4] overflow-hidden">
           <!-- ✨ Optimized image — lazy load, CDN-cached eager transform mobile-first -->
@@ -117,6 +130,13 @@ onMounted(() => {
           </span>
         </div>
       </NuxtLink>
+    </div>
+
+    <!-- CTA Lihat Semua -->
+    <div v-if="!loading && hasMore" class="text-center mt-8 md:mt-10 reveal-in">
+      <button @click="scrollToKatalog" class="btn-primary px-8 py-3 rounded-full font-semibold text-sm md:text-base">
+        Jelajahi Semua Koleksi
+      </button>
     </div>
   </section>
 </template>

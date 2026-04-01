@@ -96,7 +96,7 @@ useHead(
       <div v-else>
         <!-- Breadcrumb -->
         <nav class="mb-6 text-sm">
-          <ol class="flex items-center gap-2 text-neutral-600 flex-wrap">
+          <ol class="flex items-center gap-2 text-neutral-600 min-w-0 overflow-hidden">
             <li>
               <NuxtLink to="/" class="hover:text-maroon transition-colors flex items-center gap-1">
                 <HomeIcon class="w-4 h-4" />
@@ -108,8 +108,10 @@ useHead(
               <NuxtLink to="/#custom" class="hover:text-maroon transition-colors">Layanan Custom</NuxtLink>
             </li>
             <li><ChevronRightIcon class="w-3 h-3" /></li>
-            <li>
-              <span class="font-semibold text-maroon">{{ service?.title }}</span>
+            <li class="min-w-0">
+              <span class="block font-semibold text-maroon truncate max-w-[100px] sm:max-w-xs md:max-w-none">
+                {{ service?.title }}
+              </span>
             </li>
           </ol>
         </nav>

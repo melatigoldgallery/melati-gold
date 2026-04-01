@@ -1,4 +1,26 @@
+# Nuxt
 .nuxt
-node_modules
 .output
+.nitro
+
+# Dependencies
+node_modules
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Build
+dist/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Netlify
+.netlify

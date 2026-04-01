@@ -1,4 +1,3 @@
-
 interface KaratConfig {
   id: string;
   category: string;
@@ -25,7 +24,7 @@ export const useKaratConfig = () => {
     if (!supabase) return { success: false, error: "Supabase not configured", data: [] };
     try {
       const { data, error } = await supabase
-        .from("karat_configurations")
+        .from(TABLES.KARAT_CONFIGURATIONS)
         .select("*")
         .eq("is_active", true)
         .order("category");
@@ -42,7 +41,7 @@ export const useKaratConfig = () => {
   const getConfigByKarat = async (karat: string): Promise<KaratConfig | null> => {
     if (!supabase) return null;
     try {
-      const { data, error } = await supabase.from("karat_configurations").select("*").eq("is_active", true);
+      const { data, error } = await supabase.from(TABLES.KARAT_CONFIGURATIONS).select("*").eq("is_active", true);
 
       if (error) throw error;
 
@@ -60,7 +59,7 @@ export const useKaratConfig = () => {
     if (!supabase) return { success: false, error: "Supabase not configured" };
     try {
       const { data, error } = await supabase
-        .from("karat_configurations")
+        .from(TABLES.KARAT_CONFIGURATIONS)
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq("id", id)
         .select()
@@ -84,7 +83,7 @@ export const useKaratConfig = () => {
         whatsapp_number: product.custom_whatsapp_number || config?.whatsapp_number || "",
         whatsapp_message: formatWhatsAppMessage(
           config?.whatsapp_message_template || "Halo, saya tertarik dengan {product_name}",
-          product
+          product,
         ),
       };
     }

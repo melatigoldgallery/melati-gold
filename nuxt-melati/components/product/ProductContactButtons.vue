@@ -128,25 +128,18 @@ const getAllConfigs = async () => {
   }
 };
 
-// Get Shopee/Tokopedia URL from matching config
-const getContactUrls = async (product: any) => {
-  try {
-    const { data, error } = await supabase
-      .from("karat_configurations")
-      .select("shopee_store_url, tokopedia_store_url")
-      .contains("karat_list", [product.karat])
-      .single();
+// Derive Shopee/Tokopedia URLs from already-loaded allConfigs (no extra DB call)
+const resolveContactUrls = (product: any, configs: any[]) => {
+  // Try matching by karat first; fall back to first available config
+  const matched = product?.karat
+    ? configs.find((c) => Array.isArray(c.karat_list) && c.karat_list.includes(product.karat))
+    : null;
+  const source = matched ?? configs[0] ?? null;
 
-    if (error) throw error;
-
-    return {
-      shopee_url: product.custom_shopee_link || data?.shopee_store_url || "",
-      tokopedia_url: data?.tokopedia_store_url || "",
-    };
-  } catch (error) {
-    console.error("Error getting contact URLs:", error);
-    return { shopee_url: "", tokopedia_url: "" };
-  }
+  return {
+    shopee_url: product?.custom_shopee_link || source?.shopee_store_url || "",
+    tokopedia_url: source?.tokopedia_store_url || "",
+  };
 };
 
 // Generate WhatsApp message from template
@@ -189,11 +182,8 @@ const formatPhoneNumber = (phone: string): string => {
 
 // Load data
 const loadContact = async () => {
-  // Load all configs for modal
   allConfigs.value = await getAllConfigs();
-
-  // Load Shopee/Tokopedia URLs
-  contact.value = await getContactUrls(props.product);
+  contact.value = resolveContactUrls(props.product, allConfigs.value);
 };
 
 // Initialize

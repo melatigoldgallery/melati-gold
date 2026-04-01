@@ -35,7 +35,7 @@ export const useCatalogManager = () => {
     let slug = baseSlug;
     let counter = 2;
     while (true) {
-      let query = $supabase.from("catalog_products").select("id").eq("slug", slug);
+      let query = $supabase.from(TABLES.PRODUCTS).select("id").eq("slug", slug);
       if (excludeId) query = query.neq("id", excludeId);
       const { data } = await query.maybeSingle();
       if (!data) break; // slug tersedia
@@ -59,7 +59,7 @@ export const useCatalogManager = () => {
           cacheKey,
           async () => {
             const { data, error } = await $supabase
-              .from("catalog_categories")
+              .from(TABLES.CATEGORIES)
               .select("*")
               .order("display_order", { ascending: true });
 
@@ -72,7 +72,7 @@ export const useCatalogManager = () => {
 
       // No cache, fetch directly
       const { data, error } = await $supabase
-        .from("catalog_categories")
+        .from(TABLES.CATEGORIES)
         .select("*")
         .order("display_order", { ascending: true });
 
@@ -87,7 +87,7 @@ export const useCatalogManager = () => {
 
   const createCategory = async (categoryData: any) => {
     try {
-      const { data, error } = await $supabase.from("catalog_categories").insert([categoryData]).select().single();
+      const { data, error } = await $supabase.from(TABLES.CATEGORIES).insert([categoryData]).select().single();
 
       if (error) throw error;
 
@@ -107,7 +107,7 @@ export const useCatalogManager = () => {
       const { ...cleanData } = categoryData;
 
       const { data, error } = await $supabase
-        .from("catalog_categories")
+        .from(TABLES.CATEGORIES)
         .update(cleanData)
         .eq("id", id)
         .select()
@@ -127,7 +127,7 @@ export const useCatalogManager = () => {
 
   const deleteCategory = async (id: string) => {
     try {
-      const { error } = await $supabase.from("catalog_categories").delete().eq("id", id);
+      const { error } = await $supabase.from(TABLES.CATEGORIES).delete().eq("id", id);
 
       if (error) throw error;
 
@@ -164,7 +164,7 @@ export const useCatalogManager = () => {
 
       async function fetchSubcategoriesFromDB() {
         let query = $supabase!
-          .from("catalog_subcategories")
+          .from(TABLES.SUBCATEGORIES)
           .select(
             `
             *,
@@ -190,7 +190,7 @@ export const useCatalogManager = () => {
 
   const createSubcategory = async (subcategoryData: any) => {
     try {
-      const { data, error } = await $supabase.from("catalog_subcategories").insert([subcategoryData]).select().single();
+      const { data, error } = await $supabase.from(TABLES.SUBCATEGORIES).insert([subcategoryData]).select().single();
 
       if (error) throw error;
 
@@ -210,7 +210,7 @@ export const useCatalogManager = () => {
       const { category, ...cleanData } = subcategoryData;
 
       const { data, error } = await $supabase
-        .from("catalog_subcategories")
+        .from(TABLES.SUBCATEGORIES)
         .update(cleanData)
         .eq("id", id)
         .select()
@@ -230,7 +230,7 @@ export const useCatalogManager = () => {
 
   const deleteSubcategory = async (id: string) => {
     try {
-      const { error } = await $supabase.from("catalog_subcategories").delete().eq("id", id);
+      const { error } = await $supabase.from(TABLES.SUBCATEGORIES).delete().eq("id", id);
 
       if (error) throw error;
 
@@ -321,7 +321,7 @@ export const useCatalogManager = () => {
           `;
 
         let query = $supabase!
-          .from("catalog_products")
+          .from(TABLES.PRODUCTS)
           .select(selectColumns, { count: "exact" })
           .eq("is_active", true)
           .order("display_order", { ascending: true })
@@ -372,7 +372,7 @@ export const useCatalogManager = () => {
 
     try {
       const { data, error } = await $supabase
-        .from("catalog_products")
+        .from(TABLES.PRODUCTS)
         .select(
           `*,
           category:catalog_categories(id, name, slug),
@@ -425,7 +425,7 @@ export const useCatalogManager = () => {
       );
 
       const fetchPromise = $supabase
-        .from("catalog_products")
+        .from(TABLES.PRODUCTS)
         .select(
           `
           *,
@@ -561,7 +561,7 @@ export const useCatalogManager = () => {
         cleanData.slug = await ensureUniqueProductSlug(base);
       }
 
-      const insertPromise = $supabase.from("catalog_products").insert([cleanData]).select().single();
+      const insertPromise = $supabase.from(TABLES.PRODUCTS).insert([cleanData]).select().single();
 
       const { data, error } = (await Promise.race([insertPromise, timeoutPromise])) as Awaited<typeof insertPromise>;
 
@@ -616,7 +616,7 @@ export const useCatalogManager = () => {
         ...cleanData
       } = productData;
 
-      const { data, error } = await $supabase.from("catalog_products").update(cleanData).eq("id", id).select().single();
+      const { data, error } = await $supabase.from(TABLES.PRODUCTS).update(cleanData).eq("id", id).select().single();
 
       if (error) throw error;
 
@@ -652,12 +652,12 @@ export const useCatalogManager = () => {
     try {
       // Fetch media URLs before deleting from DB
       const { data: product } = await $supabase
-        .from("catalog_products")
+        .from(TABLES.PRODUCTS)
         .select("thumbnail_image, images, video_url")
         .eq("id", id)
         .single();
 
-      const { error } = await $supabase.from("catalog_products").delete().eq("id", id);
+      const { error } = await $supabase.from(TABLES.PRODUCTS).delete().eq("id", id);
 
       if (error) throw error;
 
@@ -747,7 +747,7 @@ export const useCatalogManager = () => {
 
       async function fetchServicesFromDB() {
         const { data, error } = await $supabase!
-          .from("custom_services")
+          .from(TABLES.CUSTOM_SERVICES)
           .select("*")
           .eq("is_active", true)
           .order("display_order", { ascending: true });
@@ -765,7 +765,7 @@ export const useCatalogManager = () => {
     try {
       // Get service details
       const { data: service, error: serviceError } = await $supabase
-        .from("custom_services")
+        .from(TABLES.CUSTOM_SERVICES)
         .select("*")
         .eq("id", serviceId)
         .single();
@@ -779,7 +779,7 @@ export const useCatalogManager = () => {
       let products: any[] = [];
       if (service.example_products && service.example_products.length > 0) {
         const { data: productsData, error: productsError } = await $supabase
-          .from("catalog_products")
+          .from(TABLES.PRODUCTS)
           .select(
             "id, title, name, description, thumbnail_image, price, price_display, stock_status, category_id, subcategory_id, weight, karat",
           )
@@ -810,7 +810,7 @@ export const useCatalogManager = () => {
 
   const createCustomService = async (serviceData: any) => {
     try {
-      const { data, error } = await $supabase.from("custom_services").insert([serviceData]).select().single();
+      const { data, error } = await $supabase.from(TABLES.CUSTOM_SERVICES).insert([serviceData]).select().single();
 
       if (error) throw error;
 
@@ -829,7 +829,7 @@ export const useCatalogManager = () => {
       // Remove any non-column fields before update
       const { ...cleanData } = serviceData;
 
-      const { data, error } = await $supabase.from("custom_services").update(cleanData).eq("id", id).select().single();
+      const { data, error } = await $supabase.from(TABLES.CUSTOM_SERVICES).update(cleanData).eq("id", id).select().single();
 
       if (error) throw error;
 
@@ -845,7 +845,7 @@ export const useCatalogManager = () => {
 
   const deleteCustomService = async (id: string) => {
     try {
-      const { error } = await $supabase.from("custom_services").delete().eq("id", id);
+      const { error } = await $supabase.from(TABLES.CUSTOM_SERVICES).delete().eq("id", id);
 
       if (error) throw error;
 
@@ -880,7 +880,7 @@ export const useCatalogManager = () => {
       return await fetchBestSellersFromDB();
 
       async function fetchBestSellersFromDB() {
-        let query = $supabase!.from("v_best_sellers").select("*");
+        let query = $supabase!.from(VIEWS.BEST_SELLERS).select("*");
 
         if (limit) {
           query = query.limit(limit);
@@ -914,7 +914,7 @@ export const useCatalogManager = () => {
       return await fetchFeaturedFromDB();
 
       async function fetchFeaturedFromDB() {
-        let query = $supabase!.from("v_featured_products").select("*");
+        let query = $supabase!.from(VIEWS.FEATURED_PRODUCTS).select("*");
 
         if (limit) {
           query = query.limit(limit);
@@ -978,7 +978,7 @@ export const useCatalogManager = () => {
         cacheKey,
         async () => {
           const { data, error } = await $supabase
-            .from("catalog_categories")
+            .from(TABLES.CATEGORIES)
             .select("*")
             .eq("slug", slug)
             .eq("is_active", true)
@@ -987,7 +987,7 @@ export const useCatalogManager = () => {
           if (error) {
             // If not found by slug, try by name (fallback for backward compatibility)
             const { data: fallbackData, error: fallbackError } = await $supabase
-              .from("catalog_categories")
+              .from(TABLES.CATEGORIES)
               .select("*")
               .ilike("name", slug)
               .eq("is_active", true)
@@ -1013,7 +1013,7 @@ export const useCatalogManager = () => {
    */
   const getSubcategoryBySlug = async (slug: string, categoryId?: string) => {
     try {
-      let query = $supabase.from("catalog_subcategories").select("*").eq("slug", slug).eq("is_active", true);
+      let query = $supabase.from(TABLES.SUBCATEGORIES).select("*").eq("slug", slug).eq("is_active", true);
 
       if (categoryId) {
         query = query.eq("category_id", categoryId);
@@ -1037,7 +1037,7 @@ export const useCatalogManager = () => {
     try {
       // First, get the current product to know its category/subcategory
       const { data: currentProduct, error: productError } = await $supabase
-        .from("catalog_products")
+        .from(TABLES.PRODUCTS)
         .select("id, category_id, subcategory_id")
         .eq("id", productId)
         .single();
@@ -1054,7 +1054,7 @@ export const useCatalogManager = () => {
 
       // Fetch related products from same subcategory first, then same category
       let query = $supabase
-        .from("catalog_products")
+        .from(TABLES.PRODUCTS)
         .select(
           `
           id,
@@ -1091,7 +1091,7 @@ export const useCatalogManager = () => {
       if (data && data.length < limit && currentProduct.subcategory_id && currentProduct.category_id) {
         const remaining = limit - data.length;
         const { data: moreData, error: moreError } = await $supabase
-          .from("catalog_products")
+          .from(TABLES.PRODUCTS)
           .select(
             `
             id,
