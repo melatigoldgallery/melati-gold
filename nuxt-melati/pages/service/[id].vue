@@ -76,7 +76,7 @@ useHead(
 
 <template>
   <div class="min-h-screen bg-cream overflow-x-hidden">
-    <main class="container mx-auto max-w-7xl px-4 py-8 overflow-x-hidden">
+    <main class="container mx-auto max-w-7xl px-4 py-6 md:py-8 overflow-x-hidden">
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-20">
         <div class="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-yellow-600"></div>
@@ -123,8 +123,8 @@ useHead(
           </h1>
 
           <!-- Service Info Card -->
-          <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <p class="text-gray-700 mb-4 leading-relaxed">{{ service?.description }}</p>
+          <div class="bg-white rounded-xl shadow-md border border-gray-100 p-5 md:p-7 mb-6">
+            <p class="service-description text-gray-700 mb-5 md:mb-6">{{ service?.description }}</p>
 
             <!-- Features -->
             <div v-if="service?.features && service.features.length > 0" class="mb-4">
@@ -132,21 +132,27 @@ useHead(
                 <StarIconSolid class="w-5 h-5 text-gold" />
                 <span>Keunggulan Layanan</span>
               </h3>
-              <ul class="space-y-2">
+              <ul class="space-y-2 md:space-y-2.5">
                 <li v-for="(feature, idx) in service.features" :key="idx" class="flex items-start gap-2">
                   <CheckCircleIcon class="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
-                  <span class="text-gray-700">{{ feature }}</span>
+                  <span class="text-gray-700 leading-relaxed">{{ feature }}</span>
                 </li>
               </ul>
             </div>
 
             <!-- Meta Info -->
-            <div class="flex flex-wrap gap-4 text-sm border-t pt-4 mt-4">
-              <span v-if="service?.duration" class="flex items-center gap-2 text-gray-600">
+            <div class="flex flex-wrap gap-3 md:gap-4 text-sm border-t pt-4 mt-4 justify-center md:justify-start">
+              <span
+                v-if="service?.duration"
+                class="inline-flex items-center gap-2 text-gray-700 bg-cream px-3 py-1.5 rounded-full"
+              >
                 <ClockIcon class="w-4 h-4" />
                 {{ service.duration }}
               </span>
-              <span v-if="service?.price_info" class="flex items-center gap-2 text-maroon font-semibold">
+              <span
+                v-if="service?.price_info"
+                class="inline-flex items-center gap-2 text-maroon font-semibold bg-maroon/5 px-3 py-1.5 rounded-full"
+              >
                 <TagIcon class="w-4 h-4" />
                 {{ service.price_info }}
               </span>
@@ -193,6 +199,15 @@ useHead(
 </template>
 
 <style>
+.service-description {
+  max-width: 72ch;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: justify;
+  text-justify: inter-word;
+  line-height: 1.85;
+}
+
 /* Override grid untuk contoh produk - sedikit lebih besar dan proporsional */
 .example-products-grid :deep(.grid) {
   display: grid;
