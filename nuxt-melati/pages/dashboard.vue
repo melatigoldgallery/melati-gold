@@ -127,7 +127,21 @@
                 <i class="bi bi-grid-3x3-gap mr-2"></i>
                 Manajemen Katalog
               </NuxtLink>
-              <p class="text-sm text-gray-500 text-center">Kelola katalog, produk, layanan, dan konten situs web</p>
+              <NuxtLink
+                to="/admin/orders"
+                class="block w-full bg-maroon hover:bg-maroon/90 text-white text-center py-3 px-4 rounded-lg font-medium transition-colors text-sm sm:text-base"
+              >
+                <i class="bi bi-bag-check mr-2"></i>
+                Manajemen Pesanan
+              </NuxtLink>
+              <NuxtLink
+                to="/admin/inventory"
+                class="block w-full bg-emerald-700 hover:bg-emerald-800 text-white text-center py-3 px-4 rounded-lg font-medium transition-colors text-sm sm:text-base"
+              >
+                <i class="bi bi-boxes mr-2"></i>
+                Manajemen Inventori
+              </NuxtLink>
+              <p class="text-sm text-gray-500 text-center">Kelola katalog, produk, pesanan, dan stok</p>
             </div>
           </div>
         </div>
@@ -194,6 +208,34 @@
               </div>
               <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-purple-700 text-center">
                 Kategori
+              </span>
+            </NuxtLink>
+
+            <NuxtLink
+              to="/admin/orders"
+              class="flex flex-col items-center p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-maroon/30 hover:bg-maroon/5 transition-colors group"
+            >
+              <div
+                class="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 group-hover:bg-red-200 rounded-lg flex items-center justify-center mb-2"
+              >
+                <i class="bi bi-bag-check text-maroon text-lg sm:text-xl"></i>
+              </div>
+              <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-maroon text-center">
+                Pesanan
+              </span>
+            </NuxtLink>
+
+            <NuxtLink
+              to="/admin/inventory"
+              class="flex flex-col items-center p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 transition-colors group"
+            >
+              <div
+                class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 group-hover:bg-emerald-200 rounded-lg flex items-center justify-center mb-2"
+              >
+                <i class="bi bi-boxes text-emerald-700 text-lg sm:text-xl"></i>
+              </div>
+              <span class="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-emerald-700 text-center">
+                Inventori
               </span>
             </NuxtLink>
           </div>

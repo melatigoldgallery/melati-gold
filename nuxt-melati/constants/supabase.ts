@@ -9,6 +9,12 @@ export const TABLES = {
   GOLD_PRICE_SETTINGS: "gold_price_settings",
   GOLD_PRICE_HISTORY: "gold_price_history",
   KARAT_CONFIGURATIONS: "karat_configurations",
+  // Inventori & Pesanan
+  PRODUCT_VARIANTS: "product_variants",
+  ORDERS: "orders",
+  ORDER_ITEMS: "order_items",
+  STOCK_LOGS: "stock_logs",
+  AUDIT_LOGS: "admin_audit_logs",
 } as const;
 
 /** Nama view Supabase */

@@ -580,3 +580,240 @@ COMMENT ON COLUMN catalog_categories.slug                       IS 'URL-friendly
 COMMENT ON COLUMN catalog_subcategories.slug                    IS 'URL-friendly slug (contoh: anak, fashion, pria)';
 COMMENT ON COLUMN custom_services.example_products              IS 'Array UUID catalog_products sebagai contoh untuk service ini';
 COMMENT ON COLUMN karat_configurations.tokopedia_store_url      IS 'Link toko Tokopedia (bukan produk spesifik)';
+
+
+-- ============================================================
+-- SECTION 9: TABEL INVENTORI & PESANAN
+-- ============================================================
+
+-- ----------------------------------------------------------
+-- 9.1 product_variants  (stok per varian produk)
+-- ----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS product_variants (
+  id                   uuid         DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id           uuid         NOT NULL REFERENCES catalog_products(id) ON DELETE CASCADE,
+  sku                  varchar(60)  UNIQUE NOT NULL,
+  variant_label        varchar(100),              -- "Ukuran 16", "Rose Gold", dsb.
+  current_stock        integer      DEFAULT 0,
+  stock_booked         integer      DEFAULT 0,    -- stok dipesan tapi belum dibayar
+  min_stock_threshold  integer      DEFAULT 2,
+  is_active            boolean      DEFAULT true,
+  created_at           timestamp    DEFAULT now(),
+  updated_at           timestamp    DEFAULT now()
+);
+
+-- ----------------------------------------------------------
+-- 9.2 orders
+-- ----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS orders (
+  id                       uuid          DEFAULT gen_random_uuid() PRIMARY KEY,
+  order_number             varchar(30)   UNIQUE NOT NULL,   -- ORD-YYYYMMDD-XXX
+  customer_name            varchar(150)  NOT NULL,
+  customer_phone           varchar(20)   NOT NULL,
+  customer_address         text,
+  status                   varchar(20)   DEFAULT 'pending'
+                             CHECK (status IN ('pending','paid','processing','shipped','completed','cancelled')),
+  payment_method           varchar(20)   DEFAULT 'transfer'
+                             CHECK (payment_method IN ('transfer','cod','gateway')),
+  payment_proof_url        text,
+  shipping_tracking_number varchar(60),
+  shipping_courier         varchar(60),
+  total_amount             numeric(15,2) NOT NULL,
+  notes                    text,
+  created_by               uuid          REFERENCES admin_users(id) ON DELETE SET NULL,
+  created_at               timestamp     DEFAULT now(),
+  updated_at               timestamp     DEFAULT now()
+);
+
+-- ----------------------------------------------------------
+-- 9.3 order_items
+-- ----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS order_items (
+  id             uuid          DEFAULT gen_random_uuid() PRIMARY KEY,
+  order_id       uuid          NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  product_id     uuid          REFERENCES catalog_products(id) ON DELETE SET NULL,
+  variant_id     uuid          REFERENCES product_variants(id) ON DELETE SET NULL,
+  product_title  varchar(255)  NOT NULL,   -- snapshot saat order
+  product_sku    varchar(60)   NOT NULL,
+  karat_type     varchar(20),
+  weight_grams   numeric(8,3),
+  unit_price     numeric(15,2) NOT NULL,
+  quantity       integer       DEFAULT 1   CHECK (quantity > 0),
+  subtotal       numeric(15,2) NOT NULL,
+  created_at     timestamp     DEFAULT now()
+);
+
+-- ----------------------------------------------------------
+-- 9.4 stock_logs
+-- ----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS stock_logs (
+  id              uuid         DEFAULT gen_random_uuid() PRIMARY KEY,
+  variant_id      uuid         NOT NULL REFERENCES product_variants(id) ON DELETE CASCADE,
+  order_id        uuid         REFERENCES orders(id) ON DELETE SET NULL,
+  change_type     varchar(20)  NOT NULL
+                    CHECK (change_type IN ('sale','restock','adjustment','return','booking','unbook')),
+  quantity_change integer      NOT NULL,   -- positif = tambah, negatif = kurang
+  stock_before    integer      NOT NULL,
+  stock_after     integer      NOT NULL,
+  notes           text,
+  created_by      uuid         REFERENCES admin_users(id) ON DELETE SET NULL,
+  created_at      timestamp    DEFAULT now()
+);
+
+-- ----------------------------------------------------------
+-- 9.5 admin_audit_logs
+-- ----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS admin_audit_logs (
+  id             uuid         DEFAULT gen_random_uuid() PRIMARY KEY,
+  admin_user_id  uuid         REFERENCES admin_users(id) ON DELETE SET NULL,
+  action         varchar(50)  NOT NULL,   -- 'update_stock' | 'change_order_status' | 'update_price'
+  target_table   varchar(60),
+  target_id      uuid,
+  old_values     jsonb,
+  new_values     jsonb,
+  ip_address     varchar(45),
+  created_at     timestamp    DEFAULT now()
+);
+
+
+-- ============================================================
+-- SECTION 10: INDEXES UNTUK TABEL BARU
+-- ============================================================
+
+CREATE        INDEX IF NOT EXISTS idx_product_variants_product  ON product_variants(product_id, is_active);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_product_variants_sku      ON product_variants(sku);
+CREATE        INDEX IF NOT EXISTS idx_product_variants_stock    ON product_variants(current_stock) WHERE is_active = true;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_number             ON orders(order_number);
+CREATE        INDEX IF NOT EXISTS idx_orders_status             ON orders(status, created_at DESC);
+CREATE        INDEX IF NOT EXISTS idx_orders_customer_phone     ON orders(customer_phone);
+CREATE        INDEX IF NOT EXISTS idx_orders_created_at         ON orders(created_at DESC);
+
+CREATE        INDEX IF NOT EXISTS idx_order_items_order         ON order_items(order_id);
+CREATE        INDEX IF NOT EXISTS idx_order_items_product       ON order_items(product_id);
+CREATE        INDEX IF NOT EXISTS idx_order_items_variant       ON order_items(variant_id);
+
+CREATE        INDEX IF NOT EXISTS idx_stock_logs_variant        ON stock_logs(variant_id, created_at DESC);
+CREATE        INDEX IF NOT EXISTS idx_stock_logs_order          ON stock_logs(order_id) WHERE order_id IS NOT NULL;
+CREATE        INDEX IF NOT EXISTS idx_stock_logs_type           ON stock_logs(change_type, created_at DESC);
+
+CREATE        INDEX IF NOT EXISTS idx_audit_logs_admin          ON admin_audit_logs(admin_user_id, created_at DESC);
+CREATE        INDEX IF NOT EXISTS idx_audit_logs_target         ON admin_audit_logs(target_table, target_id);
+CREATE        INDEX IF NOT EXISTS idx_audit_logs_created        ON admin_audit_logs(created_at DESC);
+
+
+-- ============================================================
+-- SECTION 11: FUNCTIONS & TRIGGERS UNTUK INVENTORI
+-- ============================================================
+
+-- ----------------------------------------------------------
+-- 11.1 Auto-generate order_number
+-- ----------------------------------------------------------
+CREATE OR REPLACE FUNCTION generate_order_number()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_date   text;
+  v_seq    integer;
+  v_number text;
+BEGIN
+  v_date := to_char(now(), 'YYYYMMDD');
+  SELECT COUNT(*) + 1 INTO v_seq
+  FROM orders
+  WHERE order_number LIKE 'ORD-' || v_date || '-%';
+
+  v_number := 'ORD-' || v_date || '-' || LPAD(v_seq::text, 3, '0');
+  NEW.order_number := v_number;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_generate_order_number ON orders;
+CREATE TRIGGER trigger_generate_order_number
+  BEFORE INSERT ON orders
+  FOR EACH ROW
+  WHEN (NEW.order_number IS NULL OR NEW.order_number = '')
+  EXECUTE FUNCTION generate_order_number();
+
+-- ----------------------------------------------------------
+-- 11.2 Auto-log stock changes
+-- ----------------------------------------------------------
+CREATE OR REPLACE FUNCTION log_stock_change()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF OLD.current_stock IS DISTINCT FROM NEW.current_stock THEN
+    INSERT INTO stock_logs (
+      variant_id, change_type, quantity_change,
+      stock_before, stock_after, notes, created_by
+    )
+    VALUES (
+      NEW.id,
+      'adjustment',
+      NEW.current_stock - OLD.current_stock,
+      OLD.current_stock,
+      NEW.current_stock,
+      'Auto-logged via trigger',
+      NULL
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_log_stock_change ON product_variants;
+CREATE TRIGGER trigger_log_stock_change
+  AFTER UPDATE ON product_variants
+  FOR EACH ROW
+  EXECUTE FUNCTION log_stock_change();
+
+
+-- ============================================================
+-- SECTION 12: RLS UNTUK TABEL BARU
+-- ============================================================
+
+ALTER TABLE product_variants  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE order_items        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stock_logs         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_audit_logs   ENABLE ROW LEVEL SECURITY;
+
+-- product_variants: publik bisa baca stok yang aktif
+DROP POLICY IF EXISTS "public_read_variants"       ON product_variants;
+DROP POLICY IF EXISTS "admin_full_variants"        ON product_variants;
+CREATE POLICY "public_read_variants"
+  ON product_variants FOR SELECT TO anon, authenticated USING (is_active = true);
+CREATE POLICY "admin_full_variants"
+  ON product_variants FOR ALL TO authenticated
+  USING (is_admin_user()) WITH CHECK (is_admin_user());
+
+-- orders & order_items: hanya admin
+DROP POLICY IF EXISTS "admin_full_orders"          ON orders;
+DROP POLICY IF EXISTS "admin_full_order_items"     ON order_items;
+DROP POLICY IF EXISTS "admin_full_stock_logs"      ON stock_logs;
+DROP POLICY IF EXISTS "admin_read_audit_logs"      ON admin_audit_logs;
+DROP POLICY IF EXISTS "supervisor_full_audit_logs" ON admin_audit_logs;
+
+CREATE POLICY "admin_full_orders"
+  ON orders FOR ALL TO authenticated
+  USING (is_admin_user()) WITH CHECK (is_admin_user());
+
+CREATE POLICY "admin_full_order_items"
+  ON order_items FOR ALL TO authenticated
+  USING (is_admin_user()) WITH CHECK (is_admin_user());
+
+CREATE POLICY "admin_full_stock_logs"
+  ON stock_logs FOR ALL TO authenticated
+  USING (is_admin_user()) WITH CHECK (is_admin_user());
+
+-- audit_logs: hanya supervisor bisa baca/hapus; admin bisa insert
+CREATE POLICY "admin_read_audit_logs"
+  ON admin_audit_logs FOR SELECT TO authenticated USING (is_admin_user());
+CREATE POLICY "supervisor_full_audit_logs"
+  ON admin_audit_logs FOR ALL TO authenticated
+  USING (is_supervisor()) WITH CHECK (is_supervisor());
+
+GRANT SELECT               ON product_variants TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON product_variants  TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON orders            TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON order_items       TO authenticated;
+GRANT SELECT, INSERT                 ON stock_logs        TO authenticated;
+GRANT SELECT, INSERT                 ON admin_audit_logs  TO authenticated;
